@@ -1,6 +1,7 @@
-Jackalope - Nothing
-===================
+Jackalope Filesystem PHPCR implementation
+=========================================
 
-This is a Jackalope implementation that does nothing at all.
+This is a WIP implementation to support a filesystem implementation of PHPCR.
 
-Use it to create new implementations.
+The implementation is meant to be lightweight and ideal for testing PHPCR
+components.

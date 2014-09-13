@@ -24,12 +24,6 @@ class RepositoryFactoryFilesystem implements RepositoryFactoryInterface
 {
     public function getRepository(array $parameters = null)
     {
-        if (!isset($parameters['path'])) {
-            throw new \InvalidArgumentException(
-                'You must provide the "path" parameter for the filesystem jackalope repository'
-            );
-        }
-
         $factory = new Factory();
         $transport = $factory->get('Transport\Filesystem\Client', array($parameters));
         $options = array();

@@ -21,12 +21,17 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
      */
     private $fixturePath;
 
+    /**
+     * Base path for content repository
+     * @var string
+     */
+    private $path;
+
     protected function __construct()
     {
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Connecting',
             'Reading',
             'Query',
             'Export',
@@ -54,13 +59,13 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
         $this->unsupportedTests = array(
         );
+
+        $this->path = __DIR__ . '/data';
     }
 
     public function getRepositoryFactoryParameters()
     {
-        return array(
-            'path' => __DIR__ . '/data',
-        );
+        return array('path' => $this->path);
     }
 
     public function getCredentials()
@@ -90,7 +95,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getRepository()
     {
-        $transport = new \Jackalope\Transport\Filesystem\Client(new \Jackalope\Factory);
+        $transport = new \Jackalope\Transport\Filesystem\Client(new \Jackalope\Factory, array('path' => $this->path));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {
                 $transport->createWorkspace($workspace);
