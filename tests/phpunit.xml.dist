@@ -1,0 +1,28 @@
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         syntaxCheck="true"
+         strict="true"
+         bootstrap="bootstrap.php">
+    <php>
+        <var name="phpcr.user" value="admin" />
+        <var name="phpcr.pass" value="admin" />
+        <var name="phpcr.workspace" value="tests" />
+    </php>
+
+    <testsuites>
+        <testsuite name="all">
+            <directory>vendor/phpcr/phpcr-api-tests/tests/</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist>
+        </whitelist>
+    </filter>
+</phpunit>

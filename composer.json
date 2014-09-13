@@ -1,0 +1,39 @@
+{
+    "name": "jackalope/jackalope-fs",
+    "type": "library",
+    "description": "Jackalope Transport library using the filesystem",
+    "keywords": ["transport implementation", "filesystem", "phpcr"],
+    "homepage": "http://jackalope.github.io",
+    "license": [
+        "MIT",
+        "Apache-2.0"
+    ],
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Jackalope Community",
+            "homepage": "https://github.com/jackalope/jackalope-jackrabbit/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "jackalope/jackalope": "~1.1.1"
+    },
+    "provide": {
+        "jackalope/jackalope-transport": "1.1.0"
+    },
+    "require-dev": {
+        "phpcr/phpcr-api-tests": "2.1.0"
+    },
+    "autoload": {
+        "psr-4": { 
+            "Jackalope\\": "src/",
+            "Jackalope\\Test\\": "tests/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.2-dev"
+        }
+    }
+}
