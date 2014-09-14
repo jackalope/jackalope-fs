@@ -7,12 +7,16 @@ use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use PHPCR\CredentialsInterface;
 use PHPCR\NoSuchWorkspaceException;
-use Symfony\Component\Filesystem\Filesystem;
 use PHPCR\RepositoryInterface;
 use PHPCR\Shell\Serializer\NodeNormalizer;
 use PHPCR\Shell\Serializer\YamlEncoder;
 use PHPCR\ItemNotFoundException;
 use Symfony\Component\Yaml\Yaml;
+use PHPCR\LoginException;
+use PHPCR\RepositoryException;
+use PHPCR\Util\PathHelper;
+use Gaufrette\Filesystem;
+use Gaufrette\Adapter\Local;
 
 /**
  */
@@ -25,9 +29,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     protected $nodeTypeManager;
 
     protected $fs;
-
-    protected $nodeNormalizer;
-    protected $nodeEncoder;
 
     /**
      * Base path for content repository
@@ -44,9 +45,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         }
 
         $this->path = $parameters['path'];
-        $this->fs = new Filesystem();
-        $this->nodeNormalizer = new NodeNormalizer();
-        $this->nodeEncoder = new YamlEncoder();
+        $adapter = new Local($this->path, true);
+        $this->fs = new Filesystem($adapter);
     }
 
     /**
@@ -108,7 +108,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getAccessibleWorkspaceNames()
     {
-        throw new NotImplementedException(__METHOD__);
+        $keys = $this->fs->listKeys();
+        var_dump($keys);die();;
     }
 
     /**
@@ -116,6 +117,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function login(CredentialsInterface $credentials = null, $workspaceName = null)
     {
+        $this->validateWorkspaceName($workspaceName);
+
         $this->workspaceName = $workspaceName ? : 'default';
 
         if (!$this->workspaceExists($this->workspaceName)) {
@@ -127,6 +130,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
             // create default workspace if it not exists
             $this->createWorkspace($this->workspaceName);
+        }
+
+        if ($credentials) {
+            if ($credentials->getUserId() != 'admin' || $credentials->getPassword() != 'admin') {
+                throw new LoginException('Invalid credentials (you must connect with admin/admin');
+            }
         }
 
         $this->loggedIn = true;
@@ -155,16 +164,15 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNode($path)
     {
-        $nodeRecordPath = $this->getNodeRecordPath($path);
-
-        if (!file_exists($nodeRecordPath)) {
+        if (!$this->nodeExists($path)) {
             throw new ItemNotFoundException(sprintf(
                 'Could not find node record at "%s"',
                 $path
             ));
         }
 
-        $nodeContent = file_get_contents($nodeRecordPath);
+        $nodeRecordPath = $this->getNodeRecordPath($path);
+        $nodeContent = $this->fs->read($nodeRecordPath);
         $res = Yaml::parse($nodeContent);
         $ret = new \stdClass;
         foreach ($res as $key => $value) {
@@ -293,8 +301,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     {
         $this->workspaceName = $name;
 
-        $workspacePath = $this->getWorkspacePath($name);
-        $this->fs->mkdir($workspacePath);
+        if (null !== $srcWorkspace) {
+            throw new NotImplementedException('Creating workspace as clone of existing workspace not supported');
+        }
+
+        if ($this->workspaceExists($name)) {
+            throw new RepositoryException("Workspace '$name' already exists");
+        }
 
         $this->createNode('/', array(
             'jcr:primaryType' => array(
@@ -314,35 +327,25 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
     public function workspaceExists($name)
     {
-        return file_exists($this->getWorkspacePath($name));
+        return $this->fs->has($this->getWorkspacePath($name));
     }
 
     private function getWorkspacePath($name)
     {
-        return $this->path . '/' . $name;
-    }
-
-    /**
-     * Return the nodes path on the filesystem
-     */
-    private function getNodeFsPath($path)
-    {
-        if (substr($path, -1) === '/') {
-            $path = substr($path, 0, -1);
-        }
-
-        $workspacePath = $this->getWorkspacePath($this->workspaceName);
-
-        $path = sprintf('%s/%s', $workspacePath, $path);
-        return $path;
+        return '/' . $name;
     }
 
     private function getNodeRecordPath($path)
     {
-        $nodePath = $this->getNodeFsPath($path);
-        $nodeRecordPath = $nodePath . '/node.yml';
+        $workspacePath = $this->getWorkspacePath($this->workspaceName);
+        $nodeRecordPath = $workspacePath . '/' . $path . '/node.yml';
 
         return $nodeRecordPath;
+    }
+
+    private function nodeExists($path)
+    {
+        return $this->fs->has($this->getNodeRecordPath($path));
     }
 
     private function createNode($path, $nodeData)
@@ -361,6 +364,15 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         $res = Yaml::dump($node);
 
         $nodeRecordPath = $this->getNodeRecordPath($path);
-        file_put_contents($nodeRecordPath, $res);
+        $this->fs->write($nodeRecordPath, $res);
+    }
+
+    private function validateWorkspaceName($name)
+    {
+        $res = PathHelper::assertValidLocalName($name);
+
+        if (!$res) {
+            throw new RepositoryException(sprintf('Invalid workspace name "%s"', $name));
+        }
     }
 }
