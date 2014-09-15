@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackalope\Transport\Filesystem\Filesystem;
+namespace Jackalope\Transport\Fs\Filesystem;
 
 class Filesystem implements AdapterInterface
 {

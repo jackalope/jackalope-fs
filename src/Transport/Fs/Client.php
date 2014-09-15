@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackalope\Transport\Filesystem;
+namespace Jackalope\Transport\Fs;
 
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\WorkspaceManagementInterface;

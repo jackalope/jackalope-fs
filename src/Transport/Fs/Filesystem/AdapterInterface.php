@@ -1,6 +1,6 @@
 <?php
 
-namespace Jackalope\Transport\Filesystem\Filesystem;
+namespace Jackalope\Transport\Fs\Filesystem;
 
 interface AdapterInterface
 {
@@ -8,7 +8,7 @@ interface AdapterInterface
 
     public function mkdir($path);
 
-    public function read($path, $contents);
+    public function read($path);
 
     public function remove($path, $recursive = false);
 

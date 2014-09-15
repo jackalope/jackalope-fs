@@ -18,14 +18,14 @@
     "require": {
         "php": ">=5.4",
         "jackalope/jackalope": "~1.1.1",
-        "symfony/yaml": "~2.4",
-        "knplabs/gaufrette": "~0.1.8"
-    }
+        "symfony/yaml": "~2.4"
+    },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
-        "phpcr/phpcr-api-tests": "2.1.0"
+        "phpcr/phpcr-api-tests": "2.1.0",
+        "symfony/filesystem": "~2.4"
     },
     "autoload": {
         "psr-4": { 

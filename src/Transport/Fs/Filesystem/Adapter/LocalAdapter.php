@@ -1,8 +1,8 @@
 <?php
 
-namespace J\Transport\Filesysteackalope\Transport\Filesystem\Filesystem\Adapter;
+namespace Jackalope\Transport\Fs\Filesystem\Adapter;
 
-use Filesystem\AdapterInterface;
+use Jackalope\Transport\Fs\Filesystem\AdapterInterface;
 
 class LocalAdapter implements AdapterInterface
 {
@@ -17,12 +17,13 @@ class LocalAdapter implements AdapterInterface
     
     public function write($path, $contents)
     {
-        $this->ensureDirectoryExists(dirname($path));
+        $this->ensureDirectoryExists(dirname($this->getAbsPath($this->path)));
+        file_put_contents($this->getAbsPath($path), $contents);
     }
 
     public function mkdir($path)
     {
-        mkdir($path, $this->mode, true);
+        mkdir($this->getAbsPath($path), $this->mode, true);
     }
 
     public function read($path)
@@ -64,7 +65,7 @@ class LocalAdapter implements AdapterInterface
         return file_exists($this->getAbsPath($path));
     }
 
-    public function ensureDirectoryExists($path)
+    private function ensureDirectoryExists($path)
     {
         if (!file_exists($path)) {
             $this->mkdir($path, true);
