@@ -83,4 +83,15 @@ class LocalAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertFalse($this->adapter->exists('/asdasd'));
     }
+
+    public function testRemove()
+    {
+        mkdir($this->testDir . '/level1');
+        touch($this->testDir . '/level1/file');
+        mkdir($this->testDir . '/level1/level2');
+
+        $this->adapter->remove('level1', true);
+
+        $this->assertFalse(file_exists($this->testDir .'/level1'));
+    }
 }

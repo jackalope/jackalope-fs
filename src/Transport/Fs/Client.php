@@ -15,8 +15,8 @@ use Symfony\Component\Yaml\Yaml;
 use PHPCR\LoginException;
 use PHPCR\RepositoryException;
 use PHPCR\Util\PathHelper;
-use Gaufrette\Filesystem;
-use Gaufrette\Adapter\Local;
+use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
+use Jackalope\Transport\Fs\Filesystem\Filesystem;
 
 /**
  */
@@ -45,7 +45,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         }
 
         $this->path = $parameters['path'];
-        $adapter = new Local($this->path, true);
+        $adapter = new LocalAdapter($this->path, true);
         $this->fs = new Filesystem($adapter);
     }
 

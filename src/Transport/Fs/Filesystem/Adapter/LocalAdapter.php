@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Fs\Filesystem\Adapter;
 
 use Jackalope\Transport\Fs\Filesystem\AdapterInterface;
+use Symfony\Component\Filesystem\Filesystem as SfFilesystem;
 
 class LocalAdapter implements AdapterInterface
 {
@@ -13,17 +14,17 @@ class LocalAdapter implements AdapterInterface
     {
         $this->path = $path;
         $this->mode = $mode;
+        $this->fs = new SfFilesystem();
     }
     
     public function write($path, $contents)
     {
-        $this->ensureDirectoryExists(dirname($this->getAbsPath($this->path)));
-        file_put_contents($this->getAbsPath($path), $contents);
+        $this->fs->dumpFile($this->getAbsPath($path), $contents, $this->mode);
     }
 
     public function mkdir($path)
     {
-        mkdir($this->getAbsPath($path), $this->mode, true);
+        $this->fs->mkdir($this->getAbsPath($path));
     }
 
     public function read($path)
@@ -39,37 +40,12 @@ class LocalAdapter implements AdapterInterface
 
     public function remove($path, $recursive = false)
     {
-        $absPath = $this->getAbsPath($path);
-
-        $removeFunc = function ($absPath) {
-            if (false === unlink($absPath)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Could not remove file "%s"', $absPath
-                ));
-            }
-        };
-
-        if (!$recursive) {
-            $removeFunc($absPath);
-            return;
-        }
-
-        $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($absPath), RecursiveIteratorIterator::SELF_FIRST);
-        foreach ($files as $file => $obj) {
-            $removeFunc($file);
-        }
+        $this->fs->remove($this->getAbsPath($path));
     }
 
     public function exists($path)
     {
         return file_exists($this->getAbsPath($path));
-    }
-
-    private function ensureDirectoryExists($path)
-    {
-        if (!file_exists($path)) {
-            $this->mkdir($path, true);
-        }
     }
 
     private function getAbsPath($path)
