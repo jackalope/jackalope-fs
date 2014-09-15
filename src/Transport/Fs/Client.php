@@ -45,7 +45,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         }
 
         $this->path = $parameters['path'];
-        $adapter = new LocalAdapter($this->path, true);
+        $adapter = new LocalAdapter($this->path);
         $this->fs = new Filesystem($adapter);
     }
 
@@ -108,8 +108,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getAccessibleWorkspaceNames()
     {
-        $keys = $this->fs->listKeys();
-        var_dump($keys);die();;
+        $files = $this->fs->ls($this->path);
+        return $files['dirs'];
     }
 
     /**
@@ -327,7 +327,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
     public function workspaceExists($name)
     {
-        return $this->fs->has($this->getWorkspacePath($name));
+        return $this->fs->exists($this->getWorkspacePath($name));
     }
 
     private function getWorkspacePath($name)
@@ -337,15 +337,20 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
     private function getNodeRecordPath($path)
     {
+        $path = $this->normalizePath($path);
+        if ($path) {
+            $path .= '/';
+        }
+
         $workspacePath = $this->getWorkspacePath($this->workspaceName);
-        $nodeRecordPath = $workspacePath . '/' . $path . '/node.yml';
+        $nodeRecordPath = $workspacePath . '/' . $path . 'node.yml';
 
         return $nodeRecordPath;
     }
 
     private function nodeExists($path)
     {
-        return $this->fs->has($this->getNodeRecordPath($path));
+        return $this->fs->exists($this->getNodeRecordPath($path));
     }
 
     private function createNode($path, $nodeData)
@@ -374,5 +379,15 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         if (!$res) {
             throw new RepositoryException(sprintf('Invalid workspace name "%s"', $name));
         }
+    }
+
+    private function normalizePath($path)
+    {
+        $path = trim($path);
+        if (strlen($path) == 1 && $path == '/') {
+            return '';
+        }
+
+        return $path;
     }
 }

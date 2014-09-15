@@ -96,7 +96,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getRepository()
     {
-        $transport = new \Jackalope\Transport\Filesystem\Client(new \Jackalope\Factory, array('path' => $this->path));
+        $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array('path' => $this->path));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {
                 $transport->createWorkspace($workspace);

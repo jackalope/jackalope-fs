@@ -23,7 +23,7 @@ class Filesystem implements AdapterInterface
 
     public function read($path)
     {
-        $this->adapter->read($path);
+        return $this->adapter->read($path);
     }
 
     public function remove($path, $recursive = false)
@@ -33,6 +33,11 @@ class Filesystem implements AdapterInterface
 
     public function exists($path)
     {
-        $this->adapter->exists($path);
+        return $this->adapter->exists($path);
+    }
+
+    public function ls($path)
+    {
+        return $this->adapter->ls($path);
     }
 }

@@ -25,7 +25,7 @@ class RepositoryFactoryFilesystem implements RepositoryFactoryInterface
     public function getRepository(array $parameters = null)
     {
         $factory = new Factory();
-        $transport = $factory->get('Transport\Filesystem\Client', array($parameters));
+        $transport = $factory->get('Transport\Fs\Client', array($parameters));
         $options = array();
 
         return new Repository($factory, $transport, $options);

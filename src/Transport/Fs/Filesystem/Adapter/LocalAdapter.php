@@ -48,6 +48,35 @@ class LocalAdapter implements AdapterInterface
         return file_exists($this->getAbsPath($path));
     }
 
+    public function ls($path)
+    {
+        $absPath = $this->getAbsPath($path);
+        if (!is_dir($path)) {
+            $path = dirname($path);
+        }
+
+        $res = opendir($path);
+
+        $files = array(
+            'files' => array(),
+            'dirs' => array(),
+        );
+
+        while ($file = readdir($res)) {
+            if (in_array($file, array('..', '.'))) {
+                continue;
+            }
+
+            if (is_dir($file)) {
+                $files['dirs'][] = $file;
+            } else {
+                $files['files'][] = $file;
+            }
+        }
+
+        return $files;
+    }
+
     private function getAbsPath($path)
     {
         if (substr($path, 0, 1) == '/') {
