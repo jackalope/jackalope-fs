@@ -3,19 +3,18 @@
 namespace Jackalope\Test\Tester;
 
 use PHPCR\Test\FixtureLoaderInterface;
+use Jackalope\Transport\Fs\Test\FixtureGenerator;
 
 /**
  * Filesystem fixture loader
  */
 class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
-    protected $distPath;
-    protected $testPath;
-
-    public function __construct($distPath, $testPath)
+    public function __construct()
     {
-        $this->distPath = $distPath;
-        $this->testPath = $testPath;
+        $fixtureGenerator = new FixtureGenerator();
+        $srcDir = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures';
+        $fixtureGenerator->generateFixtures($srcDir, __DIR__ . '/../data/tests');
     }
 
     public function import($fixture, $workspaceKey = 'workspace')

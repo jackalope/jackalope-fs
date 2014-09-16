@@ -350,7 +350,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
     private function nodeExists($path)
     {
-        return $this->fs->exists($this->getNodeRecordPath($path));
+        $path = $this->getNodeRecordPath($path);
+        return $this->fs->exists($path);
     }
 
     private function createNode($path, $nodeData)

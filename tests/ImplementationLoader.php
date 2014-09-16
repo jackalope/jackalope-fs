@@ -32,7 +32,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Reading',
             'Query',
             'Export',
             'NodeTypeDiscovery',
@@ -113,7 +112,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getFixtureLoader()
     {
-        return new \Jackalope\Test\Tester\FilesystemFixtureLoader(__DIR__ . '/data.dist', '/data');
+        return new \Jackalope\Test\Tester\FilesystemFixtureLoader();
     }
 
 }
