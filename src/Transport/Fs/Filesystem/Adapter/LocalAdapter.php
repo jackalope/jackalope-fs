@@ -55,7 +55,7 @@ class LocalAdapter implements AdapterInterface
     {
         $absPath = $this->getAbsPath($path);
         if (!is_dir($path)) {
-            $path = dirname($path);
+            $path = $this->getAbsPath(dirname($path));
         }
 
         $res = opendir($path);

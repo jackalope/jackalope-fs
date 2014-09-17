@@ -13,4 +13,6 @@ interface AdapterInterface
     public function remove($path, $recursive = false);
 
     public function exists($path);
+
+    public function ls($path);
 }

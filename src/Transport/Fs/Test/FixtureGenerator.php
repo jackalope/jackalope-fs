@@ -5,6 +5,9 @@ namespace Jackalope\Transport\Fs\Test;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
 use PHPCR\Util\UUIDHelper;
+use Jackalope\Transport\Fs\Filesystem\Storage;
+use Jackalope\Transport\Fs\Filesystem\Filesystem as FsFilesystem;
+use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 
 class FixtureGenerator
 {
@@ -15,11 +18,10 @@ class FixtureGenerator
 
     function generateFixtures($srcDir, $destDir)
     {
-        $this->destDir = $destDir;
-        $this->fs = new Filesystem();
-        $this->fs->remove($destDir);
-        mkdir($destDir);
-        $this->makeRootNode();
+        $this->storage = new Storage(new FsFilesystem(new LocalAdapter(dirname($destDir))));
+        $this->workspaceName = basename($destDir);
+
+        $this->storage->workspaceInit($this->workspaceName);
 
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($srcDir)) as $srcFile) {
             if (!$srcFile->isFile() || $srcFile->getExtension() !== 'xml') {
@@ -33,25 +35,6 @@ class FixtureGenerator
 
             $this->iterateNode($dom->firstChild);
         }
-    }
-
-    function makeRootNode()
-    {
-        $uuid = UUIDHelper::generateUUID();
-        $node = array(
-            'jcr:uuid' => array(
-                'type' => 'String',
-                'value' => $uuid,
-            ),
-            'jcr:primaryType' => array(
-                'type' => 'String',
-                'value' => 'nt:unstructured',
-            ),
-        );
-
-        $yaml = Yaml::dump($node);
-        $path = $this->destDir .'/node.yml';
-        file_put_contents($path, $yaml);
     }
 
     function iterateNode(\DomNode $domNode)
@@ -72,15 +55,17 @@ class FixtureGenerator
     function persistSystemNode(\DomNode $domNode)
     {
         $xpath = new \DOMXpath($domNode->ownerDocument);
+        $properties = array();
         foreach ($domNode->childNodes as $domProperty) {
             if ($domProperty->nodeName != 'sv:property') {
                 continue;
             }
 
-            $node[$domProperty->getAttributeNS(self::NS_SV, 'name')] = array(
-                'type' => $domProperty->getAttributeNs(self::NS_SV, 'type'),
-                'value' => trim($domProperty->nodeValue)
-            );
+            $propertyName = $domProperty->getAttributeNS(self::NS_SV, 'name');
+            $propertyType = $domProperty->getAttributeNs(self::NS_SV, 'type');
+            $propertyValue = trim($domProperty->nodeValue);
+            $properties[$propertyName] = $propertyValue;
+            $properties[':' . $propertyName] = $propertyType;
         }
 
         $ancestors = $xpath->query('ancestor::*', $domNode);
@@ -89,17 +74,9 @@ class FixtureGenerator
         foreach ($ancestors as $ancestorNode) {
             $path[] = $ancestorNode->getAttributeNs(self::NS_SV, 'name');
         }
-    
+
         $path[] = $domNode->getAttributeNs(self::NS_SV, 'name');
 
-        $path = implode('/', $path);
-        $filePath = sprintf('%s/%s/node.yml', $this->destDir, $path);
-        $dirPath = dirname($filePath);
-        if (!file_exists($dirPath)) {
-            $this->fs->mkdir($dirPath);
-        }
-
-        $yaml = Yaml::dump($node);
-        file_put_contents($filePath, $yaml);
+        $this->storage->writeNode($this->workspaceName, '/' . implode('/', $path), $properties);
     }
 }

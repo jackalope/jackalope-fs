@@ -18,19 +18,21 @@ use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Jackalope\Transport\Fs\Filesystem\Filesystem;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
+use Jackalope\Transport\Fs\Filesystem\Storage;
 
 /**
  */
 class Client extends BaseTransport implements WorkspaceManagementInterface
 {
-    protected $workspaceName = 'default';
     protected $loggedIn;
     protected $autoLastModified;
+    protected $workspaceName = 'default';
 
     protected $nodeTypeManager;
 
     protected $fs;
     protected $nodeSerializer;
+    protected $storage;
 
     /**
      * Base path for content repository
@@ -38,7 +40,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null)
+    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null, $storage = null)
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -48,7 +50,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
         $this->path = $parameters['path'];
         $adapter = new LocalAdapter($this->path);
-        $this->fs = $filesystem ? : new Filesystem($adapter);
+        $this->storage = $storage ? : new Storage(new Filesystem($adapter));
         $this->nodeSerializer = $nodeSerializer ? : new YamlNodeSerializer();
     }
 
@@ -111,8 +113,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getAccessibleWorkspaceNames()
     {
-        $files = $this->fs->ls($this->path);
-        return $files['dirs'];
+        $workspaces = $this->storage->workspaceList();
+        return $workspaces;
     }
 
     /**
@@ -122,7 +124,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     {
         $this->validateWorkspaceName($workspaceName);
 
-        $this->workspaceName = $workspaceName ? : 'default';
+        if ($workspaceName) {
+            $this->workspaceName = $workspaceName;
+        }
 
         if (!$this->workspaceExists($this->workspaceName)) {
             if ('default' !== $this->workspaceName) {
@@ -167,19 +171,17 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNode($path)
     {
-        if (!$this->nodeExists($path)) {
+        if (!$this->storage->nodeExists($this->workspaceName, $path)) {
             throw new ItemNotFoundException(sprintf(
-                'Could not find node record at "%s"',
-                $path
+                'Could not find node record at "%s" for workspace "%s"',
+                $path,
+                $this->workspaceName
             ));
         }
 
-        $nodeRecordPath = $this->getNodeRecordPath($path);
-        $nodeContent = $this->fs->read($nodeRecordPath);
+        $node = $this->storage->readNode($this->workspaceName, $path);
 
-        $jsonObj = $this->nodeSerializer->serialize($nodeContent);
-
-        return $jsonObj;
+        return $node;
     }
 
     /**
@@ -299,8 +301,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function createWorkspace($name, $srcWorkspace = null)
     {
-        $this->workspaceName = $name;
-
         if (null !== $srcWorkspace) {
             throw new NotImplementedException('Creating workspace as clone of existing workspace not supported');
         }
@@ -309,12 +309,10 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
             throw new RepositoryException("Workspace '$name' already exists");
         }
 
-        $this->createNode('/', array(
-            'jcr:primaryType' => array(
-                'type' => 'Name',
-                'value' => 'rep:root',
-            )
-        ));
+        $this->storage->workspaceInit($name);
+
+        $this->workspaceName = $name;
+
     }
 
     /**
@@ -322,60 +320,17 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function deleteWorkspace($name)
     {
-        $this->fs->remove($this->getWorkspacePath($name));
+        $this->storage->removeWorkspace($name);
     }
 
     public function workspaceExists($name)
     {
-        return $this->fs->exists($this->getWorkspacePath($name));
-    }
-
-    private function getWorkspacePath($name)
-    {
-        return '/' . $name;
-    }
-
-    private function getNodeRecordPath($path)
-    {
-        $path = PathHelper::normalizePath($path);
-
-        if (substr($path, 0, 1) == '/') {
-            $path = substr($path, 1);
-        }
-
-        if ($path) {
-            $path .= '/';
-        }
-
-        $workspacePath = $this->getWorkspacePath($this->workspaceName);
-        $nodeRecordPath = $workspacePath . '/' . $path . 'node.yml';
-
-        return $nodeRecordPath;
-    }
-
-    private function nodeExists($path)
-    {
-        $path = $this->getNodeRecordPath($path);
-        return $this->fs->exists($path);
+        return $this->storage->workspaceExists($name);
     }
 
     private function createNode($path, $nodeData)
     {
-        $node = array();
-        foreach ($nodeData as $propertyName => $propertyConfig) {
-            if (isset($propertyConfig['type'])) {
-                $node[':' . $propertyName] = $propertyConfig['type'];
-            }
-
-            if (isset($propertyConfig['value'])) {
-                $node[$propertyName] = $propertyConfig['value'];
-            }
-        }
-
-        $res = Yaml::dump($node);
-
-        $nodeRecordPath = $this->getNodeRecordPath($path);
-        $this->fs->write($nodeRecordPath, $res);
+        $this->storage->writeNode($this->workspaceName, $path, $nodeData);
     }
 
     private function validateWorkspaceName($name)
@@ -394,19 +349,5 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
                 'You are not logged in'
             );
         }
-    }
-
-    private function normalizePath($path)
-    {
-        $path = trim($path);
-        if (strlen($path) == 1 && $path == '/') {
-            return '';
-        }
-
-        if (substr($path, -1, 1) == '/') {
-            $path = substr($path, 0, -1);
-        }
-
-        return $path;
     }
 }
