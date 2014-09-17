@@ -69,6 +69,14 @@ class Storage
 
         $node = $this->serializer->deserialize($nodeData);
 
+        $nodePath = $this->getNodePath($workspace, $path, false);
+        $children = $this->filesystem->ls($nodePath);
+        $children = $children['dirs'];
+
+        foreach ($children as $childName) {
+            $node->{$childName} = new \stdClass();
+        }
+
         return $node;
     }
 
@@ -180,7 +188,7 @@ class Storage
         $this->filesystem->write($indexPath, $index);
     }
 
-    private function getNodePath($workspace, $path)
+    private function getNodePath($workspace, $path, $withFilename = true)
     {
         $path = PathHelper::normalizePath($path);
 
@@ -193,6 +201,10 @@ class Storage
         }
 
         $nodeRecordPath = self::WORKSPACE_PATH . '/' . $workspace . '/' . $path . 'node.yml';
+
+        if ($withFilename === false) {
+            $nodeRecordPath = dirname($nodeRecordPath);
+        }
 
         return $nodeRecordPath;
     }

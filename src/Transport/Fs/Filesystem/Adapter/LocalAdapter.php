@@ -54,11 +54,11 @@ class LocalAdapter implements AdapterInterface
     public function ls($path)
     {
         $absPath = $this->getAbsPath($path);
-        if (!is_dir($path)) {
-            $path = $this->getAbsPath(dirname($path));
+        if (!is_dir($absPath)) {
+            $absPath = $this->getAbsPath(dirname($absPath));
         }
 
-        $res = opendir($path);
+        $res = opendir($absPath);
 
         $files = array(
             'files' => array(),
@@ -70,7 +70,7 @@ class LocalAdapter implements AdapterInterface
                 continue;
             }
 
-            if (is_dir($file)) {
+            if (is_dir($absPath . '/' . $file)) {
                 $files['dirs'][] = $file;
             } else {
                 $files['files'][] = $file;
