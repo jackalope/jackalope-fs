@@ -12,12 +12,12 @@ class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
     public function __construct()
     {
-        $fixtureGenerator = new FixtureGenerator();
-        $srcDir = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures';
-        $fixtureGenerator->generateFixtures($srcDir, __DIR__ . '/../data/tests');
     }
 
     public function import($fixture, $workspaceKey = 'workspace')
     {
+        $fixtureGenerator = new FixtureGenerator();
+        $srcDir = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures';
+        $fixtureGenerator->generateFixtures($srcDir, __DIR__ . '/../data/tests');
     }
 }

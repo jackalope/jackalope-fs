@@ -1,2 +1,6 @@
-'jcr:uuid': 1bd4db57-65ce-4cbc-a02f-8fd2f3dcc21c
-'jcr:primaryType': 'nt:unstructured'
+'jcr:uuid':
+    type: String
+    value: 4ba1cd17-2f2b-4145-b174-e4d97b6afa97
+'jcr:primaryType':
+    type: String
+    value: 'nt:unstructured'

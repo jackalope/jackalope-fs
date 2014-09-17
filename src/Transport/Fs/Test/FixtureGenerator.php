@@ -39,8 +39,14 @@ class FixtureGenerator
     {
         $uuid = UUIDHelper::generateUUID();
         $node = array(
-            'jcr:uuid' => $uuid,
-            'jcr:primaryType' => 'nt:unstructured',
+            'jcr:uuid' => array(
+                'type' => 'String',
+                'value' => $uuid,
+            ),
+            'jcr:primaryType' => array(
+                'type' => 'String',
+                'value' => 'nt:unstructured',
+            ),
         );
 
         $yaml = Yaml::dump($node);

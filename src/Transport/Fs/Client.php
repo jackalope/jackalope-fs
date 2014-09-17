@@ -17,18 +17,20 @@ use PHPCR\RepositoryException;
 use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Jackalope\Transport\Fs\Filesystem\Filesystem;
+use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 
 /**
  */
 class Client extends BaseTransport implements WorkspaceManagementInterface
 {
-    protected $workspaceName;
+    protected $workspaceName = 'default';
     protected $loggedIn;
     protected $autoLastModified;
 
     protected $nodeTypeManager;
 
     protected $fs;
+    protected $nodeSerializer;
 
     /**
      * Base path for content repository
@@ -36,7 +38,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array())
+    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null)
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -46,7 +48,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
         $this->path = $parameters['path'];
         $adapter = new LocalAdapter($this->path);
-        $this->fs = new Filesystem($adapter);
+        $this->fs = $filesystem ? : new Filesystem($adapter);
+        $this->nodeSerializer = $nodeSerializer ? : new YamlNodeSerializer();
     }
 
     /**
@@ -173,13 +176,10 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
         $nodeRecordPath = $this->getNodeRecordPath($path);
         $nodeContent = $this->fs->read($nodeRecordPath);
-        $res = Yaml::parse($nodeContent);
-        $ret = new \stdClass;
-        foreach ($res as $key => $value) {
-            $ret->$key = $value;
-        }
 
-        return $ret;
+        $jsonObj = $this->nodeSerializer->serialize($nodeContent);
+
+        return $jsonObj;
     }
 
     /**
@@ -337,7 +337,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
     private function getNodeRecordPath($path)
     {
-        $path = $this->normalizePath($path);
+        $path = PathHelper::normalizePath($path);
+
+        if (substr($path, 0, 1) == '/') {
+            $path = substr($path, 1);
+        }
+
         if ($path) {
             $path .= '/';
         }
@@ -382,11 +387,24 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         }
     }
 
+    private function assertLoggedIn()
+    {
+        if (false === $this->loggedIn) {
+            throw new \InvalidArgumentException(
+                'You are not logged in'
+            );
+        }
+    }
+
     private function normalizePath($path)
     {
         $path = trim($path);
         if (strlen($path) == 1 && $path == '/') {
             return '';
+        }
+
+        if (substr($path, -1, 1) == '/') {
+            $path = substr($path, 0, -1);
         }
 
         return $path;

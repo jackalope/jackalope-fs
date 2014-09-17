@@ -47,7 +47,6 @@ class LocalAdapter implements AdapterInterface
     {
         $path = $this->getAbsPath($path);
         $exists = file_exists($path);
-        error_log($path . ' ' . ($exists ? 'does' : 'does not') . ' exist');
 
         return $exists;
     }
