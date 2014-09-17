@@ -12,6 +12,7 @@ class Storage
     const WORKSPACE_PATH = '/workspaces';
     const IDX_REFERRERS_DIR = 'referrers';
     const IDX_WEAKREFERRERS_DIR = 'referrers-weak';
+    const IDX_UUID = 'uuid';
 
     protected $filesystem;
     protected $serializer;
@@ -37,7 +38,7 @@ class Storage
         $absPath = $this->getNodePath($workspace, $path);
         $this->filesystem->write($absPath, $serialized);
 
-        $this->createIndex('uuid', $uuid, $workspace . ':' . $path);
+        $this->createIndex(self::IDX_UUID, $uuid, $workspace . ':' . $path);
 
         foreach ($nodeData as $key => $value) {
             if (substr($key, 0, 1) !== ':') {
@@ -49,11 +50,11 @@ class Storage
 
             foreach ($propertyValues as $propertyValue) {
                 if ($value === 'Reference') {
-                    $this->appendToIndex(self::IDX_REFERRERS_DIR, $propertyValue, $uuid);
+                    $this->appendToIndex(self::IDX_REFERRERS_DIR, $propertyValue, $propertyName . ':' . $uuid);
                 }
 
                 if ($value === 'WeakReference') {
-                    $this->appendToIndex(self::IDX_WEAKREFERRERS_DIR, $propertyValue, $uuid);
+                    $this->appendToIndex(self::IDX_WEAKREFERRERS_DIR, $propertyValue, $propertyName . ':' . $uuid);
                 }
             }
         }
@@ -91,11 +92,11 @@ class Storage
         $nodes = array();
 
         foreach ($uuids as $uuid) {
-            $path = self::INDEX_DIR . '/uuid/' . $uuid;
+            $path = self::INDEX_DIR . '/' . self::IDX_UUID . '/' . $uuid;
 
             if (!$this->filesystem->exists($path)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'Index "%s" of type "%s" does not exist', $uuid, $type
+                    'Index "%s" of type "uuid" does not exist', $uuid
                 ));
             }
 
@@ -115,7 +116,6 @@ class Storage
         $node = $this->readNode($workspace, $path);
         $uuid = $node->{'jcr:uuid'};
 
-
         if ($weak === true) {
             $path = self::INDEX_DIR . '/' . self::IDX_WEAKREFERRERS_DIR . '/' . $uuid;
         } else {
@@ -127,10 +127,26 @@ class Storage
         }
 
         $value = $this->filesystem->read($path);
-        $uuids = explode("\n", $value);
+        $values = explode("\n", $value);
+
+        $propertyNames = array();
+        $uuids = array();
+
+        foreach ($values as $line) {
+            $propertyName = strstr($line, ':', true);
+            $propertyNames[] = $propertyName;
+            $uuids[] = substr($line, strlen($propertyName) + 1);
+        }
+
         $referrers = $this->readNodesByUuids($uuids);
 
-        return array_keys($referrers);
+        $referrerPaths = array();
+
+        foreach (array_keys($referrers) as $i => $referrerNodePath) {
+            $referrerPaths[] = sprintf('%s/%s', $referrerNodePath, $propertyNames[$i]);
+        }
+
+        return $referrerPaths;
     }
 
     public function remove($path, $recursive = false)

@@ -182,6 +182,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
 
         $node = $this->storage->readNode($this->workspaceName, $path);
 
+
         return $node;
     }
 
