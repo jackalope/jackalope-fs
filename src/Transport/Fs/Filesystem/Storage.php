@@ -7,7 +7,7 @@ use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 
 class Storage
 {
-    const UUID_DIR = '/index/uuid';
+    const INDEX_DIR = '/indexes';
     const WORKSPACE_PATH = '/workspaces';
 
     protected $filesystem;
@@ -22,14 +22,15 @@ class Storage
     public function writeNode($workspace, $path, $nodeData)
     {
         $serialized = $this->serializer->serialize($nodeData);
-        $path = $this->getNodePath($workspace, $path);
-        $this->filesystem->write($path, $serialized);
+        $absPath = $this->getNodePath($workspace, $path);
+        $this->filesystem->write($absPath, $serialized);
 
         if (isset($nodeData['jcr:uuid'])) {
             $uuid = $nodeData['jcr:uuid'];
-            $this->filesystem->write(self::UUID_DIR, $path);
+            $this->createIndex('uuid', $uuid, $workspace . ':' . $path);
         }
     }
+
     public function readNode($workspace, $path)
     {
         $nodeData = $this->filesystem->read($this->getNodePath($workspace, $path));
@@ -43,6 +44,30 @@ class Storage
         $node = $this->serializer->deserialize($nodeData);
 
         return $node;
+    }
+
+    public function readNodesByIndexes($type, array $keys)
+    {
+        $nodes = array();
+
+        foreach ($keys as $key) {
+            $path = self::INDEX_DIR . '/' . $type . '/' . $key;
+
+            if (!$this->filesystem->exists($path)) {
+                throw new \InvalidArgumentException(sprintf(
+                    'Index "%s" of type "%s" does not exist', $key, $type
+                ));
+            }
+
+            $value = $this->filesystem->read($path);
+            $workspace = strstr($value, ':', true);
+            $path = substr($value, strlen($workspace) + 1);
+
+            $node = $this->readNode($workspace, $path);
+            $nodes[$path] = $node;
+        }
+
+        return $nodes;
     }
 
     public function remove($path, $recursive = false)
@@ -85,6 +110,11 @@ class Storage
         $list = $this->filesystem->ls($fsPath);
 
         return $list;
+    }
+
+    private function createIndex($type, $name, $value)
+    {
+        $this->filesystem->write(self::INDEX_DIR . '/' . $type . '/' . $name, $value);
     }
 
     private function getNodePath($workspace, $path)

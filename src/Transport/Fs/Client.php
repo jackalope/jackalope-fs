@@ -197,7 +197,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodesByIdentifier($identifiers)
     {
-        throw new NotImplementedException(__METHOD__);
+        return $this->storage->readNodesByIndexes('uuid', $identifiers);
     }
 
     /**
@@ -213,7 +213,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodeByIdentifier($uuid)
     {
-        throw new NotImplementedException(__METHOD__);
+        $nodes = $this->getNodesByIdentifier(array($uuid));
+        return current($nodes);
     }
 
     /**

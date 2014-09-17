@@ -10,10 +10,6 @@ use Jackalope\Transport\Fs\Test\FixtureGenerator;
  */
 class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
-    public function __construct()
-    {
-    }
-
     public function import($fixture, $workspaceKey = 'workspace')
     {
         $fixtureGenerator = new FixtureGenerator();
