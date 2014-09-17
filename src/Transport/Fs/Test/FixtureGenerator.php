@@ -63,7 +63,22 @@ class FixtureGenerator
 
             $propertyName = $domProperty->getAttributeNS(self::NS_SV, 'name');
             $propertyType = $domProperty->getAttributeNs(self::NS_SV, 'type');
-            $propertyValue = trim($domProperty->nodeValue);
+
+            $values = array();
+            foreach ($domProperty->childNodes as $childNode) {
+                if ($childNode->nodeName != 'sv:value') {
+                    continue;
+                }
+
+                $values[] = $childNode->nodeValue;
+            }
+
+            $propertyValue = $values;
+
+            if ($propertyName !== 'jcr:mixinTypes' || ($domNode->getAttribute('sv:multiple') && $domNode->getAttribute('sv:multiple') === 'true')) {
+                $propertyValue = current($values);
+            }
+
             $properties[$propertyName] = $propertyValue;
             $properties[':' . $propertyName] = $propertyType;
         }

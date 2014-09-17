@@ -45,14 +45,16 @@ class Storage
             }
 
             $propertyName = substr($key, 1);
-            $propertyValue = $nodeData[$propertyName];
+            $propertyValues = (array) $nodeData[$propertyName];
 
-            if (in_array($value, array('Reference', 'WeakReference'))) {
-                $this->appendToIndex(self::IDX_REFERRERS_DIR, $propertyValue, $uuid);
-            }
+            foreach ($propertyValues as $propertyValue) {
+                if ($value === 'Reference') {
+                    $this->appendToIndex(self::IDX_REFERRERS_DIR, $propertyValue, $uuid);
+                }
 
-            if (in_array($value, array('WeakReference', 'WeakReference'))) {
-                $this->appendToIndex(self::IDX_WEAKREFERRERS_DIR, $propertyValue, $uuid);
+                if ($value === 'WeakReference') {
+                    $this->appendToIndex(self::IDX_WEAKREFERRERS_DIR, $propertyValue, $uuid);
+                }
             }
         }
     }
