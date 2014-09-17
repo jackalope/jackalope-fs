@@ -19,6 +19,7 @@ use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Jackalope\Transport\Fs\Filesystem\Filesystem;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage;
+use Jackalope\Transport\StandardNodeTypes;
 
 /**
  */
@@ -262,7 +263,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodeTypes($nodeTypes = array())
     {
-        throw new NotImplementedException(__METHOD__);
+        $standardTypes = StandardNodeTypes::getNodeTypeData();
+        return $standardTypes;
     }
 
     /**
