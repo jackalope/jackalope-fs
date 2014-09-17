@@ -25,7 +25,8 @@
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
-        "phpcr/phpcr-api-tests": "2.1.0"
+        "phpcr/phpcr-api-tests": "2.1.0",
+        "phpspec/prophecy-phpunit": "~1.0"
     },
     "autoload": {
         "psr-4": { 
@@ -35,7 +36,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.2-dev"
+            "dev-master": "1.0-dev"
         }
     }
 }
