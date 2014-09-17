@@ -71,6 +71,10 @@ class Storage
 
         $node = $this->serializer->deserialize($nodeData);
 
+        if (!isset($node->{'jcr:mixinTypes'})) {
+            $node->{'jcr:mixinTypes'} = array();
+        }
+
         $nodePath = $this->getNodePath($workspace, $path, false);
         $children = $this->filesystem->ls($nodePath);
         $children = $children['dirs'];
