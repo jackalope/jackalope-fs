@@ -58,6 +58,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
         $this->unsupportedTests = array(
             'Connecting\\RepositoryTest::testLoginException', //TODO: figure out what would be invalid credentials
+            'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
         );
 
         $this->path = __DIR__ . '/data';

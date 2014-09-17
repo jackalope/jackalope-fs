@@ -190,7 +190,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodes($paths)
     {
-        throw new NotImplementedException(__METHOD__);
+        $nodes = array();
+        foreach ($paths as $path) {
+            $nodes[$path] = $this->storage->readNode($this->workspaceName, $path);
+        }
+
+        return $nodes;
     }
 
     /**
@@ -198,7 +203,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodesByIdentifier($identifiers)
     {
-        return $this->storage->readNodesByIndexes('uuid', $identifiers);
+        return $this->storage->readNodesByUuids($identifiers);
     }
 
     /**
@@ -239,7 +244,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getReferences($path, $name = null)
     {
-        throw new NotImplementedException(__METHOD__);
+        return $this->storage->readNodeReferrers($this->workspaceName, $path);
     }
 
     /**
@@ -247,7 +252,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getWeakReferences($path, $name = null)
     {
-        throw new NotImplementedException(__METHOD__);
+        return $this->storage->readNodeReferrers($this->workspaceName, $path, true);
     }
 
     /**
