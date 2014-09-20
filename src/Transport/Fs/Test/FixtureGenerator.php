@@ -23,18 +23,27 @@ class FixtureGenerator
 
         $this->storage->workspaceInit($this->workspaceName);
 
+        if (is_file($srcDir)) {
+            return $this->loadFile($srcDir);
+        }
+
         foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($srcDir)) as $srcFile) {
             if (!$srcFile->isFile() || $srcFile->getExtension() !== 'xml') {
                 continue;
             }
 
-            $dom = new \DOMDocument(1.0);
-            $dom->load($srcFile->getPathname());
-            $dom->preserveWhitepace = true;
-            $dom->format = true;
-
-            $this->iterateNode($dom->firstChild);
+            $this->loadFile($srcFile->getPathname());
         }
+    }
+
+    function loadFile($filePath)
+    {
+        $dom = new \DOMDocument(1.0);
+        $dom->load($filePath);
+        $dom->preserveWhitepace = true;
+        $dom->format = true;
+
+        $this->iterateNode($dom->firstChild);
     }
 
     function iterateNode(\DomNode $domNode)

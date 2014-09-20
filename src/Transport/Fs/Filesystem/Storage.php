@@ -111,7 +111,7 @@ class Storage
         return $nodes;
     }
 
-    public function readNodeReferrers($workspace, $path, $weak = false)
+    public function readNodeReferrers($workspace, $path, $weak = false, $name)
     {
         $node = $this->readNode($workspace, $path);
         $uuid = $node->{'jcr:uuid'};
@@ -134,16 +134,20 @@ class Storage
 
         foreach ($values as $line) {
             $propertyName = strstr($line, ':', true);
-            $propertyNames[] = $propertyName;
-            $uuids[] = substr($line, strlen($propertyName) + 1);
-        }
 
-        $referrers = $this->readNodesByUuids($uuids);
+            if (null !== $name && $name != $propertyName) {
+                continue;
+            }
+
+            $uuid = substr($line, strlen($propertyName) + 1);
+            $propertyNames[$propertyName] = $uuid;
+        }
 
         $referrerPaths = array();
 
-        foreach (array_keys($referrers) as $i => $referrerNodePath) {
-            $referrerPaths[] = sprintf('%s/%s', $referrerNodePath, $propertyNames[$i]);
+        foreach ($propertyNames as $propertyName => $uuid) {
+            $referrer = $this->readNodesByUuids(array($uuid));
+            $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
         }
 
         return $referrerPaths;

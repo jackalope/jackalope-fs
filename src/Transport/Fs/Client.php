@@ -245,7 +245,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getReferences($path, $name = null)
     {
-        return $this->storage->readNodeReferrers($this->workspaceName, $path);
+        return $this->storage->readNodeReferrers($this->workspaceName, $path, false, $name);
     }
 
     /**
@@ -253,7 +253,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getWeakReferences($path, $name = null)
     {
-        return $this->storage->readNodeReferrers($this->workspaceName, $path, true);
+        return $this->storage->readNodeReferrers($this->workspaceName, $path, true, $name);
     }
 
     /**
