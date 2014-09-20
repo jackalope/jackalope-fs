@@ -2,9 +2,10 @@
 
 namespace Jackalope\Transport\Fs\Filesystem;
 
-use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
-use PHPCR\Util\UUIDHelper;
+use Jackalope\Transport\Fs\Filesystem\PathRegistry;
+use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
+use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
 
 class Storage
 {
@@ -12,57 +13,34 @@ class Storage
     const WORKSPACE_PATH = '/workspaces';
     const IDX_REFERRERS_DIR = 'referrers';
     const IDX_WEAKREFERRERS_DIR = 'referrers-weak';
-    const IDX_UUID = 'uuid';
+    const IDX_JCR_UUID = 'jcr-uuid';
+    const IDX_INTERNAL_UUID = 'internal-uuid';
+    const INTERNAL_UUID = 'jackalope:fs:id';
 
-    protected $filesystem;
-    protected $serializer;
+    private $filesystem;
+    private $serializer;
+    private $pathRegistry;
+    private $nodeWriter;
+    private $helper;
 
     public function __construct(Filesystem $filesystem)
     {
         $this->filesystem = $filesystem;
         $this->serializer = new YamlNodeSerializer();
+        $this->pathRegistry = new PathRegistry();
+        $this->helper = new StorageHelper();
+
+        $this->nodeWriter = new NodeWriter($this->filesystem, $this->serializer, $this->pathRegistry, $this->helper);
     }
 
     public function writeNode($workspace, $path, $nodeData)
     {
-        // always have a UUID
-        if (isset($nodeData['jcr:uuid'])) {
-            $uuid = $nodeData['jcr:uuid'];
-        } else {
-            $uuid = UUIDHelper::generateUUID();
-            $nodeData['jcr:uuid'] = $uuid;
-            $nodeData[':jcr:uuid'] = 'String';
-        }
-
-        $serialized = $this->serializer->serialize($nodeData);
-        $absPath = $this->getNodePath($workspace, $path);
-        $this->filesystem->write($absPath, $serialized);
-
-        $this->createIndex(self::IDX_UUID, $uuid, $workspace . ':' . $path);
-
-        foreach ($nodeData as $key => $value) {
-            if (substr($key, 0, 1) !== ':') {
-                continue;
-            }
-
-            $propertyName = substr($key, 1);
-            $propertyValues = (array) $nodeData[$propertyName];
-
-            foreach ($propertyValues as $propertyValue) {
-                if ($value === 'Reference') {
-                    $this->appendToIndex(self::IDX_REFERRERS_DIR, $propertyValue, $propertyName . ':' . $uuid);
-                }
-
-                if ($value === 'WeakReference') {
-                    $this->appendToIndex(self::IDX_WEAKREFERRERS_DIR, $propertyValue, $propertyName . ':' . $uuid);
-                }
-            }
-        }
+        $this->nodeWriter->writeNode($workspace, $path, $nodeData);
     }
 
     public function readNode($workspace, $path)
     {
-        $nodeData = $this->filesystem->read($this->getNodePath($workspace, $path));
+        $nodeData = $this->filesystem->read($this->helper->getNodePath($workspace, $path));
 
         if (!$nodeData) {
             throw new \RuntimeException(sprintf(
@@ -76,7 +54,7 @@ class Storage
             $node->{'jcr:mixinTypes'} = array();
         }
 
-        $nodePath = $this->getNodePath($workspace, $path, false);
+        $nodePath = $this->helper->getNodePath($workspace, $path, false);
         $children = $this->filesystem->ls($nodePath);
         $children = $children['dirs'];
 
@@ -84,19 +62,30 @@ class Storage
             $node->{$childName} = new \stdClass();
         }
 
+        // the user shouldn't know about the internal UUID
+        if (!isset($node->{self::INTERNAL_UUID})) {
+            throw new \RuntimeException(sprintf('Internal UUID propery (%s) not set on node at path "%s". This should not happen!', self::INTERNAL_UUID, $path));
+        }
+
+        $internalUuid = $node->{self::INTERNAL_UUID};
+
+        $this->pathRegistry->registerUuid($path, $internalUuid);
+        unset($node->{self::INTERNAL_UUID});
+
         return $node;
     }
 
-    public function readNodesByUuids(array $uuids)
+    public function readNodesByUuids(array $uuids, $internal = false)
     {
         $nodes = array();
 
         foreach ($uuids as $uuid) {
-            $path = self::INDEX_DIR . '/' . self::IDX_UUID . '/' . $uuid;
+            $indexName = $internal ? self::IDX_INTERNAL_UUID : self::IDX_JCR_UUID;
+            $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
             if (!$this->filesystem->exists($path)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'Index "%s" of type "uuid" does not exist', $uuid
+                    'Index "%s" of type "%s" does not exist', $uuid, $indexName
                 ));
             }
 
@@ -114,13 +103,17 @@ class Storage
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
     {
         $node = $this->readNode($workspace, $path);
+
+        // tests say that we should return an empty iteratable when node is not referenceable
+        if (!isset($node->{'jcr:uuid'})) {
+            return array();
+        }
+
         $uuid = $node->{'jcr:uuid'};
 
-        if ($weak === true) {
-            $path = self::INDEX_DIR . '/' . self::IDX_WEAKREFERRERS_DIR . '/' . $uuid;
-        } else {
-            $path = self::INDEX_DIR . '/' . self::IDX_REFERRERS_DIR . '/' . $uuid;
-        }
+        $indexName = $weak === true ? self::IDX_WEAKREFERRERS_DIR : self::IDX_REFERRERS_DIR;
+
+        $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
         if (!$this->filesystem->exists($path)) {
             return array();
@@ -130,7 +123,7 @@ class Storage
         $values = explode("\n", $value);
 
         $propertyNames = array();
-        $uuids = array();
+        $internalUuids = array();
 
         foreach ($values as $line) {
             $propertyName = strstr($line, ':', true);
@@ -139,14 +132,15 @@ class Storage
                 continue;
             }
 
-            $uuid = substr($line, strlen($propertyName) + 1);
-            $propertyNames[$propertyName] = $uuid;
+            $internalUuid = substr($line, strlen($propertyName) + 1);
+            $propertyNames[$propertyName] = $internalUuid;
         }
 
         $referrerPaths = array();
 
-        foreach ($propertyNames as $propertyName => $uuid) {
-            $referrer = $this->readNodesByUuids(array($uuid));
+        foreach ($propertyNames as $propertyName => $internalUuid) {
+
+            $referrer = $this->readNodesByUuids(array($internalUuid), true);
             $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
         }
 
@@ -160,7 +154,7 @@ class Storage
 
     public function nodeExists($workspace, $path)
     {
-        return $this->filesystem->exists($this->getNodePath($workspace, $path));
+        return $this->filesystem->exists($this->helper->getNodePath($workspace, $path));
     }
 
     public function workspaceExists($name)
@@ -189,49 +183,9 @@ class Storage
 
     public function ls($workspace, $path)
     {
-        $fsPath = dirname($this->getNodePath($workspace, $path));
+        $fsPath = dirname($this->helper->getNodePath($workspace, $path));
         $list = $this->filesystem->ls($fsPath);
 
         return $list;
-    }
-
-    private function createIndex($type, $name, $value)
-    {
-        $this->filesystem->write(self::INDEX_DIR . '/' . $type . '/' . $name, $value);
-    }
-
-    private function appendToIndex($type, $name, $value)
-    {
-        $indexPath = self::INDEX_DIR . '/' . $type . '/' . $name;
-
-        if (!$this->filesystem->exists($indexPath)) {
-            $this->filesystem->write($indexPath, $value);
-            return;
-        }
-
-        $index = $this->filesystem->read($indexPath);
-        $index .= "\n" . $value;
-        $this->filesystem->write($indexPath, $index);
-    }
-
-    private function getNodePath($workspace, $path, $withFilename = true)
-    {
-        $path = PathHelper::normalizePath($path);
-
-        if (substr($path, 0, 1) == '/') {
-            $path = substr($path, 1);
-        }
-
-        if ($path) {
-            $path .= '/';
-        }
-
-        $nodeRecordPath = self::WORKSPACE_PATH . '/' . $workspace . '/' . $path . 'node.yml';
-
-        if ($withFilename === false) {
-            $nodeRecordPath = dirname($nodeRecordPath);
-        }
-
-        return $nodeRecordPath;
     }
 }

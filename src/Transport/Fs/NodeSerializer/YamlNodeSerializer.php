@@ -37,6 +37,7 @@ class YamlNodeSerializer implements NodeSerializerInterface
     public function serialize($nodeData)
     {
         $properties = array();
+
         do {
             $propertyName = key($nodeData);
             $propertyValue = current($nodeData);
@@ -54,7 +55,7 @@ class YamlNodeSerializer implements NodeSerializerInterface
             }
 
             $properties[$propertyName]['type'] = $propertyTypeValue;
-        } while (next($nodeData));
+        } while (false !== next($nodeData));
 
         $yaml = Yaml::dump($properties);
 
