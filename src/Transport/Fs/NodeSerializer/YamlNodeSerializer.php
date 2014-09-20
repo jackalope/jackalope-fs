@@ -4,9 +4,12 @@ namespace Jackalope\Transport\Fs\NodeSerializer;
 
 use Jackalope\Transport\Fs\NodeSerializerInterface;
 use Symfony\Component\Yaml\Yaml;
+use PHPCR\Util\UUIDHelper;
 
 class YamlNodeSerializer implements NodeSerializerInterface
 {
+    protected $binaries;
+
     /**
      * Static method for debugging
      */
@@ -37,12 +40,12 @@ class YamlNodeSerializer implements NodeSerializerInterface
     public function serialize($nodeData)
     {
         $properties = array();
+        $this->binaries = array();
 
         do {
             $propertyName = key($nodeData);
             $propertyValue = current($nodeData);
 
-            $properties[$propertyName]['value'] = $propertyValue;
             next($nodeData);
             $propertyTypeName = key($nodeData);
             $propertyTypeValue = current($nodeData);
@@ -54,11 +57,22 @@ class YamlNodeSerializer implements NodeSerializerInterface
                 ));
             }
 
+            if ($propertyTypeValue == 'Binary') {
+                $this->binaries[$propertyName] = $propertyValue;
+                $propertyValue = null;
+            }
+
             $properties[$propertyName]['type'] = $propertyTypeValue;
+            $properties[$propertyName]['value'] = $propertyValue;
         } while (false !== next($nodeData));
 
         $yaml = Yaml::dump($properties);
 
         return $yaml;
+    }
+
+    public function getSerializedBinaries()
+    {
+        return $this->binaries;
     }
 }

@@ -15,4 +15,6 @@ interface AdapterInterface
     public function exists($path);
 
     public function ls($path);
+
+    public function stream($path);
 }

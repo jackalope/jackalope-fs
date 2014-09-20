@@ -40,4 +40,9 @@ class Filesystem implements AdapterInterface
     {
         return $this->adapter->ls($path);
     }
+
+    public function stream($path)
+    {
+        return $this->adapter->stream($path);
+    }
 }

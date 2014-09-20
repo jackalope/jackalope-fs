@@ -237,7 +237,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getBinaryStream($path)
     {
-        throw new NotImplementedException(__METHOD__);
+        return $this->storage->readBinaryStream($this->workspaceName, $path);
     }
 
     /**

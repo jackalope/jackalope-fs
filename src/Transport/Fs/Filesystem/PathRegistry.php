@@ -4,7 +4,8 @@ namespace Jackalope\Transport\Fs\Filesystem;
 
 class PathRegistry
 {
-    protected $pathMap;
+    protected $pathMap = array();
+    protected $propertyMap = array();
 
     public function registerUuid($path, $uuid)
     {

@@ -100,6 +100,32 @@ class Storage
         return $nodes;
     }
 
+    public function readBinaryStream($workspace, $path)
+    {
+        $propertyValues = (array) $this->getPropertyValue($workspace, $path, 'Binary');
+        $nodePath = $this->helper->getNodePath($workspace, dirname($path));
+        $streams = array();
+
+        foreach ($propertyValues as $propertyValue) {
+            $binaryPath = sprintf('%s/%s.bin', dirname($nodePath), $propertyValue);
+
+            if (!$this->filesystem->exists($binaryPath)) {
+                throw new \RuntimeException(sprintf(
+                    'Expected binary file for property "%s" to exist at path "%s" but it doesn\'t',
+                    $path, $binaryPath
+                ));
+            }
+
+            $streams[] = $this->filesystem->stream($binaryPath);
+        }
+
+        if (count($streams) > 1) {
+            return $streams;
+        }
+
+        return reset($streams);
+    }
+
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
     {
         $node = $this->readNode($workspace, $path);
@@ -187,5 +213,27 @@ class Storage
         $list = $this->filesystem->ls($fsPath);
 
         return $list;
+    }
+
+    private function getPropertyValue($workspace, $path, $type)
+    {
+        $node = $this->readNode($workspace, dirname($path));
+        $propertyName = basename($path);
+
+        if (!isset($node->{$propertyName})) {
+            return null;
+        }
+
+        $propertyType = $node->{':' . $propertyName};
+
+        if ($propertyType !== $type) {
+            throw new \InvalidArgumentException(sprintf(
+                'Expected property to be of type "%s" but it is of type "%s"',
+                $type, $propertyType
+            ));
+        }
+
+        $propertyValue = $node->{$propertyName};
+        return $propertyValue;
     }
 }

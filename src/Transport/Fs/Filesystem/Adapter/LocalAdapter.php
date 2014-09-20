@@ -80,6 +80,19 @@ class LocalAdapter implements AdapterInterface
         return $files;
     }
 
+    public function stream($path)
+    {
+        if (!$this->exists($path)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Could not find file to stream at "%s"', $this->getAbsPath($path)
+            ));
+        }
+        $absPath = $this->getAbsPath($path);
+        $res = fopen($absPath, 'r');
+
+        return $res;
+    }
+
     private function getAbsPath($path)
     {
         if (substr($path, 0, 1) == '/') {
