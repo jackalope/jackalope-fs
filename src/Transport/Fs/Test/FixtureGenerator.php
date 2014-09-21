@@ -82,7 +82,7 @@ class FixtureGenerator
                 $values[] = $childNode->nodeValue;
             }
 
-            if ($propertyName === 'jcr:mixinTypes' || $domProperty->getAttributeNs(self::NS_SV, 'multiple') === 'true') {
+            if ($propertyName === 'jcr:mixinTypes' || $domProperty->getAttributeNs(self::NS_SV, 'multiple') === 'true' || count($values) > 1) {
                 $propertyValue = $values;
             } else {
                 $propertyValue = current($values);

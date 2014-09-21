@@ -204,7 +204,11 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodesByIdentifier($identifiers)
     {
-        return $this->storage->readNodesByUuids($identifiers);
+        try {
+            return $this->storage->readNodesByUuids($identifiers);
+        } catch (\InvalidArgumentException $e) {
+            throw new ItemNotFoundException($e->getMessage());
+        }
     }
 
     /**
