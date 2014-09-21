@@ -58,8 +58,22 @@ class YamlNodeSerializer implements NodeSerializerInterface
             }
 
             if ($propertyTypeValue == 'Binary') {
-                $this->binaries[$propertyName] = $propertyValue;
-                $propertyValue = null;
+                $binaries = array();
+                foreach ((array) $propertyValue as $binaryData) {
+                    $binaryHash = md5($binaryData);
+                    $binaries[$binaryHash] = $binaryData;
+                    $this->binaries[$binaryHash] = $binaryData;
+                }
+
+                $binaryHashes = array_keys($binaries);
+                if (is_array($propertyValue)) {
+                    $propertyValue = array();
+                    foreach ($binaryHashes as $binaryHash) {
+                        $propertyValue[] = $binaryHash;
+                    }
+                } else {
+                    $propertyValue = reset($binaryHashes);
+                }
             }
 
             $properties[$propertyName]['type'] = $propertyTypeValue;

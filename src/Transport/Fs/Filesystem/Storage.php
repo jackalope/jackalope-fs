@@ -6,6 +6,7 @@ use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
 use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
+use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
 
 class Storage
 {

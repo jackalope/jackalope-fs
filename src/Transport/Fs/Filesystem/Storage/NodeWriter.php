@@ -52,8 +52,8 @@ class NodeWriter
         $absPath = $this->helper->getNodePath($workspace, $path);
         $this->filesystem->write($absPath, $serialized);
 
-        foreach ($this->serializer->getSerializedBinaries() as $propertyName => $binaryData) {
-            $binaryPath = sprintf('%s/%s.bin', dirname($absPath), $binaryId);
+        foreach ($this->serializer->getSerializedBinaries() as $binaryHash => $binaryData) {
+            $binaryPath = sprintf('%s/%s.bin', dirname($absPath), $binaryHash);
             $this->filesystem->write($binaryPath, base64_decode($binaryData));
         }
 

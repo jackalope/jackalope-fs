@@ -53,14 +53,14 @@ class NodeReader
         }
 
         // the user shouldn't know about the internal UUID
-        if (!isset($node->{self::INTERNAL_UUID})) {
-            throw new \RuntimeException(sprintf('Internal UUID propery (%s) not set on node at path "%s". This should not happen!', self::INTERNAL_UUID, $path));
+        if (!isset($node->{Storage::INTERNAL_UUID})) {
+            throw new \RuntimeException(sprintf('Internal UUID propery (%s) not set on node at path "%s". This should not happen!', Storage::INTERNAL_UUID, $path));
         }
 
-        $internalUuid = $node->{self::INTERNAL_UUID};
+        $internalUuid = $node->{Storage::INTERNAL_UUID};
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
-        unset($node->{self::INTERNAL_UUID});
+        unset($node->{Storage::INTERNAL_UUID});
 
         return $node;
     }
@@ -70,8 +70,8 @@ class NodeReader
         $nodes = array();
 
         foreach ($uuids as $uuid) {
-            $indexName = $internal ? self::IDX_INTERNAL_UUID : self::IDX_JCR_UUID;
-            $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
+            $indexName = $internal ? Storage::IDX_INTERNAL_UUID : Storage::IDX_JCR_UUID;
+            $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
             if (!$this->filesystem->exists($path)) {
                 throw new \InvalidArgumentException(sprintf(
@@ -92,11 +92,11 @@ class NodeReader
 
     public function readBinaryStream($workspace, $path)
     {
-        $propertyValues = (array) $this->getPropertyValue($workspace, $path, 'Binary');
+        $propertyValues = $this->getPropertyValue($workspace, $path, 'Binary');
         $nodePath = $this->helper->getNodePath($workspace, dirname($path));
         $streams = array();
 
-        foreach ($propertyValues as $propertyValue) {
+        foreach ((array) $propertyValues as $propertyValue) {
             $binaryPath = sprintf('%s/%s.bin', dirname($nodePath), $propertyValue);
 
             if (!$this->filesystem->exists($binaryPath)) {
@@ -109,7 +109,7 @@ class NodeReader
             $streams[] = $this->filesystem->stream($binaryPath);
         }
 
-        if (count($streams) > 1) {
+        if (is_array($propertyValues)) {
             return $streams;
         }
 
@@ -127,9 +127,9 @@ class NodeReader
 
         $uuid = $node->{'jcr:uuid'};
 
-        $indexName = $weak === true ? self::IDX_WEAKREFERRERS_DIR : self::IDX_REFERRERS_DIR;
+        $indexName = $weak === true ? Storage::IDX_WEAKREFERRERS_DIR : Storage::IDX_REFERRERS_DIR;
 
-        $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
+        $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
         if (!$this->filesystem->exists($path)) {
             return array();
