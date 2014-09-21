@@ -44,6 +44,8 @@ class NodeReader
             $node->{'jcr:mixinTypes'} = array();
         }
 
+        $this->deserializeBinaries($workspace, $path, $node);
+
         $nodePath = $this->helper->getNodePath($workspace, $path, false);
         $children = $this->filesystem->ls($nodePath);
         $children = $children['dirs'];
@@ -74,9 +76,7 @@ class NodeReader
             $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
             if (!$this->filesystem->exists($path)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Index "%s" of type "%s" does not exist', $uuid, $indexName
-                ));
+                continue;
             }
 
             $value = $this->filesystem->read($path);
@@ -93,27 +93,7 @@ class NodeReader
     public function readBinaryStream($workspace, $path)
     {
         $propertyValues = $this->getPropertyValue($workspace, $path, 'Binary');
-        $nodePath = $this->helper->getNodePath($workspace, dirname($path));
-        $streams = array();
-
-        foreach ((array) $propertyValues as $propertyValue) {
-            $binaryPath = sprintf('%s/%s.bin', dirname($nodePath), $propertyValue);
-
-            if (!$this->filesystem->exists($binaryPath)) {
-                throw new \RuntimeException(sprintf(
-                    'Expected binary file for property "%s" to exist at path "%s" but it doesn\'t',
-                    $path, $binaryPath
-                ));
-            }
-
-            $streams[] = $this->filesystem->stream($binaryPath);
-        }
-
-        if (is_array($propertyValues)) {
-            return $streams;
-        }
-
-        return reset($streams);
+        return $propertyValues;
     }
 
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
@@ -183,5 +163,40 @@ class NodeReader
 
         $propertyValue = $node->{$propertyName};
         return $propertyValue;
+    }
+
+    private function deserializeBinaries($workspace, $path, $node)
+    {
+        do {
+            $propertyName = key($node);
+            $propertyValue = current($node);
+            next($node);
+            $propertyType = key($node);
+            $propertyTypeValue = current($node);
+            next($node);
+
+            if ($propertyTypeValue == 'Binary') {
+                $streams = array();
+                foreach ((array) $propertyValue as $binaryHash) {
+                    $binaryPath = $this->helper->getBinaryPath($workspace, $path, $binaryHash);
+
+                    if (!$this->filesystem->exists($binaryPath)) {
+                        throw new \RuntimeException(sprintf(
+                            'Expected binary file to exist at "%s" but it doesn\t.',
+                            $binaryPath
+                        ));
+                    }
+
+                    $streams[] = $this->filesystem->stream($binaryPath);
+                }
+
+                if (is_array($propertyValue)) {
+                    $node->{$propertyName} = $streams;
+                } else {
+                    $node->{$propertyName} = reset($streams);
+                }
+            }
+
+        } while(false !== current($node));
     }
 }
