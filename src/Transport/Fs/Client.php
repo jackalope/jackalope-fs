@@ -278,7 +278,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function setFetchDepth($depth)
     {
-        throw new NotImplementedException(__METHOD__);
+        // do nothing. there is no performance benefit to be gained by premptively fetching
+        // nodes from the filesystem.
     }
 
     /**
