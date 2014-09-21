@@ -28,9 +28,24 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
         $ret = new \stdClass;
         foreach ($res as $key => $property) {
-            $value = $property['value'];
+            $values = $property['value'];
+            $newValues = array();
 
-            $ret->$key = $value;
+            foreach ((array) $values as $value) {
+                switch ($property['type']) {
+                    case 'Boolean':
+                        $value = $value === 'false' ? false : true;
+                        break;
+                }
+
+                $newValues[] = $value;
+            }
+
+            if (false === is_array($values)) {
+                $newValues = reset($newValues);
+            }
+
+            $ret->$key = $newValues;
             $ret->{':' . $key} = $property['type'];
         }
 
