@@ -27,4 +27,9 @@ class StorageHelper
 
         return $nodeRecordPath;
     }
+
+    public function getBinaryPath($workspace, $path, $binaryHash)
+    {
+        return sprintf('%s/%s.bin', dirname($this->getNodePath($workspace, $path)), $binaryHash);
+    }
 }

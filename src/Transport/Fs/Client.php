@@ -164,7 +164,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNamespaces()
     {
-        throw new NotImplementedException(__METHOD__);
+        return array();
     }
 
     /**
@@ -193,7 +193,11 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     {
         $nodes = array();
         foreach ($paths as $path) {
-            $nodes[$path] = $this->storage->readNode($this->workspaceName, $path);
+            try {
+                $nodes[$path] = $this->getNode($path);
+            } catch (ItemNotFoundException $e) {
+                continue;
+            }
         }
 
         return $nodes;
@@ -204,11 +208,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNodesByIdentifier($identifiers)
     {
-        try {
-            return $this->storage->readNodesByUuids($identifiers);
-        } catch (\InvalidArgumentException $e) {
-            throw new ItemNotFoundException($e->getMessage());
-        }
+        return $this->storage->readNodesByUuids($identifiers);
     }
 
     /**
@@ -225,7 +225,15 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     public function getNodeByIdentifier($uuid)
     {
         $nodes = $this->getNodesByIdentifier(array($uuid));
-        return current($nodes);
+        $node = current($nodes);
+
+        if (!$node) {
+            throw new ItemNotFoundException(sprintf(
+                'Could not find node with UUID "%s"', $uuid
+            ));
+        }
+
+        return $node;
     }
 
     /**
