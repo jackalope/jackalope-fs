@@ -36,7 +36,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Export',
             'NodeTypeDiscovery',
             'PermissionsAndCapabilities',
-            'Writing',
             'Import',
             'Observation',
             'WorkspaceManagement',

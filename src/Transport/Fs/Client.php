@@ -20,10 +20,18 @@ use Jackalope\Transport\Fs\Filesystem\Filesystem;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\StandardNodeTypes;
+use Jackalope\Transport\WritingInterface;
+use Jackalope\Node;
+use Jackalope\NodeType\NodeProcessor;
+use PHPCR\NamespaceRegistryInterface;
+use PHPCR\NodeInterface;
+use PHPCR\PropertyType;
+use PHPCR\ItemExistsException;
+use PHPCR\Util\ValueConverter;
 
 /**
  */
-class Client extends BaseTransport implements WorkspaceManagementInterface
+class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface
 {
     protected $loggedIn;
     protected $autoLastModified;
@@ -34,6 +42,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
     protected $fs;
     protected $nodeSerializer;
     protected $storage;
+    protected $credentials;
+    protected $valueConverter;
 
     /**
      * Base path for content repository
@@ -41,7 +51,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null, $storage = null)
+    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null, $storage = null, $nodeProcessor = null)
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -53,6 +63,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         $adapter = new LocalAdapter($this->path);
         $this->storage = $storage ? : new Storage(new Filesystem($adapter));
         $this->nodeSerializer = $nodeSerializer ? : new YamlNodeSerializer();
+        $this->valueConverter = new ValueConverter();
     }
 
     /**
@@ -105,7 +116,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
             RepositoryInterface::QUERY_JOINS => RepositoryInterface::QUERY_JOINS_NONE,
             RepositoryInterface::QUERY_LANGUAGES => array(),
             RepositoryInterface::QUERY_STORED_QUERIES_SUPPORTED => false,
-            RepositoryInterface::WRITE_SUPPORTED => false,
+            RepositoryInterface::WRITE_SUPPORTED => true,
         );
     }
 
@@ -129,6 +140,10 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
             $this->workspaceName = $workspaceName;
         }
 
+        if (null === $credentials) {
+            throw new LoginException('No credentials provided');
+        }
+
         if (!$this->workspaceExists($this->workspaceName)) {
             if ('default' !== $this->workspaceName) {
                 throw new NoSuchWorkspaceException(sprintf(
@@ -140,13 +155,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
             $this->createWorkspace($this->workspaceName);
         }
 
-        if ($credentials) {
-            if ($credentials->getUserId() != 'admin' || $credentials->getPassword() != 'admin') {
-                throw new LoginException('Invalid credentials (you must connect with admin/admin');
-            }
+        if ($credentials->getUserId() != 'admin' || $credentials->getPassword() != 'admin') {
+            throw new LoginException('Invalid credentials (you must connect with admin/admin');
         }
 
         $this->loggedIn = true;
+        $this->credentials = $credentials;
+        $this->init();
 
         return $this->workspaceName;
     }
@@ -164,7 +179,14 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
      */
     public function getNamespaces()
     {
-        return array();
+        return array(
+            NamespaceRegistryInterface::PREFIX_EMPTY => NamespaceRegistryInterface::NAMESPACE_EMPTY,
+            NamespaceRegistryInterface::PREFIX_JCR => NamespaceRegistryInterface::NAMESPACE_JCR,
+            NamespaceRegistryInterface::PREFIX_NT => NamespaceRegistryInterface::NAMESPACE_NT,
+            NamespaceRegistryInterface::PREFIX_MIX => NamespaceRegistryInterface::NAMESPACE_MIX,
+            NamespaceRegistryInterface::PREFIX_XML => NamespaceRegistryInterface::NAMESPACE_XML,
+            NamespaceRegistryInterface::PREFIX_SV => NamespaceRegistryInterface::NAMESPACE_SV,
+        );
     }
 
     /**
@@ -350,11 +372,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
         return $this->storage->workspaceExists($name);
     }
 
-    private function createNode($path, $nodeData)
-    {
-        $this->storage->writeNode($this->workspaceName, $path, $nodeData);
-    }
-
     private function validateWorkspaceName($name)
     {
         $res = PathHelper::assertValidLocalName($name);
@@ -371,5 +388,196 @@ class Client extends BaseTransport implements WorkspaceManagementInterface
                 'You are not logged in'
             );
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function assertValidName($name)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function copyNode($srcAbsPath, $destAbsPath, $srcWorkspace = null)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function cloneFrom($srcWorkspace, $srcAbsPath, $destAbsPath, $removeExisting)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateNode(Node $node, $srcWorkspace)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function moveNodes(array $operations)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function moveNodeImmediately($srcAbsPath, $dstAbsPath)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function reorderChildren(Node $node)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deleteNodes(array $operations)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deleteProperties(array $operations)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deleteNodeImmediately($path)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function deletePropertyImmediately($path)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function storeNodes(array $operations)
+    {
+        foreach ($operations as $operation) {
+            $node = $operation->node;
+            $this->nodeProcessor->process($node);
+            $nodeData = $this->nodePropertiesToJackalopeArray($node);
+
+            if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
+                throw new ItemExistsException(sprintf(
+                    'Node at path "%s" already exists',
+                    $operation->srcPath
+                ));
+            }
+
+            $this->storage->writeNode($this->workspaceName, $operation->srcPath, $nodeData);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateProperties(Node $node)
+    {
+        $this->assertLoggedIn();
+        $this->nodeProcessor->process($node);
+        $nodeData = $this->nodePropertiesToJackalopeArray($node);
+        $this->storage->writeNode($this->workspaceName, $node->getPath(), $nodeData);
+
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function registerNamespace($prefix, $uri)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function unregisterNamespace($prefix)
+    {
+        throw new NotImplementedException(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function prepareSave()
+    {
+        // nothing
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function finishSave()
+    {
+        // nothing
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function rollbackSave()
+    {
+    }
+
+    private function init()
+    {
+        $this->nodeProcessor = new NodeProcessor($this->credentials, $this->getNamespaces());
+    }
+
+    private function nodePropertiesToJackalopeArray(NodeInterface $node)
+    {
+        $res = array();
+
+        // is there some common code which does this?
+        foreach ($node->getProperties() as $name => $property) {
+            $value = null;
+            switch ($property->getType()) {
+                case PropertyType::DATE:
+                    $value = $property->getValue()->format('c');
+                    break;
+                case PropertyType::REFERENCE:
+                case PropertyType::WEAKREFERENCE:
+                    $value = $property->getValue()->getPropertyValue('jcr:uuid');
+                    break;
+                default:
+                    $value = $property->getValue();
+            }
+            $res[$name] = $value;
+            $res[':' . $name] = $property->getType();
+        }
+
+        return $res;
     }
 }
