@@ -20,6 +20,7 @@ class FixtureGenerator
     {
         $this->storage = new Storage(new FsFilesystem(new LocalAdapter(dirname($destDir))));
         $this->workspaceName = basename($destDir);
+        $this->storage->registerNamespace($this->workspaceName, 'test', 'http://example.com');
 
         $this->storage->workspaceInit($this->workspaceName);
 

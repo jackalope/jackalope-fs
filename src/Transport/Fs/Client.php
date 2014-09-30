@@ -179,13 +179,16 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function getNamespaces()
     {
-        return array(
-            NamespaceRegistryInterface::PREFIX_EMPTY => NamespaceRegistryInterface::NAMESPACE_EMPTY,
-            NamespaceRegistryInterface::PREFIX_JCR => NamespaceRegistryInterface::NAMESPACE_JCR,
-            NamespaceRegistryInterface::PREFIX_NT => NamespaceRegistryInterface::NAMESPACE_NT,
-            NamespaceRegistryInterface::PREFIX_MIX => NamespaceRegistryInterface::NAMESPACE_MIX,
-            NamespaceRegistryInterface::PREFIX_XML => NamespaceRegistryInterface::NAMESPACE_XML,
-            NamespaceRegistryInterface::PREFIX_SV => NamespaceRegistryInterface::NAMESPACE_SV,
+        return array_merge(
+            $this->storage->getNamespaces(),
+            array(
+                NamespaceRegistryInterface::PREFIX_EMPTY => NamespaceRegistryInterface::NAMESPACE_EMPTY,
+                NamespaceRegistryInterface::PREFIX_JCR => NamespaceRegistryInterface::NAMESPACE_JCR,
+                NamespaceRegistryInterface::PREFIX_NT => NamespaceRegistryInterface::NAMESPACE_NT,
+                NamespaceRegistryInterface::PREFIX_MIX => NamespaceRegistryInterface::NAMESPACE_MIX,
+                NamespaceRegistryInterface::PREFIX_XML => NamespaceRegistryInterface::NAMESPACE_XML,
+                NamespaceRegistryInterface::PREFIX_SV => NamespaceRegistryInterface::NAMESPACE_SV,
+            )
         );
     }
 
@@ -517,7 +520,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function registerNamespace($prefix, $uri)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->registerNamespace($this->workspaceName, $prefix, $uri);
     }
 
     /**
@@ -525,7 +528,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function unregisterNamespace($prefix)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->unregisterNamespace($this->workspaceName, $prefix);
     }
 
     /**

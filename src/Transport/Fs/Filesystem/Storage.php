@@ -12,6 +12,9 @@ class Storage
 {
     const INDEX_DIR = '/indexes';
     const WORKSPACE_PATH = '/workspaces';
+    const NAMESPACE_FILE = '/namespaces';
+    const NS_DELIMITER = ':::';
+
     const IDX_REFERRERS_DIR = 'referrers';
     const IDX_WEAKREFERRERS_DIR = 'referrers-weak';
     const IDX_JCR_UUID = 'jcr-uuid';
@@ -101,5 +104,57 @@ class Storage
         $list = $this->filesystem->ls($fsPath);
 
         return $list;
+    }
+
+    public function registerNamespace($workspaceName, $prefix, $uri)
+    {
+        $ns = $prefix . self::NS_DELIMITER . $uri;
+        $out = array();
+        if (false === $this->filesystem->exists(self::NAMESPACE_FILE)) {
+            $out[] = $ns;
+        } else {
+            $out = explode("\n", $this->filesystem->read(self::NAMESPACE_FILE));
+            $out[] = $ns;
+        }
+
+        $this->filesystem->write(self::NAMESPACE_FILE, implode("\n", $out));
+    }
+
+    public function unregisterNamespace($workspaceName, $targetPrefix)
+    {
+        $out = array();
+
+        if (false === $this->filesystem->exists(self::NAMESPACE_FILE)) {
+            return true;
+        } else {
+            $namespaces = explode("\n", $this->filesystem->read(self::NAMESPACE_FILE));
+            foreach ($namespaces as $namespace) {
+                list($prefix, $uri) = explode(self::NS_DELIMITER, $namespace);
+                if ($prefix !== $targetPrefix) {
+                    $out[] = $namespace;
+                }
+            }
+        }
+
+        $this->filesystem->write(self::NAMESPACE_FILE, implode("\n", $out));
+
+        return true;
+    }
+
+    public function getNamespaces()
+    {
+        $res = array();
+
+        if (!$this->filesystem->exists(self::NAMESPACE_FILE)) {
+            return $res;
+        }
+
+        $namespaces = explode("\n", $this->filesystem->read(self::NAMESPACE_FILE));
+        foreach ($namespaces as $namespace) {
+            list($alias, $namespace) = explode(self::NS_DELIMITER, $namespace);
+            $res[$alias] = $namespace;
+        }
+
+        return $res;
     }
 }

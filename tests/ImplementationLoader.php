@@ -87,7 +87,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function prepareAnonymousLogin()
     {
-        return true;
+        return false;
     }
 
     public function getUserId()
