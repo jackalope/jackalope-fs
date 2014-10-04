@@ -61,6 +61,11 @@ class YamlNodeSerializer implements NodeSerializerInterface
             $propertyName = key($nodeData);
             $propertyValue = current($nodeData);
 
+            // should this be moved "up" ?
+            if ($propertyValue instanceof \DateTime) {
+                $propertyValue = $propertyValue->format('c');
+            }
+
             next($nodeData);
             $propertyTypeName = key($nodeData);
             $propertyTypeValue = current($nodeData);
