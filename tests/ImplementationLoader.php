@@ -32,7 +32,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Query',
             'Export',
             'NodeTypeDiscovery',
             'PermissionsAndCapabilities',
