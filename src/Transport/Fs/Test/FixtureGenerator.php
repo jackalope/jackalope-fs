@@ -8,6 +8,9 @@ use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\Fs\Filesystem\Filesystem as FsFilesystem;
 use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Jackalope\Transport\Fs\Search\IndexSubscriber;
+use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
 
 class FixtureGenerator
 {
@@ -18,7 +21,15 @@ class FixtureGenerator
 
     function generateFixtures($srcDir, $destDir)
     {
-        $this->storage = new Storage(new FsFilesystem(new LocalAdapter(dirname($destDir))));
+        $dataDir = dirname($destDir);
+        $eventDispatcher = new EventDispatcher();
+        $searchAdapter = new ZendSearchAdapter($dataDir);
+
+        $eventDispatcher->addSubscriber(
+            new IndexSubscriber($searchAdapter)
+        );
+
+        $this->storage = new Storage(new FsFilesystem(new LocalAdapter($dataDir)), $eventDispatcher);
         $this->workspaceName = basename($destDir);
         $this->storage->registerNamespace($this->workspaceName, 'test', 'http://example.com');
 

@@ -11,14 +11,20 @@ use ZendSearch\Lucene\Document\Field;
 use PHPCR\PropertyType;
 use Jackalope\Query\Query;
 use PHPCR\Query\QOM\QueryObjectModelInterface;
+use Jackalope\Transport\Fs\Search\QOMWalker\ZendSearchQOMWalker;
+use PHPCR\Util\PathHelper;
 
 class ZendSearchAdapter implements SearchAdapterInterface
 {
     const SEARCH_PATH = 'zend-search-indexes';
+    const IDX_PATH = 'jcr:path';
+    const IDX_NODENAME = 'jcr:nodename';
+    const IDX_NODELOCALNAME = 'jcr:nodename';
 
     private $path;
     private $indexes = array();
     private $filesystem;
+    private $qomWalker;
 
     /**
      * @param string $path Path to search index
@@ -27,6 +33,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     {
         $this->path = $path;
         $this->filesystem = new Filesystem();
+        $this->qomWalker = new ZendSearchQOMWalker();
     }
 
     /**
@@ -36,6 +43,12 @@ class ZendSearchAdapter implements SearchAdapterInterface
     {
         $index = $this->getIndex($workspace);
         $document = new Document();
+        $nodeName = PathHelper::getNodeName($path);
+        $localNodeName = PathHelper::getLocalNodeName($path);
+
+        $document->addField(Field::Keyword(self::IDX_PATH, $path));
+        $document->addField(Field::Keyword(self::IDX_NODENAME, $nodeName));
+        $document->addField(Field::Keyword(self::IDX_NODELOCALNAME, $localNodeName));
 
         do {
             $propertyName = key($nodeData);
@@ -49,11 +62,22 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 continue;
             }
 
-            switch ($typeName) {
-                case PropertyType::STRING:
-                    $document->addField(Field::Text($propertyName, $propertyValue));
-            }
 
+            switch ($typeValue) {
+                case PropertyType::TYPENAME_STRING:
+                case PropertyType::TYPENAME_LONG:
+                case PropertyType::TYPENAME_DOUBLE:
+                case PropertyType::TYPENAME_DATE:
+                case PropertyType::TYPENAME_NAME:
+                case PropertyType::TYPENAME_PATH:
+                case PropertyType::TYPENAME_URI:
+                case PropertyType::TYPENAME_DECIMAL:
+                case PropertyType::TYPENAME_BOOLEAN:
+                    $value = (array) $propertyValue;
+                    $value = join(' ', $value);
+                    $document->addField(Field::Text($propertyName, $value));
+                    break;
+            }
 
         } while (current($nodeData));
 
@@ -62,12 +86,81 @@ class ZendSearchAdapter implements SearchAdapterInterface
 
     /**
      * {@inheritDoc}
+     * array(
+     *     //row 1
+     *     array(
+     *         //column1
+     *         array('dcr:name' => 'value1',
+     *               'dcr:value' => 'value2',
+     *               'dcr:selectorName' => 'value3' //optional
+     *         ),
+     *         //column 2...
+     *     ),
+     *     //row 2
+     *     array(...
+     * )
      */
     public function query($workspace, QueryObjectModelInterface $qom)
     {
         $index = $this->getIndex($workspace);
+        list($selectors, $selectorAliases, $query) = $this->qomWalker->walkQOMQuery($qom);
+        $results = $index->find($query);
 
-        throw new \Exception('I am here');
+        $selectorName = $this->qomWalker->getSource();
+        $rows = array();
+        $columns = $qom->getColumns();
+        $columnNames = array();
+
+        foreach ($columns as $column) {
+            $columnPropertyNames[$column->getPropertyName()] = $column;
+            $columnNames[$column->getColumnName()] = $column;
+        }
+
+        foreach ($results as $result) {
+            $selectedColumns = array();
+
+            $row = array();
+            $document = $result->getDocument();
+
+            foreach ($document->getFieldNames() as $fieldName) {
+                if ($columns) {
+                    if (!isset($columnPropertyNames[$fieldName])) {
+                        continue;
+                    }
+
+                    $column = $columnPropertyNames[$fieldName];
+                    $name = $column->getColumnName();
+                } else {
+                    if ($fieldName === 'jcr:path') {
+                        $name = $fieldName;
+                    } else {
+                        $name = $selectorName . '.' . $fieldName;
+                    }
+                }
+
+                $field = $document->getField($fieldName);
+                $row[] = array(
+                    'dcr:name' => $name,
+                    'dcr:value' => $field->getUtf8Value()
+                );
+
+                $selectedColumns[$name] = $name;
+            }
+
+            // add any columns which were specified by not contained in the results
+            foreach (array_keys($columnNames) as $columnName) {
+                if (false === isset($selectedColumns[$columnName])) {
+                    $row[] = array(
+                        'dcr:name' => $columnName,
+                        'dcr:value' =>  '',
+                    );
+                }
+            }
+
+            $rows[] = $row;
+        }
+
+        return $rows;
     }
 
     private function getIndexPath($workspace)

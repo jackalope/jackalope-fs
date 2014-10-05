@@ -589,7 +589,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $qom = $query;
         }
 
-        $this->searchAdapter->query($this->workspaceName, $qom);
+        return $this->searchAdapter->query($this->workspaceName, $qom);
     }
 
     public function getSupportedQueryLanguages()
