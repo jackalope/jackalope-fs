@@ -20,6 +20,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     const IDX_PATH = 'jcr:path';
     const IDX_NODENAME = 'jcr:nodename';
     const IDX_NODELOCALNAME = 'jcr:nodename';
+    const IDX_PARENTPATH= 'jcr:parentpath';
 
     private $path;
     private $indexes = array();
@@ -45,10 +46,12 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $document = new Document();
         $nodeName = PathHelper::getNodeName($path);
         $localNodeName = PathHelper::getLocalNodeName($path);
+        $parentPath = PathHelper::getParentPath($path);
 
         $document->addField(Field::Keyword(self::IDX_PATH, $path));
         $document->addField(Field::Keyword(self::IDX_NODENAME, $nodeName));
         $document->addField(Field::Keyword(self::IDX_NODELOCALNAME, $localNodeName));
+        $document->addField(Field::Keyword(self::IDX_PARENTPATH, $parentPath));
 
         do {
             $propertyName = key($nodeData);

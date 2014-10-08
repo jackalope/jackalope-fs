@@ -11,8 +11,8 @@ use Jackalope\Transport\DoctrineDBAL\Util\Xpath;
 use PHPCR\NamespaceException;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Query\InvalidQueryException;
-use PHPCR\Query\QOM;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as QOMConstants;
+use PHPCR\Query\QOM;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -20,6 +20,7 @@ use Doctrine\DBAL\Platforms\MySqlPlatform;
 use Doctrine\DBAL\Platforms\PostgreSqlPlatform;
 use Doctrine\DBAL\Platforms\SqlitePlatform;
 use ZendSearch\Lucene;
+use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
 
 /**
  * Converts QOM a ZendSearch query
@@ -76,14 +77,17 @@ class ZendSearchQOMWalker
     {
         $source = $qom->getSource();
         $query = new Lucene\Search\Query\Boolean();
-        $sourceQuery = $this->walkSource($source);
-        $constraintSubquery = $this->walkConstraint($qom->getConstraint());
+        $parts = array();
+        $parts[] = '(' . $this->walkSource($source) . ')';
+
+        if ($constraint = $qom->getConstraint()) {
+            $parts[] = '(' . $this->walkConstraint($constraint) . ')';
+        }
 
         // $orderings = $qom->getOrderings();
-        $query = sprintf('(%s) AND (%s)', $sourceQuery, $constraintSubquery);;
-        $query = Lucene\Search\QueryParser::parse($query);
+        $query = join(' AND ', $parts);
 
-        return array($source, array(), $query);
+        return $query;
     }
 
     /**
@@ -122,35 +126,35 @@ class ZendSearchQOMWalker
      */
     private function walkConstraint(QOM\ConstraintInterface $constraint)
     {
-        if ($constraint instanceof QueryObjectModelInterface\AndInterface) {
+        if ($constraint instanceof QOM\AndInterface) {
             return $this->walkAndConstraint($constraint);
         }
-        if ($constraint instanceof QueryObjectModelInterface\OrInterface) {
-            // return $this->walkOrConstraint($constraint);
+        if ($constraint instanceof QOM\OrInterface) {
+            return $this->walkOrConstraint($constraint);
         }
-        if ($constraint instanceof QueryObjectModelInterface\NotInterface) {
-            // return $this->walkNotConstraint($constraint);
+        if ($constraint instanceof QOM\NotInterface) {
+            return $this->walkNotConstraint($constraint);
         }
         if ($constraint instanceof QOM\ComparisonInterface) {
             return $this->walkComparisonConstraint($constraint);
         }
         if ($constraint instanceof QOM\DescendantNodeInterface) {
-            // return $this->walkDescendantNodeConstraint($constraint);
+            return $this->walkDescendantNodeConstraint($constraint);
         }
         if ($constraint instanceof QOM\ChildNodeInterface) {
-            // return $this->walkChildNodeConstraint($constraint);
+            return $this->walkChildNodeConstraint($constraint);
         }
         if ($constraint instanceof QOM\PropertyExistenceInterface) {
-            // return $this->walkPropertyExistenceConstraint($constraint);
+            return $this->walkPropertyExistenceConstraint($constraint);
         }
         if ($constraint instanceof QOM\SameNodeInterface) {
-            // return $this->walkSameNodeConstraint($constraint);
+            return $this->walkSameNodeConstraint($constraint);
         }
         if ($constraint instanceof QOM\FullTextSearchInterface) {
-            // return $this->walkFullTextSearchConstraint($constraint);
+            return $this->walkFullTextSearchConstraint($constraint);
         }
 
-        throw new InvalidQueryException("Constraint " . get_class($constraint) . " not yet supported.");
+        throw new InvalidQueryException('Constraint "' . get_class($constraint) . '" not yet supported.');
     }
 
     private function walkAndConstraint(QOM\AndInterface $constraint)
@@ -161,7 +165,7 @@ class ZendSearchQOMWalker
         return sprintf('%s AND %s', $left, $right);
     }
 
-    private function walkOrConstraint(QOM\AndInterface $constraint)
+    private function walkOrConstraint(QOM\OrInterface $constraint)
     {
         $left = $this->walkConstraint($constraint->getConstraint1());
         $right = $this->walkConstraint($constraint->getConstraint2());
@@ -185,20 +189,61 @@ class ZendSearchQOMWalker
             case QOMConstants::JCR_OPERATOR_EQUAL_TO:
                 return sprintf('%s:"%s"', $operand1, $operand2);
             case QOMConstants::JCR_OPERATOR_NOT_EQUAL_TO:
-                return sprintf('-%s:"%s"', $operand1, $operand2);
+                return sprintf('NOT %s:"%s"', $operand1, $operand2);
             case QOMConstants::JCR_OPERATOR_LESS_THAN:
-                // return sprintf('%s:[%s TO %s]', $operand1, $operand2);
+                return sprintf('%s:{-%s TO %s}', $operand1, PHP_INT_MAX, $operand2);
             case QOMConstants::JCR_OPERATOR_LESS_THAN_OR_EQUAL_TO:
-                // return sprintf('%s:{%s TO %s}', $operand1, $operand2);
+                return sprintf('%s:[-%s TO %s]', $operand1, PHP_INT_MAX, $operand2);
             case QOMConstants::JCR_OPERATOR_GREATER_THAN:
-                // return sprintf('%s:[%s TO %s], $operand1, $operand2);
+                return sprintf('%s:{%s TO %s}', $operand1, $operand2, PHP_INT_MAX);
             case QOMConstants::JCR_OPERATOR_GREATER_THAN_OR_EQUAL_TO:
-                // return sprintf('%s:{%s TO %s}', $operand1, $operand2);
+                return sprintf('%s:[%s TO %s]', $operand1, $operand2, PHP_INT_MAX);
             case QOMConstants::JCR_OPERATOR_LIKE:
-                return sprintf('%s:%s', $operand1, $operand2);
+                return sprintf('%s:"%s"', $operand1, str_replace('%', '*', $operand2));
         }
 
-        throw new InvalidQueryException('Constraint "' . get_class($constraint) . ' not yet supported.');
+        throw new InvalidQueryException('Operator "' . $constraint->getOperator() . '" not yet supported.');
+    }
+
+    private function walkPropertyExistenceConstraint(QOM\PropertyExistenceInterface $constraint)
+    {
+        $selectorName = $constraint->getSelectorName();
+        $propertyName = $constraint->getPropertyName();
+
+        return sprintf('%s:*', $propertyName);
+    }
+
+    private function walkSameNodeConstraint(QOM\SameNodeInterface $constraint)
+    {
+        $selectorName = $constraint->getSelectorName();
+        $path = $constraint->getPath();
+
+        return sprintf( '%s:%s', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
+    }
+
+    private function walkChildNodeConstraint(QOM\ChildNodeInterface $constraint)
+    {
+        $selectorName = $constraint->getSelectorName();
+        $path = $constraint->getParentPath();
+
+        return sprintf('%s:%s', $this->escape(ZendSearchAdapter::IDX_PARENTPATH), $path);
+    }
+
+    private function walkDescendantNodeConstraint(QOM\DescendantNodeInterface $constraint)
+    {
+        $selectorName = $constraint->getSelectorName();
+        $path = $constraint->getAncestorPath();
+
+        return sprintf( '%s:%s/*', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
+    }
+
+    private function walkFullTextSearchConstraint(QOM\FullTextSearchInterface $constraint)
+    {
+        $selectorName = $constraint->getSelectorName();
+        $propertyName = $constraint->getPropertyName();
+        $fullTextSearch = $constraint->getFullTextSearchExpression();
+
+        return sprintf('%s:%s', $this->escape($propertyName), $fullTextSearch);
     }
 
     /**
@@ -223,6 +268,13 @@ class ZendSearchQOMWalker
             return $this->escape($operand->getPropertyName());
         }
         if ($operand instanceof QOM\LengthInterface) {
+            return $this->walkOperand($operand->getPropertyValue());
+        }
+        if ($operand instanceof QOM\LowerCaseInterface) {
+            return $this->walkOperand($operand->getOperand());
+        }
+        if ($operand instanceof QOM\UpperCaseInterface) {
+            return $this->walkOperand($operand->getOperand());
         }
 
         throw new InvalidQueryException("Dynamic operand " . get_class($operand) . " not yet supported.");
