@@ -13,6 +13,8 @@ use Jackalope\Query\Query;
 use PHPCR\Query\QOM\QueryObjectModelInterface;
 use Jackalope\Transport\Fs\Search\QOMWalker\ZendSearchQOMWalker;
 use PHPCR\Util\PathHelper;
+use Jackalope\Transport\Fs\Search\Adapter\Zend\ExactMatchAnalyzer;
+use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 
 class ZendSearchAdapter implements SearchAdapterInterface
 {
@@ -35,6 +37,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $this->path = $path;
         $this->filesystem = new Filesystem();
         $this->qomWalker = new ZendSearchQOMWalker();
+        Analyzer::setDefault(new ExactMatchAnalyzer());
     }
 
     /**
@@ -103,13 +106,15 @@ class ZendSearchAdapter implements SearchAdapterInterface
      *     array(...
      * )
      */
-    public function query($workspace, QueryObjectModelInterface $qom)
+    public function queryOld($workspace, QueryObjectModelInterface $qom)
     {
+        $query = $this->qomWalker->walkQOMQuery($qom);
         $index = $this->getIndex($workspace);
-        list($selectors, $selectorAliases, $query) = $this->qomWalker->walkQOMQuery($qom);
         $results = $index->find($query);
 
-        $selectorName = $this->qomWalker->getSource();
+        $selector = $this->qomWalker->getSource();
+        $selectorName = $selector->getSelectorName() ?: $selector->getNodeTypeName();
+
         $rows = array();
         $columns = $qom->getColumns();
         $columnNames = array();
@@ -164,6 +169,117 @@ class ZendSearchAdapter implements SearchAdapterInterface
         }
 
         return $rows;
+    }
+
+    public function query($workspace, $qom)
+    {
+        $query = $this->qomWalker->walkQOMQuery($qom);
+        $index = $this->getIndex($workspace);
+        $data = $index->find($query);
+
+        $primarySource = $this->qomWalker->getSource();
+        $primaryType = $primarySource->getSelectorName() ?: $primarySource->getNodeTypeName();
+        $selectors = array($primarySource);
+
+        $results = $properties = $standardColumns = array();
+        foreach ($data as $hit) {
+            $result = array();
+            $document = $hit->getDocument();
+
+            /** @var SelectorInterface $selector */
+            foreach ($selectors as $selector) {
+                $selectorName   = $selector->getSelectorName() ?: $selector->getNodeTypeName();
+
+                if ($primaryType === $selector->getNodeTypeName()) {
+                    $result[] = array(
+                        'dcr:name' => 'jcr:path',
+                        'dcr:value' => $document->getField(self::IDX_PATH)
+                    );
+                }
+
+                $result[] = array(
+                    'dcr:name' => 'jcr:path',
+                    'dcr:value' => $document->getField(self::IDX_PATH),
+                    'dcr:selectorName' => $selectorName
+                );
+
+                $result[] = array(
+                    'dcr:name' => 'jcr:score',
+                    'dcr:value' => $hit->score,
+                    'dcr:selectorName' => $selectorName
+                );
+
+                if (0 === count($qom->getColumns())) {
+                    $selectorPrefix = null !== $selector->getSelectorName() ? $selectorName . '.' : '';
+                    $result[] = array(
+                        'dcr:name' => $selectorPrefix . 'jcr:primaryType',
+                        'dcr:value' => $primaryType,
+                        'dcr:selectorName' => $selectorName
+                    );
+                }
+
+
+                $properties[$selectorName] = array();
+                foreach ($document->getFieldNames() as $fieldName) {
+                    $field = $document->getField($fieldName);
+                    $properties[$selectorName][$fieldName] = $field->getUtf8Value();
+                }
+
+                // TODO: add other default columns that Jackrabbit provides to provide a more consistent behavior
+                if (isset($properties[$selectorName]['jcr:createdBy'])) {
+                    $standardColumns[$selectorName]['jcr:createdBy'] = $properties[$selectorName]['jcr:createdBy'];
+                }
+                if (isset($properties[$selectorName]['jcr:created'])) {
+                    $standardColumns[$selectorName]['jcr:created'] = $properties[$selectorName]['jcr:created'];
+                }
+            }
+
+            foreach ($qom->getColumns() as $column) {
+                $selectorName = $column->getSelectorName();
+                $columnName = $column->getPropertyName();
+
+                if ('jcr:uuid' === $columnName) {
+                    $dcrValue = $document->getField(self::IDX_UUID)->getUtf8Value();
+                } else {
+                    if (isset($properties[$selectorName][$columnName])) {
+                        $dcrValue = $properties[$selectorName][$columnName];
+                    } else {
+                        $dcrValue = '';
+                    }
+                }
+
+                $dcrValue = 'jcr:uuid' === $columnName
+                    ? $row[$columnPrefix . 'identifier']
+                    : (isset($properties[$selectorName][$columnName]) ? $properties[$selectorName][$columnName] : '')
+                ;
+
+                if (isset($standardColumns[$selectorName][$columnName])) {
+                    unset($standardColumns[$selectorName][$columnName]);
+                }
+
+                $result[] = array(
+                    'dcr:name' => ($column->getColumnName() === $columnName && isset($properties[$selectorName][$columnName])
+                        ? $selectorName.'.'.$columnName : $column->getColumnName()),
+                    'dcr:value' => $dcrValue,
+                    'dcr:selectorName' => $selectorName ?: $primaryType,
+                );
+            }
+
+            foreach ($standardColumns as $selectorName => $columns) {
+                foreach ($columns as $columnName => $value) {
+                    $result[] = array(
+                        'dcr:name' => $primaryType.'.'.$columnName,
+                        'dcr:value' => $value,
+                        'dcr:selectorName' => $selectorName,
+                    );
+                }
+            }
+
+            $results[] = $result;
+        }
+
+        return $results;
+
     }
 
     private function getIndexPath($workspace)

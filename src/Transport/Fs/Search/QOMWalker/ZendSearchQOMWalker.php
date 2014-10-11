@@ -113,7 +113,7 @@ class ZendSearchQOMWalker
      */
     public function walkSelectorSource(QOM\SelectorInterface $source)
     {
-        $this->source = $source->getNodeTypeName();
+        $this->source = $source;
         return sprintf('%s:%s', $this->escape('jcr:primaryType'), $this->escape($source->getNodeTypeName()));
     }
 
