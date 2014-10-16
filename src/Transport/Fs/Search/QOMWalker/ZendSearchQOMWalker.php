@@ -179,6 +179,7 @@ class ZendSearchQOMWalker
     {
         $operand1 = $this->walkOperand($constraint->getOperand1());
         $operand2 = $this->walkOperand($constraint->getOperand2());
+        $padding = '%0' . strlen(PHP_INT_MAX) .'s';
 
         switch ($constraint->getOperator()) {
             case QOMConstants::JCR_OPERATOR_EQUAL_TO:
@@ -186,13 +187,13 @@ class ZendSearchQOMWalker
             case QOMConstants::JCR_OPERATOR_NOT_EQUAL_TO:
                 return sprintf('NOT %s:"%s"', $operand1, $operand2);
             case QOMConstants::JCR_OPERATOR_LESS_THAN:
-                return sprintf('%s:{-%s TO %s}', $operand1, PHP_INT_MAX, $operand2);
+                return sprintf('%s:{-' . $padding . ' TO %s}', $operand1, PHP_INT_MAX, $operand2);
             case QOMConstants::JCR_OPERATOR_LESS_THAN_OR_EQUAL_TO:
-                return sprintf('%s:[-%s TO %s]', $operand1, PHP_INT_MAX, $operand2);
+                return sprintf('%s:[-' . $padding . ' TO %s]', $operand1, PHP_INT_MAX, $operand2);
             case QOMConstants::JCR_OPERATOR_GREATER_THAN:
-                return sprintf('%s:{%s TO %s}', $operand1, $operand2, PHP_INT_MAX);
+                return sprintf('%s:{' . $padding .' TO %s}', $operand1, $operand2, PHP_INT_MAX);
             case QOMConstants::JCR_OPERATOR_GREATER_THAN_OR_EQUAL_TO:
-                return sprintf('%s:[%s TO %s]', $operand1, $operand2, PHP_INT_MAX);
+                return sprintf('%s:[' . $padding . ' TO %s]', $operand1, $operand2, PHP_INT_MAX);
             case QOMConstants::JCR_OPERATOR_LIKE:
                 return sprintf('%s:"%s"', $operand1, str_replace('%', '*', $operand2));
         }

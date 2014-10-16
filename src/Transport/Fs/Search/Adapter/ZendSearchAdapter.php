@@ -75,18 +75,22 @@ class ZendSearchAdapter implements SearchAdapterInterface
 
             switch ($typeValue) {
                 case PropertyType::TYPENAME_STRING:
-                case PropertyType::TYPENAME_LONG:
-                case PropertyType::TYPENAME_DOUBLE:
                 case PropertyType::TYPENAME_DATE:
                 case PropertyType::TYPENAME_NAME:
                 case PropertyType::TYPENAME_PATH:
                 case PropertyType::TYPENAME_URI:
-                case PropertyType::TYPENAME_DECIMAL:
                 case PropertyType::TYPENAME_BOOLEAN:
                     $value = (array) $propertyValue;
                     $value = join(' ', $value);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
+                case PropertyType::TYPENAME_DECIMAL:
+                case PropertyType::TYPENAME_LONG:
+                case PropertyType::TYPENAME_DOUBLE:
+                    $value = (array) $propertyValue;
+                    $value = join(' ', $value);
+                    $value = sprintf('%0' . strlen(PHP_INT_MAX) .'s', $value);
+                    $document->addField(Field::Text($propertyName, $value));
             }
 
         } while (current($nodeData));
