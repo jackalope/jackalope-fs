@@ -66,10 +66,22 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\\QueryManagerTest::testGetQueryInvalid',
             'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
 
+            // sql2 + xpath not supported by FS
             'Query\\Sql1\\QueryOperationsTest::testQueryField',
             'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
             'Query\\XPath\\QueryOperationsTest::testQueryField',
             'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
+
+
+            'Query\\QuerySql2OperationsTest::testQueryJoin',
+            'Query\\QuerySql2OperationsTest::testQueryJoinChildnode',
+            'Query\\QuerySql2OperationsTest::testQueryJoinReference',
+            'Query\\QuerySql2OperationsTest::testQueryJoinWithAlias',
+            'Query\\QuerySql2OperationsTest::testQueryLeftJoin',
+            //'Query\\QuerySql2OperationsTest::testQueryMultiValuedProperty',
+            //'Query\\QuerySql2OperationsTest::testQueryOrder',
+            //'Query\\QuerySql2OperationsTest::testQueryOrderWithMissingProperty',
+            'Query\\QuerySql2OperationsTest::testQueryRightJoin',
 
         );
 
