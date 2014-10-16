@@ -25,6 +25,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     const IDX_NODENAME = 'jcr:nodename';
     const IDX_NODELOCALNAME = 'jcr:nodename';
     const IDX_PARENTPATH= 'jcr:parentpath';
+    const VALUE_BOOLEAN_FALSE = '__BOOLEAN_FALSE_';
 
     private $path;
     private $indexes = array();
@@ -79,7 +80,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 case PropertyType::TYPENAME_NAME:
                 case PropertyType::TYPENAME_PATH:
                 case PropertyType::TYPENAME_URI:
-                case PropertyType::TYPENAME_BOOLEAN:
                     $value = (array) $propertyValue;
                     $value = join(' ', $value);
                     $document->addField(Field::Text($propertyName, $value));
@@ -91,6 +91,15 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     $value = join(' ', $value);
                     $value = sprintf('%0' . strlen(PHP_INT_MAX) .'s', $value);
                     $document->addField(Field::Text($propertyName, $value));
+                    break;
+                case PropertyType::TYPENAME_BOOLEAN:
+                    if ($propertyValue === 'false') {
+                        $value = self::VALUE_BOOLEAN_FALSE;
+                    } else {
+                        $value = 1;
+                    }
+                    $document->addField(Field::Text($propertyName, $value));
+                    break;
             }
 
         } while (current($nodeData));
@@ -199,7 +208,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 $result[] = array(
                     'dcr:name' => ($column->getColumnName() === $propertyName && isset($properties[$selectorName][$propertyName])
                         ? $selectorName.'.'.$propertyName : $column->getColumnName()),
-                    'dcr:value' => $dcrValue,
+                    'dcr:value' => $this->normalizeValue($dcrValue),
                     'dcr:selectorName' => $selectorName ? : $primaryType,
                 );
             }
@@ -257,5 +266,18 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $this->qomWalker = new ZendSearchQOMWalker($this->nodeTypeManager);
 
         return $this->qomWalker;
+    }
+
+    /**
+     * Normalize the given value.
+     * The index uses some special values, f.e. for boolean
+     */
+    private function normalizeValue($value)
+    {
+        if ($value === self::VALUE_BOOLEAN_FALSE) {
+            return false;
+        }
+
+        return $value;
     }
 }
