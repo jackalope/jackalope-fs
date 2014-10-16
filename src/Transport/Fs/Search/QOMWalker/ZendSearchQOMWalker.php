@@ -157,7 +157,7 @@ class ZendSearchQOMWalker
         $left = $this->walkConstraint($constraint->getConstraint1());
         $right = $this->walkConstraint($constraint->getConstraint2());
 
-        return sprintf('%s AND %s', $left, $right);
+        return sprintf('(%s AND %s)', $left, $right);
     }
 
     private function walkOrConstraint(QOM\OrInterface $constraint)
@@ -165,7 +165,7 @@ class ZendSearchQOMWalker
         $left = $this->walkConstraint($constraint->getConstraint1());
         $right = $this->walkConstraint($constraint->getConstraint2());
 
-        return sprintf('%s OR %s', $left, $right);
+        return sprintf('(%s OR %s)', $left, $right);
     }
 
     private function walkNotConstraint(QOM\NotInterface $constraint)

@@ -66,6 +66,11 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\\QueryManagerTest::testGetQueryInvalid',
             'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
 
+            'Query\\Sql1\\QueryOperationsTest::testQueryField',
+            'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
+            'Query\\XPath\\QueryOperationsTest::testQueryField',
+            'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
+
         );
 
         $this->path = __DIR__ . '/data';
