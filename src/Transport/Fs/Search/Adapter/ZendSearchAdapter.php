@@ -18,6 +18,14 @@ use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use ZendSearch\Lucene\Search\Query\Wildcard;
 
+/**
+ * Search adapter for the native PHP ZendSearch Lucene library.
+ *
+ * Note that this library is not suitable for large amounts of data.
+ *
+ * If you have speed issues consider using or writing anothe adapter
+ * (e.g. for ElasticSearch or Solr)
+ */
 class ZendSearchAdapter implements SearchAdapterInterface
 {
     const SEARCH_PATH = 'zend-search-indexes';
@@ -25,7 +33,9 @@ class ZendSearchAdapter implements SearchAdapterInterface
     const IDX_NODENAME = 'jcr:nodename';
     const IDX_NODELOCALNAME = 'jcr:nodename';
     const IDX_PARENTPATH= 'jcr:parentpath';
+
     const VALUE_BOOLEAN_FALSE = '__BOOLEAN_FALSE_';
+    const MULTIVALUE_SEPARATOR = '__//_';
 
     private $path;
     private $indexes = array();
@@ -73,7 +83,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 continue;
             }
 
-
             switch ($typeValue) {
                 case PropertyType::TYPENAME_STRING:
                 case PropertyType::TYPENAME_DATE:
@@ -81,42 +90,55 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 case PropertyType::TYPENAME_PATH:
                 case PropertyType::TYPENAME_URI:
                     $value = (array) $propertyValue;
-                    $value = join(' ', $value);
+                    $value = join(self::MULTIVALUE_SEPARATOR, $value);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
                 case PropertyType::TYPENAME_DECIMAL:
                 case PropertyType::TYPENAME_LONG:
                 case PropertyType::TYPENAME_DOUBLE:
-                    $value = (array) $propertyValue;
-                    $value = join(' ', $value);
-                    $value = sprintf('%0' . strlen(PHP_INT_MAX) .'s', $value);
+                    $values = (array) $propertyValue;
+                    foreach ($values as &$value) {
+                        $value = sprintf('%0' . strlen(PHP_INT_MAX) .'s', $value);
+                    }
+                    $value = join(self::MULTIVALUE_SEPARATOR, $values);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
                 case PropertyType::TYPENAME_BOOLEAN:
-                    if ($propertyValue === 'false') {
-                        $value = self::VALUE_BOOLEAN_FALSE;
-                    } else {
-                        $value = 1;
+                    $values = (array) $propertyValue;
+
+                    foreach ($values as &$value) {
+                        if ($propertyValue === 'false') {
+                            $value = self::VALUE_BOOLEAN_FALSE;
+                        } else {
+                            $value = 1;
+                        }
                     }
+                    $value = join(self::MULTIVALUE_SEPARATOR, $values);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
             }
 
-        } while (current($nodeData));
+        } while (false !== current($nodeData));
 
         $index->addDocument($document);
     }
 
     /**
-     * Heavily copied from doctrine-dbal. This should be factored up to Jackalope
+     * Heavily copied from doctrine-dbal. This should be factored up to Jackalope.
      */
     public function query($workspace, QueryObjectModelInterface $qom)
     {
-        $query = $this->getQomWalker()->walkQOMQuery($qom);
-        $index = $this->getIndex($workspace);
-        $data = $index->find($query);
+        $qomWalker = $this->getQomWalker();
+        $query = $qomWalker->walkQOMQuery($qom);
+        $findArgs = $qomWalker->getOrderings();
 
-        $primarySource = $this->getQomWalker()->getSource();
+        array_unshift($findArgs, $query);
+
+        $index = $this->getIndex($workspace);
+
+        $data = call_user_func_array(array(&$index, 'find'), $findArgs);
+
+        $primarySource = $qomWalker->getSource();
         $primaryType = $primarySource->getSelectorName() ?: $primarySource->getNodeTypeName();
         $selectors = array($primarySource);
 
@@ -276,6 +298,10 @@ class ZendSearchAdapter implements SearchAdapterInterface
     {
         if ($value === self::VALUE_BOOLEAN_FALSE) {
             return false;
+        }
+
+        if (strstr($value, self::MULTIVALUE_SEPARATOR)) {
+            $value = explode(self::MULTIVALUE_SEPARATOR, $value);
         }
 
         return $value;

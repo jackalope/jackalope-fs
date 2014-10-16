@@ -1,17 +1,10 @@
 <?php
-/**
- * Zend Framework (http://framework.zend.com/)
- *
- * @link      http://github.com/zendframework/zf2 for the canonical source repository
- * @copyright Copyright (c) 2005-2012 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
- * @package   Zend_Search
- */
 
 namespace Jackalope\Transport\Fs\Search\Adapter\Zend;
 
 use ZendSearch\Lucene\Analysis;
 use ZendSearch\Lucene\Analysis\Analyzer\Common\AbstractCommon;
+use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
 
 /**
  * Analyzer which indexes values whole.
@@ -21,11 +14,14 @@ use ZendSearch\Lucene\Analysis\Analyzer\Common\AbstractCommon;
  */
 class ExactMatchAnalyzer extends AbstractCommon
 {
-    private $done = false;
+    private $position = 0;
 
+    /**
+     * {@inheritDoc}
+     */
     public function reset()
     {
-        $this->done = false;
+        $this->position = 0;
 
         if ($this->_input === null) {
             return;
@@ -38,14 +34,22 @@ class ExactMatchAnalyzer extends AbstractCommon
         $this->_encoding = 'ASCII';
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function nextToken()
     {
-        if ($this->done || $this->_input === null) {
+        // we provide a token for each individual value when separated by the
+        // multivalue separator
+        $parts = explode(ZendSearchAdapter::MULTIVALUE_SEPARATOR, $this->_input);
+
+        if (!isset($parts[$this->position]) || $this->_input === null) {
             return null;
         }
 
-        $token = new Analysis\Token($this->_input, 0, strlen($this->_input));
-        $this->done = true;
+
+        $token = new Analysis\Token($parts[$this->position], 0, strlen($this->_input));
+        $this->position++;
 
         return $token;
     }

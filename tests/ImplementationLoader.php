@@ -69,8 +69,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             // sql2 + xpath not supported by FS
             'Query\\Sql1\\QueryOperationsTest::testQueryField',
             'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
+            'Query\\Sql1\\QueryOperationsTest::testQueryOrder',
             'Query\\XPath\\QueryOperationsTest::testQueryField',
             'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
+            'Query\\XPath\\QueryOperationsTest::testQueryOrder',
 
 
             'Query\\QuerySql2OperationsTest::testQueryJoin',
@@ -78,10 +80,13 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\\QuerySql2OperationsTest::testQueryJoinReference',
             'Query\\QuerySql2OperationsTest::testQueryJoinWithAlias',
             'Query\\QuerySql2OperationsTest::testQueryLeftJoin',
-            //'Query\\QuerySql2OperationsTest::testQueryMultiValuedProperty',
-            //'Query\\QuerySql2OperationsTest::testQueryOrder',
-            //'Query\\QuerySql2OperationsTest::testQueryOrderWithMissingProperty',
             'Query\\QuerySql2OperationsTest::testQueryRightJoin',
+
+            // length not supported
+            'Query\QuerySql2OperationsTest::testLengthOperandOnBinaryProperty',
+            'Query\QuerySql2OperationsTest::testLengthOperandOnEmptyProperty',
+            'Query\QuerySql2OperationsTest::testLengthOperandOnStringProperty',
+
 
         );
 

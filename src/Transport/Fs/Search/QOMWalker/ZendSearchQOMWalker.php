@@ -32,9 +32,19 @@ class ZendSearchQOMWalker
      */
     private $nodeTypeManager;
 
+    /**
+     * @var array
+     */
+    private $orderings = array();
+
     public function getSource()
     {
         return $this->source;
+    }
+
+    public function getOrderings()
+    {
+        return $this->orderings;
     }
 
     /**
@@ -63,6 +73,7 @@ class ZendSearchQOMWalker
      */
     public function walkQOMQuery(QueryObjectModel $qom)
     {
+        $this->orderings = array();
         $source = $qom->getSource();
 
         $query = new Lucene\Search\Query\Boolean();
@@ -73,7 +84,7 @@ class ZendSearchQOMWalker
             $parts[] = '(' . $this->walkConstraint($constraint) . ')';
         }
 
-        // $orderings = $qom->getOrderings();
+        $this->walkOrderings($qom->getOrderings());
         $query = join(' AND ', $parts);
 
         return $query;
@@ -261,18 +272,11 @@ class ZendSearchQOMWalker
         if ($operand instanceof QOM\NodeLocalNameInterface) {
             return ZendSearchAdapter::IDX_NODELOCALNAME;
         }
-        if ($operand instanceof QOM\LowerCaseInterface) {
-        }
-        if ($operand instanceof QOM\UpperCaseInterface) {
-        }
         if ($operand instanceof QOM\LiteralInterface) {
             return $this->escape($operand->getLiteralValue());
         }
         if ($operand instanceof QOM\PropertyValueInterface) {
             return $this->escape($operand->getPropertyName());
-        }
-        if ($operand instanceof QOM\LengthInterface) {
-            return $this->walkOperand($operand->getPropertyValue());
         }
         if ($operand instanceof QOM\LowerCaseInterface) {
             return $this->walkOperand($operand->getOperand());
@@ -282,5 +286,14 @@ class ZendSearchQOMWalker
         }
 
         throw new InvalidQueryException("Dynamic operand " . get_class($operand) . " not yet supported.");
+    }
+
+    private function walkOrderings($orderings)
+    {
+        foreach ($orderings as $ordering) {
+            $this->orderings[] = $this->walkOperand($ordering->getOperand());
+            $this->orderings[] = SORT_STRING;
+            $this->orderings[] = $ordering->getOrder() === QOMConstants::JCR_ORDER_ASCENDING ? SORT_ASC : SORT_DESC;
+        }
     }
 }

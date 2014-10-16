@@ -41,6 +41,8 @@ use PHPCR\Query\InvalidQueryException;
 class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface, QueryInterface
 {
     private $loggedIn;
+
+    // not yet implemented
     private $autoLastModified;
     private $workspaceName = 'default';
     private $nodeTypeManager;
