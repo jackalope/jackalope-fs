@@ -16,6 +16,7 @@ use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\Search\Adapter\Zend\ExactMatchAnalyzer;
 use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
+use ZendSearch\Lucene\Search\Query\Wildcard;
 
 class ZendSearchAdapter implements SearchAdapterInterface
 {
@@ -40,6 +41,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $this->filesystem = new Filesystem();
         $this->nodeTypeManager = $nodeTypeManager;
         Analyzer::setDefault(new ExactMatchAnalyzer());
+        Wildcard::setMinPrefixLength(0);
     }
 
     /**
@@ -95,7 +97,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     /**
      * Heavily copied from doctrine-dbal. This should be factored up to Jackalope
      */
-    public function query($workspace, $qom)
+    public function query($workspace, QueryObjectModelInterface $qom)
     {
         $query = $this->getQomWalker()->walkQOMQuery($qom);
         $index = $this->getIndex($workspace);
@@ -105,8 +107,21 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $primaryType = $primarySource->getSelectorName() ?: $primarySource->getNodeTypeName();
         $selectors = array($primarySource);
 
+        $offset = $qom->getOffset() ? : 0;
+        $limit = $qom->getLimit();
+
         $results = $properties = $standardColumns = array();
-        foreach ($data as $hit) {
+        foreach ($data as $i => $hit) {
+
+            // offset and limit
+            // note that Lucene provides Lucene::setResultSetLimit but no offset capability 
+            if ($i < $offset) {
+                continue;
+            }
+            if (null !== $limit && $i == ($offset + $limit)) {
+                break;
+            }
+
             $result = array();
             $document = $hit->getDocument();
 
@@ -118,6 +133,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     $result[] = array(
                         'dcr:name' => 'jcr:path',
                         'dcr:value' => $document->getField(self::IDX_PATH)->getUtf8Value(),
+                        'dcr:selectorName' => $selectorName
                     );
                 }
 
@@ -160,39 +176,34 @@ class ZendSearchAdapter implements SearchAdapterInterface
 
             foreach ($qom->getColumns() as $column) {
                 $selectorName = $column->getSelectorName();
-                $columnName = $column->getPropertyName();
+                $propertyName = $column->getPropertyName();
 
-                if ('jcr:uuid' === $columnName) {
+                if ('jcr:uuid' === $propertyName) {
                     $dcrValue = $document->getField(self::IDX_UUID)->getUtf8Value();
                 } else {
-                    if (isset($properties[$selectorName][$columnName])) {
-                        $dcrValue = $properties[$selectorName][$columnName];
+                    if (isset($properties[$selectorName][$propertyName])) {
+                        $dcrValue = $properties[$selectorName][$propertyName];
                     } else {
                         $dcrValue = '';
                     }
                 }
 
-                $dcrValue = 'jcr:uuid' === $columnName
-                    ? $row[$columnPrefix . 'identifier']
-                    : (isset($properties[$selectorName][$columnName]) ? $properties[$selectorName][$columnName] : '')
-                ;
-
-                if (isset($standardColumns[$selectorName][$columnName])) {
-                    unset($standardColumns[$selectorName][$columnName]);
+                if (isset($standardColumns[$selectorName][$propertyName])) {
+                    unset($standardColumns[$selectorName][$propertyName]);
                 }
 
                 $result[] = array(
-                    'dcr:name' => ($column->getColumnName() === $columnName && isset($properties[$selectorName][$columnName])
-                        ? $selectorName.'.'.$columnName : $column->getColumnName()),
+                    'dcr:name' => ($column->getColumnName() === $propertyName && isset($properties[$selectorName][$propertyName])
+                        ? $selectorName.'.'.$propertyName : $column->getColumnName()),
                     'dcr:value' => $dcrValue,
-                    'dcr:selectorName' => $selectorName ?: $primaryType,
+                    'dcr:selectorName' => $selectorName ? : $primaryType,
                 );
             }
 
             foreach ($standardColumns as $selectorName => $columns) {
-                foreach ($columns as $columnName => $value) {
+                foreach ($columns as $propertyName => $value) {
                     $result[] = array(
-                        'dcr:name' => $primaryType.'.'.$columnName,
+                        'dcr:name' => $primaryType.'.'.$propertyName,
                         'dcr:value' => $value,
                         'dcr:selectorName' => $selectorName,
                     );
