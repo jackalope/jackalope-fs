@@ -21,6 +21,7 @@ use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\StandardNodeTypes;
 use Jackalope\Transport\WritingInterface;
+use Jackalope\Transport\QueryInterface;
 use Jackalope\Node;
 use Jackalope\NodeType\NodeProcessor;
 use PHPCR\NamespaceRegistryInterface;
@@ -28,22 +29,31 @@ use PHPCR\NodeInterface;
 use PHPCR\PropertyType;
 use PHPCR\ItemExistsException;
 use PHPCR\Util\ValueConverter;
+use Jackalope\Query\Query;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
+use Jackalope\Transport\Fs\Search\IndexSubscriber;
+use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
+use PHPCR\Query\InvalidQueryException;
 
 /**
  */
-class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface
+class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface, QueryInterface
 {
-    protected $loggedIn;
-    protected $autoLastModified;
-    protected $workspaceName = 'default';
+    private $loggedIn;
 
-    protected $nodeTypeManager;
-
-    protected $fs;
-    protected $nodeSerializer;
-    protected $storage;
-    protected $credentials;
-    protected $valueConverter;
+    // not yet implemented
+    private $autoLastModified;
+    private $workspaceName = 'default';
+    private $nodeTypeManager;
+    private $fs;
+    private $nodeSerializer;
+    private $storage;
+    private $credentials;
+    private $valueConverter;
+    private $eventDispatcher;
+    private $searchAdapter;
+    private $factory;
 
     /**
      * Base path for content repository
@@ -51,7 +61,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array(), $filesystem = null, $nodeSerializer = null, $storage = null, $nodeProcessor = null)
+    public function __construct($factory, $parameters = array())
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -60,10 +70,28 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         }
 
         $this->path = $parameters['path'];
+        $this->eventDispatcher = new EventDispatcher();
         $adapter = new LocalAdapter($this->path);
-        $this->storage = $storage ? : new Storage(new Filesystem($adapter));
-        $this->nodeSerializer = $nodeSerializer ? : new YamlNodeSerializer();
+        $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
         $this->valueConverter = new ValueConverter();
+        $this->nodeSerializer = new YamlNodeSerializer();
+        $this->factory = $factory;
+
+        $this->registerEventSubscribers();
+    }
+
+    private function getSearchAdapter()
+    {
+        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager);
+
+        return $this->searchAdapter;
+    }
+
+    private function registerEventSubscribers()
+    {
+        $this->eventDispatcher->addSubscriber(
+            new IndexSubscriber($this->getSearchAdapter())
+        );
     }
 
     /**
@@ -553,6 +581,30 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function rollbackSave()
     {
     }
+
+    public function query(Query $query)
+    {
+        if (!$query instanceof QueryObjectModelInterface) {
+            $parser = new Sql2ToQomQueryConverter($this->factory->get('Query\QOM\QueryObjectModelFactory'));
+            try {
+                $qom = $parser->parse($query->getStatement());
+                $qom->setLimit($query->getLimit());
+                $qom->setOffset($query->getOffset());
+            } catch (\Exception $e) {
+                throw new InvalidQueryException('Invalid query: '.$query->getStatement(), null, $e);
+            }
+        } else {
+            $qom = $query;
+        }
+
+        return $this->getSearchAdapter()->query($this->workspaceName, $qom);
+    }
+
+    public function getSupportedQueryLanguages()
+    {
+        return array('JCR-SQL2', 'JCR-JQOM');
+    }
+
 
     private function init()
     {

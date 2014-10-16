@@ -28,6 +28,11 @@ class NodeWriter
         $this->helper = $helper;
     }
 
+    /**
+     * Write the given node data.
+     *
+     * @return array Node data
+     */
     public function writeNode($workspace, $path, $nodeData)
     {
         $internalUuid = $this->getOrCreateInternalUuid($path);
@@ -81,6 +86,8 @@ class NodeWriter
                 }
             }
         }
+
+        return $nodeData;
     }
 
     private function getOrCreateInternalUuid($path)

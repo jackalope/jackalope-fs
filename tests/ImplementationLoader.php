@@ -32,7 +32,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Query',
             'Export',
             'NodeTypeDiscovery',
             'PermissionsAndCapabilities',
@@ -60,6 +59,35 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
             'Reading\SessionNamespaceRemappingTest::testSetNamespacePrefix', // not supported by jackalope
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+            'Query\\NodeViewTest::testSeekable', // see https://github.com/phpcr/phpcr-api-tests/issues/141
+
+            // not supported by jackalope
+            'Query\\QueryManagerTest::testGetQuery',
+            'Query\\QueryManagerTest::testGetQueryInvalid',
+            'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
+
+            // sql2 + xpath not supported by FS
+            'Query\\Sql1\\QueryOperationsTest::testQueryField',
+            'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
+            'Query\\Sql1\\QueryOperationsTest::testQueryOrder',
+            'Query\\XPath\\QueryOperationsTest::testQueryField',
+            'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
+            'Query\\XPath\\QueryOperationsTest::testQueryOrder',
+
+
+            'Query\\QuerySql2OperationsTest::testQueryJoin',
+            'Query\\QuerySql2OperationsTest::testQueryJoinChildnode',
+            'Query\\QuerySql2OperationsTest::testQueryJoinReference',
+            'Query\\QuerySql2OperationsTest::testQueryJoinWithAlias',
+            'Query\\QuerySql2OperationsTest::testQueryLeftJoin',
+            'Query\\QuerySql2OperationsTest::testQueryRightJoin',
+
+            // length not supported
+            'Query\QuerySql2OperationsTest::testLengthOperandOnBinaryProperty',
+            'Query\QuerySql2OperationsTest::testLengthOperandOnEmptyProperty',
+            'Query\QuerySql2OperationsTest::testLengthOperandOnStringProperty',
+
+
         );
 
         $this->path = __DIR__ . '/data';

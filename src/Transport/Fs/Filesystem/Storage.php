@@ -7,6 +7,9 @@ use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
 use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
+use Symfony\Component\EventDispatcher\EventDispatcher;
+use Jackalope\Transport\Fs\Events;
+use Jackalope\Transport\Fs\Event\NodeWriteEvent;
 
 class Storage
 {
@@ -27,8 +30,9 @@ class Storage
     private $nodeWriter;
     private $nodeReader;
     private $helper;
+    private $eventDispatcher;
 
-    public function __construct(Filesystem $filesystem)
+    public function __construct(Filesystem $filesystem, EventDispatcher $eventDispatcher = null)
     {
         $this->filesystem = $filesystem;
         $serializer = new YamlNodeSerializer();
@@ -37,11 +41,13 @@ class Storage
 
         $this->nodeWriter = new NodeWriter($this->filesystem, $serializer, $pathRegistry, $this->helper);
         $this->nodeReader = new NodeReader($this->filesystem, $serializer, $pathRegistry, $this->helper);
+        $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }
 
     public function writeNode($workspace, $path, $nodeData)
     {
-        $this->nodeWriter->writeNode($workspace, $path, $nodeData);
+        $nodeData = $this->nodeWriter->writeNode($workspace, $path, $nodeData);
+        $this->eventDispatcher->dispatch(Events::POST_WRITE_NODE, new NodeWriteEvent($workspace, $path, $nodeData));
     }
 
     public function readNode($workspace, $path)
