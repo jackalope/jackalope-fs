@@ -99,7 +99,7 @@ class Storage
     public function workspaceInit($name)
     {
         $this->writeNode($name, '/', array(
-            'jcr:primaryType' => 'rep:root',
+            'jcr:primaryType' => 'nt:unstructured',
             ':jcr:primaryType' => 'Name',
         ));
     }

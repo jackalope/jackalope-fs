@@ -55,6 +55,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     private $searchAdapter;
     private $factory;
 
+    private $searchEnabled;
+
     /**
      * Base path for content repository
      * @var string
@@ -70,6 +72,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         }
 
         $this->path = $parameters['path'];
+        $this->searchEnabled = isset($parameters['search_enabled']) ? $parameters['search_enabled'] : true;
         $this->eventDispatcher = new EventDispatcher();
         $adapter = new LocalAdapter($this->path);
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
@@ -89,9 +92,11 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function registerEventSubscribers()
     {
-        $this->eventDispatcher->addSubscriber(
-            new IndexSubscriber($this->getSearchAdapter())
-        );
+        if ($this->searchEnabled) {
+            $this->eventDispatcher->addSubscriber(
+                new IndexSubscriber($this->getSearchAdapter())
+            );
+        }
     }
 
     /**

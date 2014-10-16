@@ -39,7 +39,8 @@ class RepositoryFactoryFilesystem implements RepositoryFactoryInterface
     public function getConfigurationKeys()
     {
         return array(
-            'path'
+            'path',
+            'search_enabled',
         );
     }
 }

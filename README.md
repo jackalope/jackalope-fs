@@ -6,6 +6,23 @@ This is a WIP implementation to support a filesystem implementation of PHPCR.
 The implementation is meant to be lightweight and ideal for testing PHPCR
 components.
 
+Connecting
+----------
+
+Connect as follows:
+
+    $factory = new RepositoryFactoryFilesystem();
+    $repository = $factory->getRepository(array(
+        'path' => '/home/mystuff/somefolder',
+    ));
+    $credentials = new SimpleCredentials('admin', 'admin');
+    $session = $repository->login($credentials);
+
+Options:
+
+- **path**: (required) Path to store data, indexes, etc.
+- **search_enabled**: If search should be enabled or not (default true)
+
 Limitations
 -----------
 
