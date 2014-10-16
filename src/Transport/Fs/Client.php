@@ -73,16 +73,22 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
         $this->valueConverter = new ValueConverter();
         $this->nodeSerializer = new YamlNodeSerializer();
-        $this->searchAdapter = new ZendSearchAdapter($this->path);
         $this->factory = $factory;
 
         $this->registerEventSubscribers();
     }
 
+    private function getSearchAdapter()
+    {
+        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager);
+
+        return $this->searchAdapter;
+    }
+
     private function registerEventSubscribers()
     {
         $this->eventDispatcher->addSubscriber(
-            new IndexSubscriber($this->searchAdapter)
+            new IndexSubscriber($this->getSearchAdapter())
         );
     }
 
@@ -589,7 +595,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $qom = $query;
         }
 
-        return $this->searchAdapter->query($this->workspaceName, $qom);
+        return $this->getSearchAdapter()->query($this->workspaceName, $qom);
     }
 
     public function getSupportedQueryLanguages()

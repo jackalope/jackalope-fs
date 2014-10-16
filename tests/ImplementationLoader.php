@@ -59,6 +59,13 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
             'Reading\SessionNamespaceRemappingTest::testSetNamespacePrefix', // not supported by jackalope
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+            'Query\\NodeViewTest::testSeekable', // see https://github.com/phpcr/phpcr-api-tests/issues/141
+
+            // not supported by jackalope
+            'Query\\QueryManagerTest::testGetQuery',
+            'Query\\QueryManagerTest::testGetQueryInvalid',
+            'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
+
         );
 
         $this->path = __DIR__ . '/data';

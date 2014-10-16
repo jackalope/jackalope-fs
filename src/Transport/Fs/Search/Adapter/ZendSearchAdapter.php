@@ -15,6 +15,7 @@ use Jackalope\Transport\Fs\Search\QOMWalker\ZendSearchQOMWalker;
 use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\Search\Adapter\Zend\ExactMatchAnalyzer;
 use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
+use PHPCR\NodeType\NodeTypeManagerInterface;
 
 class ZendSearchAdapter implements SearchAdapterInterface
 {
@@ -28,15 +29,16 @@ class ZendSearchAdapter implements SearchAdapterInterface
     private $indexes = array();
     private $filesystem;
     private $qomWalker;
+    private $nodeTypeManager;
 
     /**
      * @param string $path Path to search index
      */
-    public function __construct($path)
+    public function __construct($path, NodeTypeManagerInterface $nodeTypeManager = null)
     {
         $this->path = $path;
         $this->filesystem = new Filesystem();
-        $this->qomWalker = new ZendSearchQOMWalker();
+        $this->nodeTypeManager = $nodeTypeManager;
         Analyzer::setDefault(new ExactMatchAnalyzer());
     }
 
@@ -48,7 +50,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $index = $this->getIndex($workspace);
         $document = new Document();
         $nodeName = PathHelper::getNodeName($path);
-        $localNodeName = PathHelper::getLocalNodeName($path);
+        $localNodeName = $nodeName; // PathHelper::getLocalNodeName($path);
         $parentPath = PathHelper::getParentPath($path);
 
         $document->addField(Field::Keyword(self::IDX_PATH, $path));
@@ -91,93 +93,15 @@ class ZendSearchAdapter implements SearchAdapterInterface
     }
 
     /**
-     * {@inheritDoc}
-     * array(
-     *     //row 1
-     *     array(
-     *         //column1
-     *         array('dcr:name' => 'value1',
-     *               'dcr:value' => 'value2',
-     *               'dcr:selectorName' => 'value3' //optional
-     *         ),
-     *         //column 2...
-     *     ),
-     *     //row 2
-     *     array(...
-     * )
+     * Heavily copied from doctrine-dbal. This should be factored up to Jackalope
      */
-    public function queryOld($workspace, QueryObjectModelInterface $qom)
-    {
-        $query = $this->qomWalker->walkQOMQuery($qom);
-        $index = $this->getIndex($workspace);
-        $results = $index->find($query);
-
-        $selector = $this->qomWalker->getSource();
-        $selectorName = $selector->getSelectorName() ?: $selector->getNodeTypeName();
-
-        $rows = array();
-        $columns = $qom->getColumns();
-        $columnNames = array();
-
-        foreach ($columns as $column) {
-            $columnPropertyNames[$column->getPropertyName()] = $column;
-            $columnNames[$column->getColumnName()] = $column;
-        }
-
-        foreach ($results as $result) {
-            $selectedColumns = array();
-
-            $row = array();
-            $document = $result->getDocument();
-
-            foreach ($document->getFieldNames() as $fieldName) {
-                if ($columns) {
-                    if (!isset($columnPropertyNames[$fieldName])) {
-                        continue;
-                    }
-
-                    $column = $columnPropertyNames[$fieldName];
-                    $name = $column->getColumnName();
-                } else {
-                    if ($fieldName === 'jcr:path') {
-                        $name = $fieldName;
-                    } else {
-                        $name = $selectorName . '.' . $fieldName;
-                    }
-                }
-
-                $field = $document->getField($fieldName);
-                $row[] = array(
-                    'dcr:name' => $name,
-                    'dcr:value' => $field->getUtf8Value()
-                );
-
-                $selectedColumns[$name] = $name;
-            }
-
-            // add any columns which were specified by not contained in the results
-            foreach (array_keys($columnNames) as $columnName) {
-                if (false === isset($selectedColumns[$columnName])) {
-                    $row[] = array(
-                        'dcr:name' => $columnName,
-                        'dcr:value' =>  '',
-                    );
-                }
-            }
-
-            $rows[] = $row;
-        }
-
-        return $rows;
-    }
-
     public function query($workspace, $qom)
     {
-        $query = $this->qomWalker->walkQOMQuery($qom);
+        $query = $this->getQomWalker()->walkQOMQuery($qom);
         $index = $this->getIndex($workspace);
         $data = $index->find($query);
 
-        $primarySource = $this->qomWalker->getSource();
+        $primarySource = $this->getQomWalker()->getSource();
         $primaryType = $primarySource->getSelectorName() ?: $primarySource->getNodeTypeName();
         $selectors = array($primarySource);
 
@@ -193,13 +117,13 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 if ($primaryType === $selector->getNodeTypeName()) {
                     $result[] = array(
                         'dcr:name' => 'jcr:path',
-                        'dcr:value' => $document->getField(self::IDX_PATH)
+                        'dcr:value' => $document->getField(self::IDX_PATH)->getUtf8Value(),
                     );
                 }
 
                 $result[] = array(
                     'dcr:name' => 'jcr:path',
-                    'dcr:value' => $document->getField(self::IDX_PATH),
+                    'dcr:value' => $document->getField(self::IDX_PATH)->getUtf8Value(),
                     'dcr:selectorName' => $selectorName
                 );
 
@@ -279,7 +203,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
         }
 
         return $results;
-
     }
 
     private function getIndexPath($workspace)
@@ -304,5 +227,20 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $this->indexes[$workspace] = $index;
 
         return $index;
+    }
+
+    /**
+     * Lazy load because this class is used by the testing implementation loader
+     * for indexing, and we do not have a node type manager then.
+     */
+    private function getQOMWalker()
+    {
+        if ($this->qomWalker) {
+            return $this->qomWalker;
+        }
+
+        $this->qomWalker = new ZendSearchQOMWalker($this->nodeTypeManager);
+
+        return $this->qomWalker;
     }
 }

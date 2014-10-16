@@ -32,16 +32,6 @@ class ZendSearchQOMWalker
      */
     private $nodeTypeManager;
 
-    /**
-     * @var array
-     */
-    private $namespaces;
-
-    /**
-     * @var string
-     */
-    private $source;
-
     public function getSource()
     {
         return $this->source;
@@ -52,12 +42,10 @@ class ZendSearchQOMWalker
      * @param Connection               $conn
      * @param array                    $namespaces
      */
-    //public function __construct(NodeTypeManagerInterface $manager, Connection $conn, array $namespaces = array())
-    //{
-    //    $this->conn = $conn;
-    //    $this->nodeTypeManager = $manager;
-    //    $this->namespaces = $namespaces;
-    //}
+    public function __construct(NodeTypeManagerInterface $nodeTypeManager)
+    {
+        $this->nodeTypeManager = $nodeTypeManager;
+    }
 
     private function escape($string)
     {
@@ -76,6 +64,7 @@ class ZendSearchQOMWalker
     public function walkQOMQuery(QueryObjectModel $qom)
     {
         $source = $qom->getSource();
+
         $query = new Lucene\Search\Query\Boolean();
         $parts = array();
         $parts[] = '(' . $this->walkSource($source) . ')';
@@ -114,6 +103,12 @@ class ZendSearchQOMWalker
     public function walkSelectorSource(QOM\SelectorInterface $source)
     {
         $this->source = $source;
+        $nodeTypeName = $source->getNodeTypeName();
+
+        if (!$this->nodeTypeManager->hasNodeType($nodeTypeName)) {
+            throw new InvalidQueryException(sprintf('Node type does not exist "%s"', $nodeTypeName));
+        }
+
         return sprintf('%s:%s', $this->escape('jcr:primaryType'), $this->escape($source->getNodeTypeName()));
     }
 
