@@ -11,7 +11,7 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
-    public function import($fixture, $workspaceKey = 'workspace')
+    public function import($fixture, $workspaceKey = null)
     {
         $destDir = __DIR__ . '/../data/tests';
         $fs = new Filesystem();

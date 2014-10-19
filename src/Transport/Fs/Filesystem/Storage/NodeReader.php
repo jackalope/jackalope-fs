@@ -8,6 +8,7 @@ use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use PHPCR\Util\PathHelper;
+use PHPCR\PropertyType;
 
 class NodeReader
 {
@@ -43,6 +44,7 @@ class NodeReader
 
         if (!isset($node->{'jcr:mixinTypes'})) {
             $node->{'jcr:mixinTypes'} = array();
+            $node->{':jcr:mixinTypes'} = 'Name';
         }
 
         $nodePath = $this->helper->getNodePath($workspace, $path, false);
@@ -62,6 +64,7 @@ class NodeReader
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
         unset($node->{Storage::INTERNAL_UUID});
+        unset($node->{':' . Storage::INTERNAL_UUID});
         // we store the lengths as the values
 
         return $node;

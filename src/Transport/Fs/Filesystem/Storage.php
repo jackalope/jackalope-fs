@@ -10,6 +10,7 @@ use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Events;
 use Jackalope\Transport\Fs\Event\NodeWriteEvent;
+use PHPCR\Util\PathHelper;
 
 class Storage
 {
@@ -25,8 +26,6 @@ class Storage
     const INTERNAL_UUID = 'jackalope:fs:id';
 
     private $filesystem;
-    private $serializer;
-    private $pathRegistry;
     private $nodeWriter;
     private $nodeReader;
     private $helper;
@@ -68,6 +67,21 @@ class Storage
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
     {
         return $this->nodeReader->readNodeReferrers($workspace, $path, $weak, $name);
+    }
+
+    public function removeNode($workspace, $path)
+    {
+        $this->remove($this->helper->getNodePath($workspace, $path, false), true);
+    }
+
+    public function removeProperty($workspace, $path)
+    {
+        $propertyName = PathHelper::getNodeName($path);
+        $nodePath = PathHelper::getParentPath($path);
+        $nodeData = $this->readNode($workspace, $nodePath);
+        unset($nodeData->{$propertyName});
+        unset($nodeData->{':' . $propertyName});
+        $this->writeNode($workspace, $nodePath, $nodeData);
     }
 
     public function remove($path, $recursive = false)

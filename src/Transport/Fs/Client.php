@@ -142,7 +142,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             RepositoryInterface::OPTION_UPDATE_PRIMARY_NODETYPE_SUPPORTED => false,
             RepositoryInterface::OPTION_VERSIONING_SUPPORTED => false,
             RepositoryInterface::OPTION_WORKSPACE_MANAGEMENT_SUPPORTED => false,
-            RepositoryInterface::OPTION_XML_EXPORT_SUPPORTED => false,
+            RepositoryInterface::OPTION_XML_EXPORT_SUPPORTED => true,
             RepositoryInterface::OPTION_XML_IMPORT_SUPPORTED => false,
             RepositoryInterface::QUERY_FULL_TEXT_SEARCH_SUPPORTED => false,
             RepositoryInterface::QUERY_CANCEL_SUPPORTED => false,
@@ -487,7 +487,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodes(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        foreach ($operations as $operation) {
+            $this->storage->removeNode($this->workspaceName, $operation->srcPath);
+        }
     }
 
     /**
@@ -495,7 +497,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteProperties(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        foreach ($operations as $operation) {
+            $this->storage->removeProperty($this->workspaceName, $operation->srcPath);
+        }
     }
 
     /**
@@ -521,8 +525,11 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     {
         foreach ($operations as $operation) {
             $node = $operation->node;
-            $this->nodeProcessor->process($node);
-            $nodeData = $this->nodePropertiesToJackalopeArray($node);
+            if ($operation->node->isDeleted()) {
+                $nodeData = $this->nodePropertiesToJackalopeArray($node);
+            } else {
+                $nodeData = $this->nodePropertiesToJackalopeArray($node);
+            }
 
             if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
                 throw new ItemExistsException(sprintf(
@@ -620,12 +627,19 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     {
         $res = array();
 
+        if ($node->isDeleted()) {
+            $properties = $node->getPropertiesForStoreDeletedNode();
+        } else {
+            $this->nodeProcessor->process($node);
+            $properties = $node->getProperties();
+        }
+
         // is there some common code which does this?
-        foreach ($node->getProperties() as $name => $property) {
+        foreach ($properties as $name => $property) {
             $value = null;
             switch ($property->getType()) {
                 case PropertyType::DATE:
-                    $value = $property->getValue()->format('c');
+                    $value = $property->getDate();
                     break;
                 case PropertyType::REFERENCE:
                 case PropertyType::WEAKREFERENCE:

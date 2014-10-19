@@ -35,6 +35,13 @@ class NodeWriter
      */
     public function writeNode($workspace, $path, $nodeData)
     {
+        // Read node returns a stdClass as required by Jackalope, but storeNodes is
+        // passed an array -- this means we need to normalize when doing internal
+        // operations betwee the two (e.g. removing properties).
+        if ($nodeData instanceof \stdClass) {
+            $nodeData = get_object_vars($nodeData);
+        }
+
         $internalUuid = $this->getOrCreateInternalUuid($path);
         $this->setProperty($nodeData, Storage::INTERNAL_UUID, $internalUuid, 'String');
 

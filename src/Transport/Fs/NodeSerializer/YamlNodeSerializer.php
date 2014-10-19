@@ -81,8 +81,8 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
             if (':' !== substr($propertyTypeName, 0, 1)) {
                 throw new \InvalidArgumentException(sprintf(
-                    'Property values must be followed by a type, e.g. "title" => "My title" MUST be followed by ":title" => "String". For "%s => %s"',
-                    $propertyTypeName, $propertyTypeValue
+                    'Property values must be followed by a type, e.g. "title" => "My title" MUST be followed by ":title" => "String". For %s = %s',
+                    var_export($propertyTypeName, true), var_export($propertyTypeValue, true)
                 ));
             }
 

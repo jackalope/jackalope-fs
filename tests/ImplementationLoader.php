@@ -17,11 +17,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     }
 
     /**
-     * @var string
-     */
-    private $fixturePath;
-
-    /**
      * Base path for content repository
      * @var string
      */
@@ -32,11 +27,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Export',
-            'NodeTypeDiscovery',
-            'PermissionsAndCapabilities',
-            'Import',
-            'Observation',
+            // to be supported
             'WorkspaceManagement',
             'ShareableNodes',
             'Versioning',
@@ -48,10 +39,18 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Transactions',
             'SameNameSiblings',
             'OrderableChildNodes',
-            'PhpcrUtils'
+            'PhpcrUtils',
+
+            // not supported yet
+            'PermissionsAndCapabilities',
+            'Observation',
         );
 
         $this->unsupportedCases = array(
+                    'Query\\XPath', // Query language 'xpath' not implemented.
+                    'Query\\Sql1', // Query language 'sql' is legacy and only makes sense with jackrabbit
+
+                    'Writing\\CloneMethodsTest', // TODO: Support for workspace->clone, node->update, node->getCorrespondingNodePath
         );
 
         $this->unsupportedTests = array(
@@ -65,15 +64,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\\QueryManagerTest::testGetQuery',
             'Query\\QueryManagerTest::testGetQueryInvalid',
             'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
-
-            // sql2 + xpath not supported by FS
-            'Query\\Sql1\\QueryOperationsTest::testQueryField',
-            'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
-            'Query\\Sql1\\QueryOperationsTest::testQueryOrder',
-            'Query\\XPath\\QueryOperationsTest::testQueryField',
-            'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
-            'Query\\XPath\\QueryOperationsTest::testQueryOrder',
-
 
             'Query\\QuerySql2OperationsTest::testQueryJoin',
             'Query\\QuerySql2OperationsTest::testQueryJoinChildnode',
