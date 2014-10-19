@@ -8,7 +8,8 @@ use PHPCR\Util\UUIDHelper;
 
 class YamlNodeSerializer implements NodeSerializerInterface
 {
-    protected $binaries;
+    private $binaries;
+    private $binaryHashMap = array();
 
     /**
      * Static method for debugging
@@ -29,6 +30,7 @@ class YamlNodeSerializer implements NodeSerializerInterface
         $ret = new \stdClass;
         foreach ($res as $key => $property) {
             $values = $property['value'];
+            $type = $property['type'];
             $newValues = array();
 
             foreach ((array) $values as $value) {
@@ -45,8 +47,14 @@ class YamlNodeSerializer implements NodeSerializerInterface
                 $newValues = reset($newValues);
             }
 
-            $ret->$key = $newValues;
-            $ret->{':' . $key} = $property['type'];
+            if ($type === 'Binary') {
+                $this->binaryHashMap[$key] = $property['value'];
+                $ret->$key = $property['length'];
+            } else {
+                $ret->$key = $newValues;
+            }
+
+            $ret->{':' . $key} = $type;
         }
 
         return $ret;
@@ -60,6 +68,7 @@ class YamlNodeSerializer implements NodeSerializerInterface
         do {
             $propertyName = key($nodeData);
             $propertyValue = current($nodeData);
+            $propertyLength = array();
 
             // should this be moved "up" ?
             if ($propertyValue instanceof \DateTime) {
@@ -78,14 +87,14 @@ class YamlNodeSerializer implements NodeSerializerInterface
             }
 
             if ($propertyTypeValue == 'Binary') {
-                $binaries = array();
+                $binaryHashes = array();
                 foreach ((array) $propertyValue as $binaryData) {
                     $binaryHash = md5($binaryData);
-                    $binaries[$binaryHash] = $binaryData;
+                    $binaryHashes[] = $binaryHash;
+                    $propertyLength[] = strlen(base64_decode($binaryData));
                     $this->binaries[$binaryHash] = $binaryData;
                 }
 
-                $binaryHashes = array_keys($binaries);
                 if (is_array($propertyValue)) {
                     $propertyValue = array();
                     foreach ($binaryHashes as $binaryHash) {
@@ -93,11 +102,17 @@ class YamlNodeSerializer implements NodeSerializerInterface
                     }
                 } else {
                     $propertyValue = reset($binaryHashes);
+                    $propertyLength = reset($propertyLength);
                 }
             }
 
             $properties[$propertyName]['type'] = $propertyTypeValue;
             $properties[$propertyName]['value'] = $propertyValue;
+
+            if (!empty($propertyLength)) {
+                $properties[$propertyName]['length'] = $propertyLength;
+            }
+
         } while (false !== next($nodeData));
 
         $yaml = Yaml::dump($properties);
@@ -108,5 +123,10 @@ class YamlNodeSerializer implements NodeSerializerInterface
     public function getSerializedBinaries()
     {
         return $this->binaries;
+    }
+
+    public function getBinaryHashMap()
+    {
+        return $this->binaryHashMap;
     }
 }
