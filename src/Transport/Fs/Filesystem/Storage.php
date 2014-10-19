@@ -84,6 +84,15 @@ class Storage
         $this->writeNode($workspace, $nodePath, $nodeData);
     }
 
+    public function moveNode($workspace, $srcPath, $destPath)
+    {
+        $destPath = $this->helper->getNodePath($workspace, $destPath, false);
+        $this->filesystem->move(
+            $this->helper->getNodePath($workspace, $srcPath, false),
+            $destPath
+        );
+    }
+
     public function remove($path, $recursive = false)
     {
         $this->filesystem->remove($path, $recursive);

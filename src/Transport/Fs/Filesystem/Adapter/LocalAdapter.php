@@ -43,6 +43,14 @@ class LocalAdapter implements AdapterInterface
         $this->fs->remove($this->getAbsPath($path));
     }
 
+    public function move($srcPath, $destPath)
+    {
+        $this->fs->rename(
+            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($destPath)
+        );
+    }
+
     public function exists($path)
     {
         $path = $this->getAbsPath($path);

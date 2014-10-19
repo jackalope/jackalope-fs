@@ -41,7 +41,6 @@ class NodeWriter
         if ($nodeData instanceof \stdClass) {
             $nodeData = get_object_vars($nodeData);
         }
-
         $internalUuid = $this->getOrCreateInternalUuid($path);
         $this->setProperty($nodeData, Storage::INTERNAL_UUID, $internalUuid, 'String');
 

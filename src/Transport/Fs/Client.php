@@ -463,7 +463,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function moveNodes(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        foreach ($operations as $operation) {
+            $this->storage->moveNode($this->workspaceName, $operation->srcPath, $operation->dstPath);
+        }
     }
 
     /**

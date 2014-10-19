@@ -70,6 +70,13 @@ class YamlNodeSerializer implements NodeSerializerInterface
             $propertyValue = current($nodeData);
             $propertyLength = array();
 
+            // if propertyValue is an object, then it is a child node and we
+            // shouldn't continue. Note that this only happens during an internal
+            // round trip from NodeReader::readNode to NodeWriter::writeNode
+            if ($propertyValue instanceof \stdClass) {
+                continue;
+            }
+
             // should this be moved "up" ?
             if ($propertyValue instanceof \DateTime) {
                 $propertyValue = $propertyValue->format('c');
@@ -80,6 +87,7 @@ class YamlNodeSerializer implements NodeSerializerInterface
             $propertyTypeValue = current($nodeData);
 
             if (':' !== substr($propertyTypeName, 0, 1)) {
+                var_dump($nodeData);die();;
                 throw new \InvalidArgumentException(sprintf(
                     'Property values must be followed by a type, e.g. "title" => "My title" MUST be followed by ":title" => "String". For %s = %s',
                     var_export($propertyTypeName, true), var_export($propertyTypeValue, true)

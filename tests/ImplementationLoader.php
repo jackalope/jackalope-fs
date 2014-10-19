@@ -77,7 +77,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\QuerySql2OperationsTest::testLengthOperandOnEmptyProperty',
             'Query\QuerySql2OperationsTest::testLengthOperandOnStringProperty',
 
-
+            // this doesn't work with ZendSearch -- need to implement a native search engine
+            'Writing\CombinedManipulationsTest::testAddAndRemoveAndAdd',
+            'Writing\CombinedManipulationsTest::testRemoveAndAddToplevelNode',
+            'Writing\CombinedManipulationsTest::testRemoveAndAddAndRemoveToplevelNode',
         );
 
         $this->path = __DIR__ . '/data';
@@ -115,7 +118,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getRepository()
     {
-        $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array('path' => $this->path));
+        $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array(
+            'path' => $this->path,
+            'search_enabled' => false,
+        ));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {
                 $transport->createWorkspace($workspace);

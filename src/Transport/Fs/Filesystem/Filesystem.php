@@ -31,6 +31,11 @@ class Filesystem implements AdapterInterface
         $this->adapter->remove($path, $recursive);
     }
 
+    public function move($srcPath, $destPath)
+    {
+        $this->adapter->move($srcPath, $destPath);
+    }
+
     public function exists($path)
     {
         return $this->adapter->exists($path);
