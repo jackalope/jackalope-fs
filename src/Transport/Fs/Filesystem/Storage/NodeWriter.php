@@ -45,7 +45,7 @@ class NodeWriter
             if (in_array('mix:referenceable', $mixinTypes)) {
                 if (!isset($nodeData['jcr:uuid'])) {
                     $jcrUuid = UUIDHelper::generateUUID();
-                    $this->setProperty($nodeData, 'jcr:uuid', $uuid);
+                    $this->setProperty($nodeData, 'jcr:uuid', $jcrUuid);
                 } else {
                     $jcrUuid = $nodeData['jcr:uuid'];
                 }
@@ -58,6 +58,7 @@ class NodeWriter
         $this->filesystem->write($absPath, $serialized);
 
         foreach ($this->serializer->getSerializedBinaries() as $binaryHash => $binaryData) {
+            // TODO: use Helper to get path ...,
             $binaryPath = sprintf('%s/%s.bin', dirname($absPath), $binaryHash);
             $this->filesystem->write($binaryPath, base64_decode($binaryData));
         }
@@ -105,10 +106,10 @@ class NodeWriter
         return $internalUuid;
     }
 
-    private function setProperty(&$nodeData, $field, $value, $type)
+    private function setProperty(&$nodeData, $field, $value, $type = 'String')
     {
         $nodeData[$field] = $value;
-        $nodeData[':' . $field] = 'String';
+        $nodeData[':' . $field] = $type;
     }
 
     private function createIndex($type, $name, $value)

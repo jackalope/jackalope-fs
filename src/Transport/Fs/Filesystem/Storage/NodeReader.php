@@ -7,6 +7,7 @@ use Jackalope\Transport\Fs\NodeSerializerInterface;
 use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
+use PHPCR\Util\PathHelper;
 
 class NodeReader
 {
@@ -44,8 +45,6 @@ class NodeReader
             $node->{'jcr:mixinTypes'} = array();
         }
 
-        $this->deserializeBinaries($workspace, $path, $node);
-
         $nodePath = $this->helper->getNodePath($workspace, $path, false);
         $children = $this->filesystem->ls($nodePath);
         $children = $children['dirs'];
@@ -63,6 +62,7 @@ class NodeReader
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
         unset($node->{Storage::INTERNAL_UUID});
+        // we store the lengths as the values
 
         return $node;
     }
@@ -92,8 +92,36 @@ class NodeReader
 
     public function readBinaryStream($workspace, $path)
     {
-        $propertyValues = $this->getPropertyValue($workspace, $path, 'Binary');
-        return $propertyValues;
+        $parentPath = PathHelper::getParentPath($path);
+        $propertyName = PathHelper::getNodeName($path);
+
+        $nodeData = $this->filesystem->read($this->helper->getNodePath($workspace, $parentPath));
+
+        if (!$nodeData) {
+            throw new \RuntimeException(sprintf(
+                'No node data at path "%s".', $path
+            ));
+        }
+        $this->serializer->deserialize($nodeData);
+        $binaryHashMap = $this->serializer->getBinaryHashMap();
+
+        if (!isset($binaryHashMap[$propertyName])) {
+            throw new \InvalidArgumentException(sprintf(
+                'Could not locate binary for property at path "%s"',
+                $path
+            ));
+        }
+
+        $originalBinaryHash = $binaryHashMap[$propertyName];
+        $binaryHashes = (array) $originalBinaryHash;
+        
+        $streams = array();
+        foreach ($binaryHashes as $binaryHash) {
+            $path = $this->helper->getBinaryPath($workspace, $parentPath, $binaryHash);
+            $streams[] = $this->filesystem->stream($path);
+        }
+
+        return is_array($originalBinaryHash) ? $streams : reset($streams);
     }
 
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
@@ -119,7 +147,6 @@ class NodeReader
         $values = explode("\n", $value);
 
         $propertyNames = array();
-        $internalUuids = array();
 
         foreach ($values as $line) {
             $propertyName = strstr($line, ':', true);
@@ -141,62 +168,5 @@ class NodeReader
         }
 
         return $referrerPaths;
-    }
-
-    private function getPropertyValue($workspace, $path, $type)
-    {
-        $node = $this->readNode($workspace, dirname($path));
-        $propertyName = basename($path);
-
-        if (!isset($node->{$propertyName})) {
-            return null;
-        }
-
-        $propertyType = $node->{':' . $propertyName};
-
-        if ($propertyType !== $type) {
-            throw new \InvalidArgumentException(sprintf(
-                'Expected property to be of type "%s" but it is of type "%s"',
-                $type, $propertyType
-            ));
-        }
-
-        $propertyValue = $node->{$propertyName};
-        return $propertyValue;
-    }
-
-    private function deserializeBinaries($workspace, $path, $node)
-    {
-        do {
-            $propertyName = key($node);
-            $propertyValue = current($node);
-            next($node);
-            $propertyType = key($node);
-            $propertyTypeValue = current($node);
-            next($node);
-
-            if ($propertyTypeValue == 'Binary') {
-                $streams = array();
-                foreach ((array) $propertyValue as $binaryHash) {
-                    $binaryPath = $this->helper->getBinaryPath($workspace, $path, $binaryHash);
-
-                    if (!$this->filesystem->exists($binaryPath)) {
-                        throw new \RuntimeException(sprintf(
-                            'Expected binary file to exist at "%s" but it doesn\t.',
-                            $binaryPath
-                        ));
-                    }
-
-                    $streams[] = $this->filesystem->stream($binaryPath);
-                }
-
-                if (is_array($propertyValue)) {
-                    $node->{$propertyName} = $streams;
-                } else {
-                    $node->{$propertyName} = reset($streams);
-                }
-            }
-
-        } while(false !== current($node));
     }
 }
