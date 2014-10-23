@@ -68,10 +68,11 @@ class NodeCopier
     private function processNode(\stdClass $node)
     {
         $jcrUuid = UUIDHelper::generateUUID();
-        if (!isset($node->{'jcr:uuid'})) {
+        if (!isset($node->{Storage::JCR_UUID})) {
             return;
         }
-        $this->uuidMap[$node->{'jcr:uuid'}] = $jcrUuid;
-        $node->{'jcr:uuid'} = $jcrUuid;
+
+        $this->uuidMap[$node->{Storage::JCR_UUID}] = $jcrUuid;
+        $node->{Storage::JCR_UUID} = $jcrUuid;
     }
 }

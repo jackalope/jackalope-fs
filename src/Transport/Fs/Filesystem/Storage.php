@@ -24,12 +24,14 @@ class Storage
     const NS_DELIMITER = ':::';
 
     const INTERNAL_UUID = 'jackalope:fs:id';
+    const JCR_UUID = 'jcr:uuid';
 
     private $filesystem;
     private $nodeWriter;
     private $nodeReader;
     private $helper;
     private $eventDispatcher;
+    private $index;
 
     public function __construct(Filesystem $filesystem, EventDispatcher $eventDispatcher = null)
     {
@@ -37,10 +39,10 @@ class Storage
         $serializer = new YamlNodeSerializer();
         $pathRegistry = new PathRegistry();
         $this->helper = new StorageHelper();
-        $index = new Index($this->filesystem);
+        $this->index = new Index($this->filesystem);
 
-        $this->nodeWriter = new NodeWriter($this->filesystem, $index, $serializer, $pathRegistry, $this->helper);
-        $this->nodeReader = new NodeReader($this->filesystem, $index, $serializer, $pathRegistry, $this->helper);
+        $this->nodeWriter = new NodeWriter($this->filesystem, $this->index, $serializer, $pathRegistry, $this->helper);
+        $this->nodeReader = new NodeReader($this->filesystem, $this->index, $serializer, $pathRegistry, $this->helper);
         $this->nodeCopier = new NodeCopier($this->nodeReader, $this->nodeWriter);
         $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }
@@ -73,6 +75,12 @@ class Storage
 
     public function removeNode($workspace, $path)
     {
+        $node = $this->readNode($workspace, $path);
+
+        if (isset($node->{Storage::JCR_UUID})) {
+            $this->index->deindexUuid($node->{Storage::JCR_UUID}, false);
+        }
+
         $this->remove($this->helper->getNodePath($workspace, $path, false), true);
     }
 

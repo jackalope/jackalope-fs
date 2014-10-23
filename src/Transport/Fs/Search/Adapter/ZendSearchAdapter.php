@@ -213,7 +213,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 $selectorName = $column->getSelectorName();
                 $propertyName = $column->getPropertyName();
 
-                if ('jcr:uuid' === $propertyName) {
+                if (Storage::JCR_UUID === $propertyName) {
                     $dcrValue = $document->getField(self::IDX_UUID)->getUtf8Value();
                 } else {
                     if (isset($properties[$selectorName][$propertyName])) {

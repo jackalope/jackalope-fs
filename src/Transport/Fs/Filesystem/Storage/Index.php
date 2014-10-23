@@ -103,15 +103,42 @@ class Index
         $this->createIndex($indexName, $uuid, $workspace . ':' . $path);
     }
 
-    public function indexReferrer($referrerUuid, $referrerPropertyName, $referencedUuid, $weak = false)
+    /**
+     * Remove an indexed UUID
+     */
+    public function deindexUuid($uuid, $internal = false)
+    {
+        $indexName = $internal ? self::IDX_INTERNAL_UUID : self::IDX_JCR_UUID;
+        $this->deleteIndex($indexName, $uuid);
+
+        if ($internal === false) {
+            $this->deleteIndex(self::IDX_WEAKREFERRERS_DIR, $uuid);
+            $this->deleteIndex(self::IDX_REFERRERS_DIR, $uuid);
+        }
+    }
+
+    /**
+     * Index the reference from a node referrer
+     *
+     * @param string $referrerUuid
+     * @param string $referrerPropertyName
+     * @param string $referencedUuid
+     * @param boolean $weak Index a strong or a weak reference
+     */
+    public function indexReferrer($referrerInternalUuid, $referrerPropertyName, $referencedJcrUuid, $weak = false)
     {
         $indexName = $weak ? self::IDX_WEAKREFERRERS_DIR : self::IDX_REFERRERS_DIR;
-        $this->appendToIndex($indexName, $referencedUuid, $referrerPropertyName . ':' . $referrerUuid);
+        $this->appendToIndex($indexName, $referencedJcrUuid, $referrerPropertyName . ':' . $referrerInternalUuid);
     }
 
     private function createIndex($type, $name, $value)
     {
         $this->filesystem->write(self::INDEX_DIR . '/' . $type . '/' . $name, $value);
+    }
+
+    private function deleteIndex($type, $name)
+    {
+        $this->filesystem->remove(self::INDEX_DIR . '/' . $type . '/' . $name);
     }
 
     private function appendToIndex($type, $name, $value)
