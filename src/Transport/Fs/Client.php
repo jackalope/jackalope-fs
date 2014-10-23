@@ -36,6 +36,7 @@ use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\PathNotFoundException;
+use PHPCR\ReferentialIntegrityException;
 
 /**
  */
@@ -506,6 +507,22 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function deleteNodes(array $operations)
     {
         foreach ($operations as $operation) {
+            $referrers = $this->getReferences($operation->srcPath);
+
+            if (count($referrers) > 0) {
+                $referrerPaths = array();
+                foreach ($referrers as $path) {
+                    $referrerPaths[] = $path;
+                }
+
+                throw new ReferentialIntegrityException(sprintf(
+                    'Could not delete node in workspace "%s" at path "%s" it is referenced by the following nodes: "%s"',
+                    $this->workspaceName,
+                    $operation->srcPath,
+                    implode($referrerPaths, '", "')
+                ));
+            }
+
             $this->storage->removeNode($this->workspaceName, $operation->srcPath);
         }
     }
@@ -549,7 +566,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 $nodeData = $this->nodePropertiesToJackalopeArray($node);
             }
 
-            $this->validatePath($workspace, $operation->srcPath);
             if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
                 throw new ItemExistsException(sprintf(
                     'Node at path "%s" already exists',
