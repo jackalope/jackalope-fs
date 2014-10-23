@@ -35,6 +35,7 @@ use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
 use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
 use PHPCR\Query\InvalidQueryException;
+use PHPCR\PathNotFoundException;
 
 /**
  */
@@ -439,7 +440,22 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function copyNode($srcAbsPath, $destAbsPath, $srcWorkspace = null)
     {
-        throw new NotImplementedException(__METHOD__);
+        if ($srcWorkspace) {
+            $this->validateWorkspace($srcWorkspace);
+        } else {
+            $srcWorkspace = $this->workspaceName;
+        }
+
+        $this->validatePath($srcWorkspace, $srcAbsPath);
+        $this->validatePath($this->workspaceName, PathHelper::getParentPath($destAbsPath));
+
+        try {
+            $this->storage->copyNode($srcWorkspace, $srcAbsPath, $this->workspaceName, $destAbsPath);
+        } catch (\Exception $e) {
+            throw new RepositoryException(sprintf(
+                $e->getMessage(), $e->getCode(), $e
+            ));
+        }
     }
 
     /**
@@ -533,6 +549,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 $nodeData = $this->nodePropertiesToJackalopeArray($node);
             }
 
+            $this->validatePath($workspace, $operation->srcPath);
             if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
                 throw new ItemExistsException(sprintf(
                     'Node at path "%s" already exists',
@@ -654,5 +671,25 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         }
 
         return $res;
+    }
+
+    private function validateWorkspace($workspaceName)
+    {
+        if (false === $this->workspaceExists($workspaceName)) {
+            throw new NoSuchWorkspaceException(sprintf(
+                'Workspace "%s" does not exist',
+                $workspaceName
+            ));
+        }
+    }
+
+    private function validatePath($workspaceName, $path)
+    {
+        if (false === $this->storage->nodeExists($workspaceName, $path)) {
+            throw new PathNotFoundException(sprintf(
+                'Path "%s" not found in workspace "%s"',
+                $path, $workspaceName
+            ));
+        }
     }
 }

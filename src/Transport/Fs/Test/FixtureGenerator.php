@@ -16,12 +16,11 @@ class FixtureGenerator
 {
     const NS_SV = 'http://www.jcp.org/jcr/sv/1.0';
 
-    protected $destDir;
     protected $fs;
 
-    function generateFixtures($srcDir, $destDir)
+    function generateFixtures($workspaceName, $dataDir, $srcDir)
     {
-        $dataDir = dirname($destDir);
+        $this->workspaceName = $workspaceName;
         $eventDispatcher = new EventDispatcher();
         $searchAdapter = new ZendSearchAdapter($dataDir);
 
@@ -30,7 +29,6 @@ class FixtureGenerator
         );
 
         $this->storage = new Storage(new FsFilesystem(new LocalAdapter($dataDir)), $eventDispatcher);
-        $this->workspaceName = basename($destDir);
         $this->storage->registerNamespace($this->workspaceName, 'test', 'http://example.com');
 
         $this->storage->workspaceInit($this->workspaceName);
@@ -56,7 +54,6 @@ class FixtureGenerator
         $dom->format = true;
 
         $this->iterateNode($dom->firstChild);
-        $this->storage->commit();
     }
 
     function iterateNode(\DomNode $domNode)

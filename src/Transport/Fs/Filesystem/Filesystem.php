@@ -36,6 +36,11 @@ class Filesystem implements AdapterInterface
         $this->adapter->move($srcPath, $destPath);
     }
 
+    public function copy($srcPath, $destPath)
+    {
+        $this->adapter->copy($srcPath, $destPath);
+    }
+
     public function exists($path)
     {
         return $this->adapter->exists($path);

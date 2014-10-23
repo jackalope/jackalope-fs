@@ -2,16 +2,19 @@
 
 namespace Jackalope\Transport\Fs\Filesystem;
 
-use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
+use Jackalope\Transport\Fs\Event\NodeWriteEvent;
+use Jackalope\Transport\Fs\Events;
 use Jackalope\Transport\Fs\Filesystem\PathRegistry;
+use Jackalope\Transport\Fs\Filesystem\Storage\NodeCopier;
+use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
 use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
-use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Jackalope\Transport\Fs\Events;
-use Jackalope\Transport\Fs\Event\NodeWriteEvent;
+use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
+
 use PHPCR\Util\PathHelper;
+
 use Symfony\Component\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Storage
 {
@@ -41,6 +44,7 @@ class Storage
 
         $this->nodeWriter = new NodeWriter($this->filesystem, $serializer, $pathRegistry, $this->helper);
         $this->nodeReader = new NodeReader($this->filesystem, $serializer, $pathRegistry, $this->helper);
+        $this->nodeCopier = new NodeCopier($this->nodeReader, $this->nodeWriter);
         $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }
 
@@ -91,6 +95,14 @@ class Storage
         $this->filesystem->move(
             $this->helper->getNodePath($workspace, $srcPath, false),
             $destPath
+        );
+    }
+
+    public function copyNode($srcWorkspace, $srcAbsPath, $destWorkspace, $destAbsPath)
+    {
+        $this->nodeCopier->copyNode(
+            $srcWorkspace, $srcAbsPath,
+            $destWorkspace, $destAbsPath
         );
     }
 

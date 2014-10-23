@@ -19,4 +19,6 @@ interface AdapterInterface
     public function stream($path);
 
     public function move($srcPath, $destPath);
+
+    public function copy($srcPath, $destPath);
 }

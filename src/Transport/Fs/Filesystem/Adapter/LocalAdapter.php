@@ -51,6 +51,14 @@ class LocalAdapter implements AdapterInterface
         );
     }
 
+    public function copy($srcPath, $destPath)
+    {
+        $this->fs->mirror(
+            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($destPath)
+        );
+    }
+
     public function exists($path)
     {
         $path = $this->getAbsPath($path);

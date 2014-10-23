@@ -81,6 +81,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Writing\CombinedManipulationsTest::testAddAndRemoveAndAdd',
             'Writing\CombinedManipulationsTest::testRemoveAndAddToplevelNode',
             'Writing\CombinedManipulationsTest::testRemoveAndAddAndRemoveToplevelNode',
+
+            'Writing\\CopyMethodsTest::testCopyUpdateOnCopy', //TODO: update-on-copy is currently not supported
         );
 
         $this->path = __DIR__ . '/data';
