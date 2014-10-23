@@ -120,7 +120,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     {
         $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array(
             'path' => $this->path,
-            'search_enabled' => false,
+            'search_enabled' => true,
         ));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {

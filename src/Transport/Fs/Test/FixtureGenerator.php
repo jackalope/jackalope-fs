@@ -56,6 +56,7 @@ class FixtureGenerator
         $dom->format = true;
 
         $this->iterateNode($dom->firstChild);
+        $this->storage->commit();
     }
 
     function iterateNode(\DomNode $domNode)

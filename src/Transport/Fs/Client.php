@@ -586,7 +586,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function finishSave()
     {
-        // nothing
+        $this->storage->commit();
     }
 
     /**
@@ -618,7 +618,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     {
         return array('JCR-SQL2', 'JCR-JQOM');
     }
-
 
     private function init()
     {

@@ -11,6 +11,7 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Events;
 use Jackalope\Transport\Fs\Event\NodeWriteEvent;
 use PHPCR\Util\PathHelper;
+use Symfony\Component\EventDispatcher\Event;
 
 class Storage
 {
@@ -168,6 +169,11 @@ class Storage
         $this->filesystem->write(self::NAMESPACE_FILE, implode("\n", $out));
 
         return true;
+    }
+
+    public function commit()
+    {
+        $this->eventDispatcher->dispatch(Events::COMMIT, new Event());
     }
 
     public function getNamespaces()
