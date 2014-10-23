@@ -10,6 +10,7 @@ use Jackalope\Transport\Fs\Filesystem\Storage\NodeReader;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
 use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
+use Jackalope\Transport\Fs\Filesystem\Storage\Index;
 
 use PHPCR\Util\PathHelper;
 
@@ -18,15 +19,10 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Storage
 {
-    const INDEX_DIR = '/indexes';
     const WORKSPACE_PATH = '/workspaces';
     const NAMESPACE_FILE = '/namespaces';
     const NS_DELIMITER = ':::';
 
-    const IDX_REFERRERS_DIR = 'referrers';
-    const IDX_WEAKREFERRERS_DIR = 'referrers-weak';
-    const IDX_JCR_UUID = 'jcr-uuid';
-    const IDX_INTERNAL_UUID = 'internal-uuid';
     const INTERNAL_UUID = 'jackalope:fs:id';
 
     private $filesystem;
@@ -41,9 +37,10 @@ class Storage
         $serializer = new YamlNodeSerializer();
         $pathRegistry = new PathRegistry();
         $this->helper = new StorageHelper();
+        $index = new Index($this->filesystem);
 
-        $this->nodeWriter = new NodeWriter($this->filesystem, $serializer, $pathRegistry, $this->helper);
-        $this->nodeReader = new NodeReader($this->filesystem, $serializer, $pathRegistry, $this->helper);
+        $this->nodeWriter = new NodeWriter($this->filesystem, $index, $serializer, $pathRegistry, $this->helper);
+        $this->nodeReader = new NodeReader($this->filesystem, $index, $serializer, $pathRegistry, $this->helper);
         $this->nodeCopier = new NodeCopier($this->nodeReader, $this->nodeWriter);
         $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }

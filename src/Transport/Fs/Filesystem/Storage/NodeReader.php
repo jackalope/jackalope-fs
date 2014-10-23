@@ -9,6 +9,7 @@ use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use PHPCR\Util\PathHelper;
 use PHPCR\PropertyType;
+use Jackalope\Transport\Fs\Filesystem\Storage\Index;
 
 class NodeReader
 {
@@ -16,9 +17,11 @@ class NodeReader
     private $serializer;
     private $filesystem;
     private $helper;
+    private $index;
 
     public function __construct(
         Filesystem $filesystem,
+        Index $index,
         NodeSerializerInterface $serializer,
         PathRegistry $pathRegistry,
         StorageHelper $helper
@@ -28,6 +31,7 @@ class NodeReader
         $this->serializer = $serializer;
         $this->filesystem = $filesystem;
         $this->helper = $helper;
+        $this->index = $index;
     }
 
     public function readNode($workspace, $path)
@@ -75,19 +79,10 @@ class NodeReader
         $nodes = array();
 
         foreach ($uuids as $uuid) {
-            $indexName = $internal ? Storage::IDX_INTERNAL_UUID : Storage::IDX_JCR_UUID;
-            $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
+            $location = $this->index->getNodeLocationForUuid($uuid, $internal);
 
-            if (!$this->filesystem->exists($path)) {
-                continue;
-            }
-
-            $value = $this->filesystem->read($path);
-            $workspace = strstr($value, ':', true);
-            $path = substr($value, strlen($workspace) + 1);
-
-            $node = $this->readNode($workspace, $path);
-            $nodes[$path] = $node;
+            $node = $this->readNode($location->getWorkspace(), $location->getPath());
+            $nodes[$location->getPath()] = $node;
         }
 
         return $nodes;
@@ -138,29 +133,7 @@ class NodeReader
 
         $uuid = $node->{'jcr:uuid'};
 
-        $indexName = $weak === true ? Storage::IDX_WEAKREFERRERS_DIR : Storage::IDX_REFERRERS_DIR;
-
-        $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
-
-        if (!$this->filesystem->exists($path)) {
-            return array();
-        }
-
-        $value = $this->filesystem->read($path);
-        $values = explode("\n", $value);
-
-        $propertyNames = array();
-
-        foreach ($values as $line) {
-            $propertyName = strstr($line, ':', true);
-
-            if (null !== $name && $name != $propertyName) {
-                continue;
-            }
-
-            $internalUuid = substr($line, strlen($propertyName) + 1);
-            $propertyNames[$propertyName] = $internalUuid;
-        }
+        $propertyNames = $this->index->getReferringProperties($uuid, $name, $weak);
 
         $referrerPaths = array();
 
