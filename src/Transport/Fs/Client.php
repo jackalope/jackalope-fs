@@ -510,22 +510,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function deleteNodes(array $operations)
     {
         foreach ($operations as $operation) {
-            $referrers = $this->getReferences($operation->srcPath);
-
-            if (count($referrers) > 0) {
-                $referrerPaths = array();
-                foreach ($referrers as $path) {
-                    $referrerPaths[] = $path;
-                }
-
-                throw new ReferentialIntegrityException(sprintf(
-                    'Could not delete node in workspace "%s" at path "%s" it is referenced by the following nodes: "%s"',
-                    $this->workspaceName,
-                    $operation->srcPath,
-                    implode($referrerPaths, '", "')
-                ));
-            }
-
             $this->storage->removeNode($this->workspaceName, $operation->srcPath);
         }
     }

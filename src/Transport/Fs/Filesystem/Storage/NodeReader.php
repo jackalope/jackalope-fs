@@ -35,7 +35,14 @@ class NodeReader
         $this->index = $index;
     }
 
-    public function readNode($workspace, $path)
+    /**
+     * @param string $workspace
+     * @param string $path
+     * @param boolean $censor Do not return internal properties
+     *
+     * @return Node
+     */
+    public function readNode($workspace, $path, $censor = false)
     {
         $nodeData = $this->filesystem->read($this->helper->getNodePath($workspace, $path));
 
@@ -68,7 +75,10 @@ class NodeReader
         $internalUuid = $node->getPropertyValue(Storage::INTERNAL_UUID);
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
-        $node->removeProperty(Storage::INTERNAL_UUID);
+
+        if (true === $censor) {
+            $node->removeProperty(Storage::INTERNAL_UUID);
+        }
 
         return $node;
     }

@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Filesystem\Filesystem;
+
 /**
  * Implemnentation Loader for filesystem
  */
@@ -86,6 +88,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         );
 
         $this->path = __DIR__ . '/data';
+
+        // start with a clean system
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->path);
     }
 
     public function getRepositoryFactoryParameters()

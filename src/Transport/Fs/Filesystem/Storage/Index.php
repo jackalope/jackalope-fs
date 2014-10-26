@@ -31,6 +31,7 @@ class Index
      * nodes that refer to the given UUID
      *
      * @param string $uuid
+     * @param string $name Optionally check only for the named property
      * @param boolean $weak To retrieve weak or "strong" references
      *
      * @return array
@@ -131,6 +132,20 @@ class Index
         $this->appendToIndex($indexName, $referencedJcrUuid, $referrerPropertyName . ':' . $referrerInternalUuid);
     }
 
+    /**
+     * Deindex the reference from a node referrer
+     *
+     * @param string $referrerUuid
+     * @param string $referrerPropertyName
+     * @param string $referencedUuid
+     * @param boolean $weak Index a strong or a weak reference
+     */
+    public function deindexReferrer($referrerInternalUuid, $referrerPropertyName)
+    {
+        $this->deleteFromIndex(self::IDX_WEAKREFERRERS_DIR, $referrerPropertyName . ':' . $referrerInternalUuid);
+        $this->deleteFromIndex(self::IDX_REFERRERS_DIR, $referrerPropertyName . ':' . $referrerInternalUuid);
+    }
+
     private function createIndex($type, $name, $value)
     {
         $this->filesystem->write(self::INDEX_DIR . '/' . $type . '/' . $name, $value);
@@ -139,6 +154,23 @@ class Index
     private function deleteIndex($type, $name)
     {
         $this->filesystem->remove(self::INDEX_DIR . '/' . $type . '/' . $name);
+    }
+
+    /**
+     * I AM HERE!!!
+     */
+    private function deleteFromIndex($type, $name, $value)
+    {
+        $indexPath = self::INDEX_DIR . '/' . $type . '/' . $name;
+
+        if (!$this->filesystem->exists($indexPath)) {
+            $this->filesystem->write($indexPath, $value);
+            return;
+        }
+
+        $index = $this->filesystem->read($indexPath);
+        $index .= "\n" . $value;
+        $this->filesystem->write($indexPath, $index);
     }
 
     private function appendToIndex($type, $name, $value)

@@ -17,6 +17,7 @@ use PHPCR\Util\PathHelper;
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Model\Node;
+use Jackalope\Transport\Fs\Filesystem\Storage\NodeRemover;
 
 class Storage
 {
@@ -46,6 +47,7 @@ class Storage
         $this->nodeWriter = new NodeWriter($this->filesystem, $this->index, $serializer, $pathRegistry, $this->helper);
         $this->nodeReader = new NodeReader($this->filesystem, $this->index, $serializer, $pathRegistry, $this->helper);
         $this->nodeCopier = new NodeCopier($this->nodeReader, $this->nodeWriter);
+        $this->nodeRemover = new NodeRemover($this->nodeReader, $this->filesystem, $this->index, $this->helper);
         $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }
 
@@ -77,13 +79,7 @@ class Storage
 
     public function removeNode($workspace, $path)
     {
-        $node = $this->readNode($workspace, $path);
-
-        if (isset($node->{Storage::JCR_UUID})) {
-            $this->index->deindexUuid($node->{Storage::JCR_UUID}, false);
-        }
-
-        $this->remove($this->helper->getNodePath($workspace, $path, false), true);
+        $this->nodeRemover->removeNode($workspace, $path);
     }
 
     public function removeProperty($workspace, $path)
@@ -93,6 +89,7 @@ class Storage
         $nodeData = $this->readNode($workspace, $nodePath);
         unset($nodeData->{$propertyName});
         unset($nodeData->{':' . $propertyName});
+        die('asd');
         $this->writeNode($workspace, $nodePath, $nodeData);
     }
 
@@ -111,11 +108,6 @@ class Storage
             $srcWorkspace, $srcAbsPath,
             $destWorkspace, $destAbsPath
         );
-    }
-
-    public function remove($path, $recursive = false)
-    {
-        $this->filesystem->remove($path, $recursive);
     }
 
     public function nodeExists($workspace, $path)
