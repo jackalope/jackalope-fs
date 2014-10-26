@@ -1,10 +1,9 @@
 Jackalope Filesystem PHPCR implementation
 =========================================
 
-This is a WIP implementation to support a filesystem implementation of PHPCR.
+[![Build Status](https://travis-ci.org/jackalope/jackalope-fs.svg?branch=master](https://travis-ci.org/jackalope/jackalope-fs)
 
-The implementation is meant to be lightweight and ideal for testing PHPCR
-components.
+This is a WIP implementation to support a filesystem implementation of PHPCR.
 
 Connecting
 ----------
