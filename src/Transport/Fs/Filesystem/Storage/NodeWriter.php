@@ -8,6 +8,7 @@ use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\Fs\Filesystem\Storage\Index;
+use Jackalope\Transport\Fs\Model\Node;
 
 class NodeWriter
 {
@@ -37,32 +38,26 @@ class NodeWriter
      *
      * @return array Node data
      */
-    public function writeNode($workspace, $path, $nodeData)
+    public function writeNode($workspace, $path, Node $node)
     {
-        // Read node returns a stdClass as required by Jackalope, but storeNodes is
-        // passed an array -- this means we need to normalize when doing internal
-        // operations betwee the two (e.g. removing properties).
-        if ($nodeData instanceof \stdClass) {
-            $nodeData = get_object_vars($nodeData);
-        }
         $internalUuid = $this->getOrCreateInternalUuid($path);
-        $this->setProperty($nodeData, Storage::INTERNAL_UUID, $internalUuid, 'String');
+        $node->setProperty(Storage::INTERNAL_UUID, $internalUuid, 'String');
 
         $jcrUuid = null;
-        if (isset($nodeData['jcr:mixinTypes'])) {
-            $mixinTypes = $nodeData['jcr:mixinTypes'];
+        if ($node->hasProperty('jcr:mixinTypes')) {
+            $mixinTypes = $node->getPropertyValue('jcr:mixinTypes');
 
             if (in_array('mix:referenceable', $mixinTypes)) {
-                if (!isset($nodeData['jcr:uuid'])) {
+                if (false === $node->hasProperty('jcr:uuid')) {
                     $jcrUuid = UUIDHelper::generateUUID();
-                    $this->setProperty($nodeData, 'jcr:uuid', $jcrUuid);
+                    $node->setProperty('jcr:uuid', $jcrUuid);
                 } else {
-                    $jcrUuid = $nodeData['jcr:uuid'];
+                    $jcrUuid = $node->getPropertyValue('jcr:uuid');
                 }
             }
         }
 
-        $serialized = $this->serializer->serialize($nodeData);
+        $serialized = $this->serializer->serialize($node);
 
         $absPath = $this->helper->getNodePath($workspace, $path);
         $this->filesystem->write($absPath, $serialized);
@@ -79,28 +74,19 @@ class NodeWriter
             $this->index->indexUuid($jcrUuid, $workspace, $path, false);
         }
 
-        // parse the inefficient Jackalope node structure
-        foreach ($nodeData as $key => $value) {
-            if (substr($key, 0, 1) !== ':') {
-                continue;
-            }
-
-            $propertyName = substr($key, 1);
-            $propertyValues = (array) $nodeData[$propertyName];
-
-            // propertyValues are UUIDs when the property type is a reference
-            foreach ($propertyValues as $propertyValue) {
-                if ($value === 'Reference') {
+        foreach ($node->getProperties() as $propertyName => $property) {
+            foreach ((array) $property['value'] as $propertyValue) {
+                if ($property['type'] === 'Reference') {
                     $this->index->indexReferrer($internalUuid, $propertyName, $propertyValue, false);
                 }
 
-                if ($value === 'WeakReference') {
-                    $this->index->indexReferrer($internalUuid, $propertyName, $propertyValue, false);
+                if ($property['type'] === 'WeakReference') {
+                    $this->index->indexReferrer($internalUuid, $propertyName, $propertyValue, true);
                 }
             }
         }
 
-        return $nodeData;
+        return $node;
     }
 
     private function getOrCreateInternalUuid($path)
@@ -116,11 +102,5 @@ class NodeWriter
         }
 
         return $internalUuid;
-    }
-
-    private function setProperty(&$nodeData, $field, $value, $type = 'String')
-    {
-        $nodeData[$field] = $value;
-        $nodeData[':' . $field] = $type;
     }
 }

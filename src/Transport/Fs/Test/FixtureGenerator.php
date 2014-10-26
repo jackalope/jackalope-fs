@@ -11,6 +11,7 @@ use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
+use Jackalope\Transport\Fs\Model\Node;
 
 class FixtureGenerator
 {
@@ -110,7 +111,8 @@ class FixtureGenerator
         }
 
         $path[] = $domNode->getAttributeNs(self::NS_SV, 'name');
+        $node = new Node($properties);
 
-        $this->storage->writeNode($this->workspaceName, '/' . implode('/', $path), $properties);
+        $this->storage->writeNode($this->workspaceName, '/' . implode('/', $path), $node);
     }
 }

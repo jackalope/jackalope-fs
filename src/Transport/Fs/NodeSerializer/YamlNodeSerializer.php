@@ -5,6 +5,7 @@ namespace Jackalope\Transport\Fs\NodeSerializer;
 use Jackalope\Transport\Fs\NodeSerializerInterface;
 use Symfony\Component\Yaml\Yaml;
 use PHPCR\Util\UUIDHelper;
+use Jackalope\Transport\Fs\Model\Node;
 
 class YamlNodeSerializer implements NodeSerializerInterface
 {
@@ -27,7 +28,8 @@ class YamlNodeSerializer implements NodeSerializerInterface
     {
         $res = Yaml::parse($yamlData);
 
-        $ret = new \stdClass;
+        $node = new Node();
+
         foreach ($res as $key => $property) {
             $values = $property['value'];
             $type = $property['type'];
@@ -49,54 +51,36 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
             if ($type === 'Binary') {
                 $this->binaryHashMap[$key] = $property['value'];
-                $ret->$key = $property['length'];
-            } else {
-                $ret->$key = $newValues;
+                $newValues = $property['length'];
             }
 
-            $ret->{':' . $key} = $type;
+            $node->setProperty($key, $newValues, $type);
         }
 
-        return $ret;
+        return $node;
     }
 
-    public function serialize($nodeData)
+    public function serialize(Node $node)
     {
         $properties = array();
         $this->binaries = array();
 
-        do {
-            $propertyName = key($nodeData);
-            $propertyValue = current($nodeData);
+        foreach ($node->getProperties() as $propertyName => $property) {
+            $propertyValue = $property['value'];
+            $propertyType = $property['type'];
             $propertyLength = array();
-
-            // if propertyValue is an object, then it is a child node and we
-            // shouldn't continue. Note that this only happens during an internal
-            // round trip from NodeReader::readNode to NodeWriter::writeNode
-            if ($propertyValue instanceof \stdClass) {
-                continue;
-            }
 
             // should this be moved "up" ?
             if ($propertyValue instanceof \DateTime) {
                 $propertyValue = $propertyValue->format('c');
             }
 
-            next($nodeData);
-            $propertyTypeName = key($nodeData);
-            $propertyTypeValue = current($nodeData);
-
-            if (':' !== substr($propertyTypeName, 0, 1)) {
-                var_dump($nodeData);die();;
-                throw new \InvalidArgumentException(sprintf(
-                    'Property values must be followed by a type, e.g. "title" => "My title" MUST be followed by ":title" => "String". For %s = %s',
-                    var_export($propertyTypeName, true), var_export($propertyTypeValue, true)
-                ));
-            }
-
-            if ($propertyTypeValue == 'Binary') {
+            if ($propertyType == 'Binary') {
                 $binaryHashes = array();
                 foreach ((array) $propertyValue as $binaryData) {
+                    if (is_resource($binaryData)) {
+                        $binaryData = stream_get_contents($binaryData);
+                    }
                     $binaryHash = md5($binaryData);
                     $binaryHashes[] = $binaryHash;
                     $propertyLength[] = strlen(base64_decode($binaryData));
@@ -114,14 +98,13 @@ class YamlNodeSerializer implements NodeSerializerInterface
                 }
             }
 
-            $properties[$propertyName]['type'] = $propertyTypeValue;
+            $properties[$propertyName]['type'] = $propertyType;
             $properties[$propertyName]['value'] = $propertyValue;
 
             if (!empty($propertyLength)) {
                 $properties[$propertyName]['length'] = $propertyLength;
             }
-
-        } while (false !== next($nodeData));
+        }
 
         $yaml = Yaml::dump($properties);
 

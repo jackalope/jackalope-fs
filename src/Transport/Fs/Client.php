@@ -22,7 +22,7 @@ use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\StandardNodeTypes;
 use Jackalope\Transport\WritingInterface;
 use Jackalope\Transport\QueryInterface;
-use Jackalope\Node;
+use Jackalope\Node as JackalopeNode;
 use Jackalope\NodeType\NodeProcessor;
 use PHPCR\NamespaceRegistryInterface;
 use PHPCR\NodeInterface;
@@ -37,6 +37,7 @@ use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\PathNotFoundException;
 use PHPCR\ReferentialIntegrityException;
+use Jackalope\Transport\Fs\Model\Node;
 
 /**
  */
@@ -242,8 +243,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
         $node = $this->storage->readNode($this->workspaceName, $path);
 
-
-        return $node;
+        return $node->toJackalopeStructure();
     }
 
     /**
@@ -254,10 +254,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $nodes = array();
         foreach ($paths as $path) {
             try {
-                $nodes[$path] = $this->getNode($path);
+                $node = $this->getNode($path);
             } catch (ItemNotFoundException $e) {
                 continue;
             }
+
+            $nodes[$path] = $node;
         }
 
         return $nodes;
@@ -268,7 +270,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function getNodesByIdentifier($identifiers)
     {
-        return $this->storage->readNodesByUuids($identifiers);
+        $nodeCollection = $this->storage->readNodesByUuids($identifiers);
+        return $nodeCollection->toJackalopeStructures();
     }
 
     /**
@@ -470,7 +473,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     /**
      * {@inheritDoc}
      */
-    public function updateNode(Node $node, $srcWorkspace)
+    public function updateNode(JackalopeNode $node, $srcWorkspace)
     {
         throw new NotImplementedException(__METHOD__);
     }
@@ -496,7 +499,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     /**
      * {@inheritDoc}
      */
-    public function reorderChildren(Node $node)
+    public function reorderChildren(JackalopeNode $node)
     {
         throw new NotImplementedException(__METHOD__);
     }
@@ -559,12 +562,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function storeNodes(array $operations)
     {
         foreach ($operations as $operation) {
-            $node = $operation->node;
-            if ($operation->node->isDeleted()) {
-                $nodeData = $this->nodePropertiesToJackalopeArray($node);
-            } else {
-                $nodeData = $this->nodePropertiesToJackalopeArray($node);
-            }
+            $phpcrNode = $operation->node;
+            $node = $this->phpcrNodeToNode($phpcrNode);
 
             if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
                 throw new ItemExistsException(sprintf(
@@ -573,19 +572,19 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 ));
             }
 
-            $this->storage->writeNode($this->workspaceName, $operation->srcPath, $nodeData);
+            $this->storage->writeNode($this->workspaceName, $operation->srcPath, $node);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function updateProperties(Node $node)
+    public function updateProperties(JackalopeNode $phpcrNode)
     {
         $this->assertLoggedIn();
-        $this->nodeProcessor->process($node);
-        $nodeData = $this->nodePropertiesToJackalopeArray($node);
-        $this->storage->writeNode($this->workspaceName, $node->getPath(), $nodeData);
+        $this->nodeProcessor->process($phpcrNode);
+        $node = $this->phpcrNodeToNode($phpcrNode);
+        $this->storage->writeNode($this->workspaceName, $phpcrNode->getPath(), $node);
 
         return true;
     }
@@ -657,10 +656,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->nodeProcessor = new NodeProcessor($this->credentials, $this->getNamespaces());
     }
 
-    private function nodePropertiesToJackalopeArray(NodeInterface $node)
+    private function phpcrNodeToNode(\Jackalope\Node $node)
     {
-        $res = array();
-
         if ($node->isDeleted()) {
             $properties = $node->getPropertiesForStoreDeletedNode();
         } else {
@@ -668,25 +665,10 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $properties = $node->getProperties();
         }
 
-        // is there some common code which does this?
-        foreach ($properties as $name => $property) {
-            $value = null;
-            switch ($property->getType()) {
-                case PropertyType::DATE:
-                    $value = $property->getDate();
-                    break;
-                case PropertyType::REFERENCE:
-                case PropertyType::WEAKREFERENCE:
-                    $value = $property->getValue()->getPropertyValue('jcr:uuid');
-                    break;
-                default:
-                    $value = $property->getValue();
-            }
-            $res[$name] = $value;
-            $res[':' . $name] = $property->getType();
-        }
+        $node = new Node();
+        $node->fromPhpcrProperties($properties);
 
-        return $res;
+        return $node;
     }
 
     private function validateWorkspace($workspaceName)

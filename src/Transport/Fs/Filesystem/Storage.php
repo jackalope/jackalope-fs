@@ -16,6 +16,7 @@ use PHPCR\Util\PathHelper;
 
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Jackalope\Transport\Fs\Model\Node;
 
 class Storage
 {
@@ -25,6 +26,7 @@ class Storage
 
     const INTERNAL_UUID = 'jackalope:fs:id';
     const JCR_UUID = 'jcr:uuid';
+    const JCR_MIXINTYPES = 'jcr:mixinTypes';
 
     private $filesystem;
     private $nodeWriter;
@@ -139,10 +141,9 @@ class Storage
 
     public function workspaceInit($name)
     {
-        $this->writeNode($name, '/', array(
-            'jcr:primaryType' => 'nt:unstructured',
-            ':jcr:primaryType' => 'Name',
-        ));
+        $node = new Node();
+        $node->setProperty('jcr:primaryType', 'nt:unstructured', 'Name');
+        $this->writeNode($name, '/', $node);
     }
 
     public function ls($workspace, $path)

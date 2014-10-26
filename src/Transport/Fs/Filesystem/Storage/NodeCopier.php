@@ -3,6 +3,8 @@
 namespace Jackalope\Transport\Fs\Filesystem\Storage;
 
 use PHPCR\Util\UUIDHelper;
+use Jackalope\Transport\Fs\Model\Node;
+use Jackalope\Transport\Fs\Filesystem\Storage;
 
 /**
  * - Every node in S' is given a new and distinct identifier
@@ -33,8 +35,6 @@ class NodeCopier
     private $nodeReader;
     private $nodeWriter;
 
-    private $uuidMap = array();
-
     public function __construct(
         NodeReader $nodeReader,
         NodeWriter $nodeWriter
@@ -55,24 +55,21 @@ class NodeCopier
         $this->processNode($node);
         $this->nodeWriter->writeNode($destWorkspace, $destPath, $node);
 
-        foreach ($node as $key => $value) {
-            if ($value instanceof \stdClass) {
-                $this->copyNode(
-                    $srcWorkspace, $srcPath . '/' . $key,
-                    $destWorkspace, $destPath . '/' . $key
-                );
-            }
+        foreach ($node->getChildrenNames() as $childName) {
+            $this->copyNode(
+                $srcWorkspace, $srcPath . '/' . $childName,
+                $destWorkspace, $destPath . '/' . $childName
+            );
         }
     }
 
-    private function processNode(\stdClass $node)
+    private function processNode(Node $node)
     {
-        $jcrUuid = UUIDHelper::generateUUID();
-        if (!isset($node->{Storage::JCR_UUID})) {
+        if (false === $node->hasProperty(Storage::JCR_UUID)) {
             return;
         }
 
-        $this->uuidMap[$node->{Storage::JCR_UUID}] = $jcrUuid;
-        $node->{Storage::JCR_UUID} = $jcrUuid;
+        $jcrUuid = UUIDHelper::generateUUID();
+        $node->setProperty(Storage::JCR_UUID, $jcrUuid, 'String');
     }
 }
