@@ -86,9 +86,16 @@ class Storage
     {
         $propertyName = PathHelper::getNodeName($path);
         $nodePath = PathHelper::getParentPath($path);
-        $node = $this->readNode($workspace, $nodePath);
-        $this->index->deindexR
-        $this->writeNode($workspace, $nodePath, $node);
+        $node = $this->readNode($workspace, $nodePath, false);
+        $property = $node->getProperty($propertyName);
+
+        if (in_array($property['type'], array('Reference', 'WeakReference'))) {
+            $this->index->deindexReferrer(
+                $node->getPropertyValue(Storage::INTERNAL_UUID),
+                $propertyName,
+                $property['type'] === 'Reference' ? false : true
+            );
+        }
     }
 
     public function moveNode($workspace, $srcPath, $destPath)

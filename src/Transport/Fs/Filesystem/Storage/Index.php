@@ -225,6 +225,9 @@ class Index
         }
 
         $value = $this->filesystem->read($path);
+        if ('' === $value) {
+            return array();
+        }
 
         $values = explode("\n", $value);
 

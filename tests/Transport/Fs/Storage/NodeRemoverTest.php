@@ -28,9 +28,28 @@ class NodeRemoverTest extends ProphecyTestCase
     public function testRemove()
     {
         $this->node->hasProperty(Storage::JCR_UUID)->willReturn(true);
-        $this->node->getPropertyValue(Storage::JCR_UUID)->willReturn(1234);
-        $this->index->deindexUuid('1234', false)->shouldBeCalled();
+        $this->node->getPropertyValue(Storage::JCR_UUID)->willReturn('jcr-uuid');
+        $this->node->hasProperty(Storage::INTERNAL_UUID)->willReturn(true);
+        $this->node->getPropertyValue(Storage::INTERNAL_UUID)->willReturn('internal-uuid');
+        $this->index->getReferringProperties('jcr-uuid')->willReturn(array());
+
         $this->node->getChildrenNames()->willReturn(array());
+        $this->node->getProperties()->willReturn(array(
+            'prop1' => array(
+                'type' => 'Reference',
+                'value' => 'reference-1',
+            ),
+            'prop2' => array(
+                'type' => 'WeakReference',
+                'value' => 'weak-reference-1',
+            ),
+        ));
+
+        $this->index->deindexUuid('jcr-uuid', false)->shouldBeCalled();
+        $this->index->deindexReferrer('internal-uuid', 'prop1', 'reference-1', false)->shouldBeCalled();
+        $this->index->deindexReferrer('internal-uuid', 'prop2', 'weak-reference-1', true)->shouldBeCalled();
+
+
         $this->helper->getNodePath('foo_workspace', 'foo', false)->willReturn('/asd');
         $this->filesystem->remove('/asd', true)->shouldBeCalled();
 

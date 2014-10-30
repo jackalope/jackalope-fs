@@ -16,8 +16,7 @@ class NodeRemover
     private $helper;
 
 
-    private $nodesToRemove;
-    private $foobars;
+    private $nodesToRemove = array();
 
     public function __construct(
         NodeReader $nodeReader,
@@ -43,7 +42,19 @@ class NodeRemover
         $this->processNode($workspace, $path, 2);
 
         foreach ($this->nodesToRemove as $node) {
-            // TODO: Deindex reference properties
+            foreach ($node->getProperties() as $propertyName => $property) {
+                if (false === in_array($property['type'], array('Reference', 'WeakReference'))) {
+                    continue;
+                }
+
+                $this->index->deindexReferrer(
+                    $node->getPropertyValue(Storage::INTERNAL_UUID),
+                    $propertyName,
+                    $property['value'],
+                    $property['type'] === 'Reference' ? false : true
+                );
+            }
+
             $this->index->deindexUuid($node->getPropertyValue(Storage::JCR_UUID), false);
         }
 
@@ -71,7 +82,8 @@ class NodeRemover
         foreach ($node->getChildrenNames() as $childName) {
             $this->processNode(
                 $workspace,
-                $path . '/' . $childName
+                $path . '/' . $childName,
+                $pass
             );
         }
     }
@@ -94,7 +106,7 @@ class NodeRemover
                     'Could not delete node with UUID "%s" at path "%s", it has the follwing referrers: "%s"',
                     $jcrUuid,
                     $path,
-                    implode($extraReferrers, '", "')
+                    implode('", "', $extraReferrers)
                 ));
             }
 
