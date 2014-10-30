@@ -105,6 +105,7 @@ class LocalAdapter implements AdapterInterface
         }
         $absPath = $this->getAbsPath($path);
         $res = fopen($absPath, 'r');
+        $this->handles[] = $res;
 
         return $res;
     }

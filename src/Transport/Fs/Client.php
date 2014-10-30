@@ -495,7 +495,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function moveNodeImmediately($srcAbsPath, $dstAbsPath)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->moveNode($this->workspaceName, $srcAbsPath, $dstAbsPath);
     }
 
     /**
@@ -531,7 +531,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodeImmediately($path)
     {
-        $this->deleteNodes(array($path));
+        $this->storage->removeNode($this->workspaceName, $path);
     }
 
     /**
@@ -539,7 +539,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deletePropertyImmediately($path)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->removeProperty($this->workspaceName, $path);
     }
 
     /**

@@ -66,43 +66,47 @@ class YamlNodeSerializer implements NodeSerializerInterface
         $this->binaries = array();
 
         foreach ($node->getProperties() as $propertyName => $property) {
-            $propertyValue = $property['value'];
             $propertyType = $property['type'];
-            $propertyLength = array();
+            $propertyValues = (array) $property['value'];
+            $propertyLengths = array();
+            $binaryHashes = array();
 
-            // should this be moved "up" ?
-            if ($propertyValue instanceof \DateTime) {
-                $propertyValue = $propertyValue->format('c');
+            foreach ($propertyValues as $i => &$value) {
+                if (null === $value) {
+                    continue;
+                }
+
+                // should this be moved "up" ?
+                if ($value instanceof \DateTime) {
+                    $value = $value->format('c');
+                }
+
+                if ($propertyType == 'Binary') {
+                    if (is_resource($value)) {
+                        $value = stream_get_contents($value);
+                    }
+                    $propertyLengths[] = strlen(base64_decode($value));
+
+                    $binaryHash = md5($value);
+                    $this->binaries[$binaryHash] = $value;
+                    $value = $binaryHash;
+                } else {
+                    $propertyLengths[] = '';
+                }
             }
 
-            if ($propertyType == 'Binary') {
-                $binaryHashes = array();
-                foreach ((array) $propertyValue as $binaryData) {
-                    if (is_resource($binaryData)) {
-                        $binaryData = stream_get_contents($binaryData);
-                    }
-                    $binaryHash = md5($binaryData);
-                    $binaryHashes[] = $binaryHash;
-                    $propertyLength[] = strlen(base64_decode($binaryData));
-                    $this->binaries[$binaryHash] = $binaryData;
-                }
-
-                if (is_array($propertyValue)) {
-                    $propertyValue = array();
-                    foreach ($binaryHashes as $binaryHash) {
-                        $propertyValue[] = $binaryHash;
-                    }
-                } else {
-                    $propertyValue = reset($binaryHashes);
-                    $propertyLength = reset($propertyLength);
-                }
+            if (empty($propertyValues)) {
+                continue;
             }
 
             $properties[$propertyName]['type'] = $propertyType;
-            $properties[$propertyName]['value'] = $propertyValue;
 
-            if (!empty($propertyLength)) {
-                $properties[$propertyName]['length'] = $propertyLength;
+            if (is_array($property['value'])) {
+                $properties[$propertyName]['value'] = $propertyValues;
+                $properties[$propertyName]['length'] = $propertyLengths;
+            } else {
+                $properties[$propertyName]['value'] = reset($propertyValues);
+                $properties[$propertyName]['length'] = reset($propertyLengths);
             }
         }
 

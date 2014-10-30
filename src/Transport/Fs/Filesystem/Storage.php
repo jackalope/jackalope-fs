@@ -100,6 +100,9 @@ class Storage
                 $property['type'] === 'Reference' ? false : true
             );
         }
+
+        $node->removeProperty($propertyName);
+        $this->nodeWriter->writeNode($workspace, $path, $node);
     }
 
     public function moveNode($workspace, $srcPath, $destPath)
