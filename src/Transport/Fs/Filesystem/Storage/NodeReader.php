@@ -146,12 +146,14 @@ class NodeReader
 
         $uuid = $node->getPropertyValue('jcr:uuid');
 
-        $propertyNames = $this->index->getReferringProperties($uuid, $name, $weak);
+        $referrers = $this->index->getReferringProperties($uuid, $name, $weak);
         $referrerPaths = array();
 
-        foreach ($propertyNames as $propertyName => $internalUuid) {
-            $referrer = $this->readNodesByUuids(array($internalUuid), true);
-            $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
+        foreach ($referrers as $internalUuid => $propertyNames) {
+            foreach (array_keys($propertyNames) as $propertyName) {
+                $referrer = $this->readNodesByUuids(array($internalUuid), true);
+                $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
+            }
         }
 
         return $referrerPaths;

@@ -43,6 +43,7 @@ class NodeRemover
         $this->processNode($workspace, $path, 2);
 
         foreach ($this->nodesToRemove as $node) {
+            // TODO: Deindex reference properties
             $this->index->deindexUuid($node->getPropertyValue(Storage::JCR_UUID), false);
         }
 
@@ -81,7 +82,8 @@ class NodeRemover
 
         if (count($referrers) > 0) {
             $extraReferrers = array();
-            foreach ($referrers as $referrerInternalUuid) {
+
+            foreach (array_keys($referrers) as $referrerInternalUuid) {
                 if (!isset($this->internalUuids[$referrerInternalUuid])) {
                     $extraReferrers[] = $referrerInternalUuid;
                 }

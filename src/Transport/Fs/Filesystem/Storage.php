@@ -86,11 +86,9 @@ class Storage
     {
         $propertyName = PathHelper::getNodeName($path);
         $nodePath = PathHelper::getParentPath($path);
-        $nodeData = $this->readNode($workspace, $nodePath);
-        unset($nodeData->{$propertyName});
-        unset($nodeData->{':' . $propertyName});
-        die('asd');
-        $this->writeNode($workspace, $nodePath, $nodeData);
+        $node = $this->readNode($workspace, $nodePath);
+        $this->index->deindexR
+        $this->writeNode($workspace, $nodePath, $node);
     }
 
     public function moveNode($workspace, $srcPath, $destPath)

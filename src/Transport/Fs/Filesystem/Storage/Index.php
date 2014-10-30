@@ -15,40 +15,48 @@ class Index
 {
     const INDEX_DIR = '/indexes';
     const IDX_REFERRERS_DIR = 'referrers';
+    const IDX_REFERRERS_REV_DIR = 'referrers-rev';
     const IDX_WEAKREFERRERS_DIR = 'referrers-weak';
+    const IDX_WEAKREFERRERS_REV_DIR = 'referrers-weak-rev';
     const IDX_JCR_UUID = 'jcr-uuid';
     const IDX_INTERNAL_UUID = 'internal-uuid';
 
+    /**
+     * @var Filesystem
+     */
     private $filesystem;
 
+    /**
+     * @param Filesystem
+     */
     public function __construct(Filesystem $filesystem)
     {
         $this->filesystem = $filesystem;
     }
 
     /**
-     * Return all propertyNames and the internal FS UUID of their respective
-     * nodes that refer to the given UUID
+     * Return the internal UUID of referring nodes with a list of the referring
+     * properties.
+     *
+     * e.g. array(
+     *      '<node-internal-uuid>': array(
+     *          'referringProperty1',
+     *          'referringProperty2',
+     *      ))
      *
      * @param string $uuid
      * @param string $name Optionally check only for the named property
      * @param boolean $weak To retrieve weak or "strong" references
      *
-     * @return array
+     * @return ReferreringPropertyCollection
      */
     public function getReferringProperties($uuid, $name = null, $weak = false)
     {
         $indexName = $weak === true ? self::IDX_WEAKREFERRERS_DIR : self::IDX_REFERRERS_DIR;
-        $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
 
-        if (!$this->filesystem->exists($path)) {
-            return array();
-        }
+        $values = $this->readIndex($indexName, $uuid);
 
-        $value = $this->filesystem->read($path);
-        $values = explode("\n", $value);
-
-        $propertyNames = array();
+        $properties = array();
 
         foreach ($values as $line) {
             $propertyName = strstr($line, ':', true);
@@ -58,10 +66,15 @@ class Index
             }
 
             $internalUuid = substr($line, strlen($propertyName) + 1);
-            $propertyNames[$propertyName] = $internalUuid;
+
+            if (!isset($properties[$internalUuid])) {
+                $properties[$internalUuid] = array();
+            }
+
+            $properties[$internalUuid][$propertyName] = $propertyName;
         }
 
-        return $propertyNames;
+        return $properties;
     }
 
     /**
@@ -74,13 +87,10 @@ class Index
     public function getNodeLocationForUuid($uuid, $internal = false)
     {
         $indexName = $internal ? self::IDX_INTERNAL_UUID : self::IDX_JCR_UUID;
-        $path = self::INDEX_DIR . '/' . $indexName . '/' . $uuid;
-
-        if (!$this->filesystem->exists($path)) {
+        if (null === $value = $this->readOne($indexName, $uuid)) {
             return null;
         }
 
-        $value = $this->filesystem->read($path);
         $workspace = strstr($value, ':', true);
         $path = substr($value, strlen($workspace) + 1);
 
@@ -129,7 +139,10 @@ class Index
     public function indexReferrer($referrerInternalUuid, $referrerPropertyName, $referencedJcrUuid, $weak = false)
     {
         $indexName = $weak ? self::IDX_WEAKREFERRERS_DIR : self::IDX_REFERRERS_DIR;
-        $this->appendToIndex($indexName, $referencedJcrUuid, $referrerPropertyName . ':' . $referrerInternalUuid);
+        $revIndexName = $weak ? self::IDX_WEAKREFERRERS_REV_DIR : self::IDX_REFERRERS_REV_DIR;
+        $indexValue = $referrerPropertyName . ':' . $referrerInternalUuid;
+        $this->appendToIndex($indexName, $referencedJcrUuid, $indexValue);
+        $this->createIndex($revIndexName, $indexValue, $referencedJcrUuid);
     }
 
     /**
@@ -140,50 +153,110 @@ class Index
      * @param string $referencedUuid
      * @param boolean $weak Index a strong or a weak reference
      */
-    public function deindexReferrer($referrerInternalUuid, $referrerPropertyName)
+    public function deindexReferrer($referrerInternalUuid, $referrerPropertyName, $weak)
     {
-        $this->deleteFromIndex(self::IDX_WEAKREFERRERS_DIR, $referrerPropertyName . ':' . $referrerInternalUuid);
-        $this->deleteFromIndex(self::IDX_REFERRERS_DIR, $referrerPropertyName . ':' . $referrerInternalUuid);
+        if ($weak) {
+            $idxName = self::IDX_WEAKREFERRERS_DIR;
+            $revIdxName = self::IDX_WEAKREFERRERS_REV_DIR;
+        } else {
+            $idxName = self::IDX_REFERRERS_DIR;
+            $revIdxName = self::IDX_REFERRERS_REV_DIR;
+        }
+
+        $indexValue = $referrerPropertyName . ':' . $referrerInternalUuid;
+        $referrerReferrer = $this->readOne($revIdxName, $indexValue);
+
+        if (false === $referrerReferrer) {
+            throw new \RuntimeException(sprintf(
+                'Could not find reverse index for "%s". Maybe you want to repair your index?',
+                $indexValue
+            ));
+        }
+
+        $this->deleteFromIndexEntry($idxName, $referrerReferrer, $indexValue);
+        $this->deleteIndex($revIdxName, $indexValue);
     }
 
-    private function createIndex($type, $name, $value)
+    private function createIndex($indexName, $name, $value)
     {
-        $this->filesystem->write(self::INDEX_DIR . '/' . $type . '/' . $name, $value);
+        $this->writeIndex($indexName, $name, $value);
     }
 
-    private function deleteIndex($type, $name)
+    private function deleteIndex($indexName, $name)
     {
-        $this->filesystem->remove(self::INDEX_DIR . '/' . $type . '/' . $name);
+        $this->filesystem->remove(self::INDEX_DIR . '/' . $indexName . '/' . $name);
     }
 
-    /**
-     * I AM HERE!!!
-     */
-    private function deleteFromIndex($type, $name, $value)
+    private function deleteFromIndexEntry($indexName, $entryName, $value)
     {
-        $indexPath = self::INDEX_DIR . '/' . $type . '/' . $name;
+        $currentIndex = $this->readIndex($indexName, $entryName);
+        $newIndex = array();
+        foreach ($currentIndex as $line) {
+            if ($line === $value) {
+                continue;
+            }
+
+            $newIndex[] = $line;
+        }
+
+        $this->writeIndex($indexName, $entryName, $newIndex);
+    }
+
+    private function appendToIndex($indexName, $name, $value)
+    {
+        $indexPath = $this->getIndexPath($indexName, $name);
 
         if (!$this->filesystem->exists($indexPath)) {
             $this->filesystem->write($indexPath, $value);
             return;
         }
 
-        $index = $this->filesystem->read($indexPath);
-        $index .= "\n" . $value;
-        $this->filesystem->write($indexPath, $index);
+        $index = $this->readIndex($indexName, $name);
+        $index[] = $value;
+        $this->writeIndex($indexName, $name, $index);
     }
 
-    private function appendToIndex($type, $name, $value)
+    private function readIndex($indexName, $entryName)
     {
-        $indexPath = self::INDEX_DIR . '/' . $type . '/' . $name;
+        $path = $this->getIndexPath($indexName, $entryName);
 
-        if (!$this->filesystem->exists($indexPath)) {
-            $this->filesystem->write($indexPath, $value);
-            return;
+        if (!$this->filesystem->exists($path)) {
+            return array();
         }
 
-        $index = $this->filesystem->read($indexPath);
-        $index .= "\n" . $value;
-        $this->filesystem->write($indexPath, $index);
+        $value = $this->filesystem->read($path);
+
+        $values = explode("\n", $value);
+
+        return $values;
+    }
+
+    private function readOne($indexName, $entryName)
+    {
+        $values = $this->readIndex($indexName, $entryName);
+
+        if (count($values) > 1) {
+            throw new \InvalidArgumentException(sprintf(
+                'Index "%s" contains more than one entry when trying to retrieve entry "%s"',
+                $indexName,
+                $entryName
+            ));
+        }
+
+        return reset($values);
+    }
+
+    private function getIndexPath($indexName, $entryName)
+    {
+        $path = self::INDEX_DIR . '/' . $indexName . '/' . $entryName;
+
+        return $path;
+    }
+
+    private function writeIndex($indexName, $entryName, $values)
+    {
+        $indexPath = $this->getIndexPath($indexName, $entryName);
+        $data = implode("\n", (array) $values);
+        $this->filesystem->write($indexPath, $data);
     }
 }
