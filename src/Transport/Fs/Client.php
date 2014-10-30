@@ -296,6 +296,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             ));
         }
 
+        $node->{':jcr:path'} = $node->{'jcr:path'};
+
         return $node;
     }
 
@@ -529,7 +531,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodeImmediately($path)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->deleteNodes(array($path));
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Jackalope\Transport\Fs\Model;
 
 use PHPCR\NodeInterface;
 use PHPCR\PropertyType;
+use Jackalope\Transport\Fs\Filesystem\Storage;
 
 /**
  * Class that encapsulates the strange Jackalope node data structure
@@ -33,6 +34,14 @@ class Node
                 'Do not know how to parse value of type "%s"', gettype($data)
             ));
         }
+    }
+
+    public function censor()
+    {
+        $this->removeProperty(Storage::INTERNAL_UUID);
+
+        // hack required by getNodeByIdentifier
+        $this->removeProperty('jcr:path');
     }
 
     public function toJackalopeStructure()

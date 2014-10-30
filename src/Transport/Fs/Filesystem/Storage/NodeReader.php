@@ -42,7 +42,7 @@ class NodeReader
      *
      * @return Node
      */
-    public function readNode($workspace, $path, $censor = false)
+    public function readNode($workspace, $path)
     {
         $nodeData = $this->filesystem->read($this->helper->getNodePath($workspace, $path));
 
@@ -76,9 +76,7 @@ class NodeReader
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
 
-        if (true === $censor) {
-            $node->removeProperty(Storage::INTERNAL_UUID);
-        }
+        $node->setProperty('jcr:path', $path);
 
         return $node;
     }

@@ -59,7 +59,10 @@ class Storage
 
     public function readNode($workspace, $path)
     {
-        return $this->nodeReader->readNode($workspace, $path);
+        $node = $this->nodeReader->readNode($workspace, $path);
+        $node->censor();
+
+        return $node;
     }
 
     public function readNodesByUuids(array $uuids, $internal = false)
@@ -86,7 +89,8 @@ class Storage
     {
         $propertyName = PathHelper::getNodeName($path);
         $nodePath = PathHelper::getParentPath($path);
-        $node = $this->readNode($workspace, $nodePath, false);
+        $node = $this->nodeReader->readNode($workspace, $nodePath);
+
         $property = $node->getProperty($propertyName);
 
         if (in_array($property['type'], array('Reference', 'WeakReference'))) {
