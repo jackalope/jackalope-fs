@@ -5,6 +5,7 @@ namespace Jackalope\Transport\Fs\Model;
 use PHPCR\NodeInterface;
 use PHPCR\PropertyType;
 use Jackalope\Transport\Fs\Filesystem\Storage;
+use PHPCR\ItemNotFoundException;
 
 /**
  * Class that encapsulates the strange Jackalope node data structure
@@ -47,13 +48,19 @@ class Node
     public function toJackalopeStructure()
     {
         $ret = new \stdClass();
-        foreach ($this->properties as $name => $data) {
-            $ret->{$name} = $data['value'];
-            $ret->{':' . $name} = $data['type'];
-        }
+
+        // Jackalope doesn't bother diferintiating between
+        // children nodes and children properties so we have
+        // to build the children first and then overwrite them
+        // with any properties with the same name.
 
         foreach ($this->childrenNames as $childName) {
             $ret->{$childName} = new \stdClass();
+        }
+
+        foreach ($this->properties as $name => $data) {
+            $ret->{$name} = $data['value'];
+            $ret->{':' . $name} = $data['type'];
         }
 
         return $ret;
@@ -160,12 +167,25 @@ class Node
         foreach ($properties as $name => $property) {
             $value = null;
             switch ($property->getType()) {
-            case PropertyType::DATE:
+                case PropertyType::DATE:
                     $value = $property->getDate();
                     break;
                 case PropertyType::REFERENCE:
                 case PropertyType::WEAKREFERENCE:
-                    $value = $property->getValue()->getPropertyValue('jcr:uuid');
+                    try {
+                        $references = $property->getValue();
+                    } catch (ItemNotFoundException $e) {
+                        continue;
+                    }
+
+                    if ($property->isMultiple()) {
+                        $value = array();
+                        foreach ($references as $reference) {
+                            $value[] = $reference->getPropertyValue('jcr:uuid');
+                        }
+                    } else {
+                        $value = $references->getPropertyValue('jcr:uuid');
+                    }
                     break;
                 default:
                     $value = $property->getValue();

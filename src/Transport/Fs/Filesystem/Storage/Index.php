@@ -94,6 +94,10 @@ class Index
         $workspace = strstr($value, ':', true);
         $path = substr($value, strlen($workspace) + 1);
 
+        if (!$workspace) {
+            var_dump($value);die();;
+        }
+
         $nodeLocation = new NodeLocation($workspace, $path);
 
         return $nodeLocation;
@@ -244,6 +248,10 @@ class Index
                 $indexName,
                 $entryName
             ));
+        }
+
+        if (0 === count($values)) {
+            return null;
         }
 
         return reset($values);
