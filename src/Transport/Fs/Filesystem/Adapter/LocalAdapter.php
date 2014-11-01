@@ -103,6 +103,7 @@ class LocalAdapter implements AdapterInterface
                 'Could not find file to stream at "%s"', $this->getAbsPath($path)
             ));
         }
+
         $absPath = $this->getAbsPath($path);
         $res = fopen($absPath, 'r');
         $this->handles[] = $res;

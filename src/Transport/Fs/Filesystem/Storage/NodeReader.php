@@ -130,7 +130,9 @@ class NodeReader
             $streams[] = $this->filesystem->stream($path);
         }
 
-        return is_array($originalBinaryHash) ? $streams : reset($streams);
+        $res = is_array($originalBinaryHash) ? $streams : reset($streams);
+
+        return $res;
     }
 
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
