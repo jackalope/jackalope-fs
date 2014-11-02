@@ -84,12 +84,21 @@ class ZendSearchAdapter implements SearchAdapterInterface
 
             switch ($propertyType) {
                 case PropertyType::TYPENAME_STRING:
-                case PropertyType::TYPENAME_DATE:
                 case PropertyType::TYPENAME_NAME:
                 case PropertyType::TYPENAME_PATH:
                 case PropertyType::TYPENAME_URI:
                     $value = (array) $propertyValue;
                     $value = join(self::MULTIVALUE_SEPARATOR, $value);
+                    $document->addField(Field::Text($propertyName, $value));
+                    break;
+                case PropertyType::TYPENAME_DATE:
+                    $values = (array) $propertyValue;
+                    foreach ($values as $i => $value) {
+                        if ($value instanceof \DateTime) {
+                            $values[$i] = $value->format('c');
+                        }
+                    }
+                    $value = join(self::MULTIVALUE_SEPARATOR, $values);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
                 case PropertyType::TYPENAME_DECIMAL:
