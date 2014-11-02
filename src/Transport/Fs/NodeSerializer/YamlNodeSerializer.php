@@ -84,10 +84,10 @@ class YamlNodeSerializer implements NodeSerializerInterface
                 if ($propertyType == 'Binary') {
                     if (is_resource($value)) {
                         $stream = $value;
-                        $value = base64_decode(stream_get_contents($stream));
+                        $value = stream_get_contents($stream);
                         fclose($stream);
                     }
-                    $propertyLengths[] = strlen(base64_decode($value));
+                    $propertyLengths[] = strlen($value);
 
                     $binaryHash = md5($value);
                     $this->binaries[$binaryHash] = $value;

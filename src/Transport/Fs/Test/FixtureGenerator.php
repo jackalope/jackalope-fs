@@ -55,6 +55,8 @@ class FixtureGenerator
         $dom->format = true;
 
         $this->iterateNode($dom->firstChild);
+
+        $this->storage->commit();
     }
 
     function iterateNode(\DomNode $domNode)
@@ -90,7 +92,11 @@ class FixtureGenerator
                     continue;
                 }
 
-                $values[] = $childNode->nodeValue;
+                if ($propertyType === 'Binary') {
+                    $values[] = base64_decode($childNode->nodeValue);
+                } else {
+                    $values[] = $childNode->nodeValue;
+                }
             }
 
             if ($propertyName === 'jcr:mixinTypes' || $domProperty->getAttributeNs(self::NS_SV, 'multiple') === 'true' || count($values) > 1) {
@@ -98,6 +104,7 @@ class FixtureGenerator
             } else {
                 $propertyValue = current($values);
             }
+
 
             $properties[$propertyName] = $propertyValue;
             $properties[':' . $propertyName] = $propertyType;
