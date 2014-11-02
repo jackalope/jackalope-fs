@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=5.4",
-        "jackalope/jackalope": "dev-node_validator",
+        "jackalope/jackalope": "dev-master",
         "symfony/yaml": "~2.4",
         "symfony/filesystem": "~2.6",
         "symfony/event-dispatcher": "~2.6",
