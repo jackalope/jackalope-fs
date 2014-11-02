@@ -32,7 +32,7 @@ class IndexSubscriber implements EventSubscriberInterface
         $this->pendingOperations['index'][$event->getPath()] = array(
             'workspace' => $event->getWorkspace(),
             'path' => $event->getPath(),
-            'node_data' => $event->getNodeData()
+            'node_data' => $event->getNode()
         );
 
     }

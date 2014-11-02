@@ -66,7 +66,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array())
+    public function __construct($factory, $parameters = array(), Filesystem $filesystem = null)
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -77,7 +77,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->path = $parameters['path'];
         $this->searchEnabled = isset($parameters['search_enabled']) ? $parameters['search_enabled'] : true;
         $this->eventDispatcher = new EventDispatcher();
-        $adapter = new LocalAdapter($this->path);
+        $adapter = $filesystem ? : new LocalAdapter($this->path);
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
         $this->valueConverter = new ValueConverter();
         $this->nodeSerializer = new YamlNodeSerializer();

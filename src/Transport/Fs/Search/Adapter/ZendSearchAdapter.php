@@ -17,6 +17,7 @@ use Jackalope\Transport\Fs\Search\Adapter\Zend\ExactMatchAnalyzer;
 use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use ZendSearch\Lucene\Search\Query\Wildcard;
+use Jackalope\Transport\Fs\Model\Node;
 
 /**
  * Search adapter for the native PHP ZendSearch Lucene library.
@@ -58,7 +59,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     /**
      * {@inheritDoc}
      */
-    public function index($workspace, $path, $nodeData)
+    public function index($workspace, $path, Node $node)
     {
         $index = $this->getIndex($workspace);
         $document = new Document();
@@ -71,19 +72,16 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $document->addField(Field::Keyword(self::IDX_NODELOCALNAME, $localNodeName));
         $document->addField(Field::Keyword(self::IDX_PARENTPATH, $parentPath));
 
-        do {
-            $propertyName = key($nodeData);
-            $propertyValue = current($nodeData);
-            next($nodeData);
-            $typeName = key($nodeData);
-            $typeValue = current($nodeData);
+        foreach ($node->getProperties() as $propertyName => $property) {
+            $propertyValue = $property['value'];
+            $propertyType = $property['type'];
 
             if ($propertyName === Storage::INTERNAL_UUID) {
                 $document->addField(Field::Keyword(Storage::INTERNAL_UUID, $propertyValue));
                 continue;
             }
 
-            switch ($typeValue) {
+            switch ($propertyType) {
                 case PropertyType::TYPENAME_STRING:
                 case PropertyType::TYPENAME_DATE:
                 case PropertyType::TYPENAME_NAME:
@@ -118,7 +116,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     break;
             }
 
-        } while (false !== current($nodeData));
+        };
 
         $index->addDocument($document);
     }

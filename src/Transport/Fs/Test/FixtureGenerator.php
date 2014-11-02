@@ -31,7 +31,6 @@ class FixtureGenerator
 
         $this->storage = new Storage(new FsFilesystem(new LocalAdapter($dataDir)), $eventDispatcher);
         $this->storage->registerNamespace($this->workspaceName, 'test', 'http://example.com');
-
         $this->storage->workspaceInit($this->workspaceName);
 
         if (is_file($srcDir)) {

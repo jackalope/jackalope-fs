@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Fs\Event;
 
 use Symfony\Component\EventDispatcher\Event;
+use Jackalope\Transport\Fs\Model\Node;
 
 /**
  * Event which is dispatched when a node is written.
@@ -13,13 +14,13 @@ class NodeWriteEvent extends Event
 {
     protected $workspace;
     protected $path;
-    protected $nodeData;
+    protected $node;
 
-    public function __construct($workspace, $path, $nodeData)
+    public function __construct($workspace, $path, Node $node)
     {
         $this->workspace = $workspace;
         $this->path = $path;
-        $this->nodeData = $nodeData;
+        $this->node = $node;
     }
 
     public function getWorkspace() 
@@ -32,8 +33,8 @@ class NodeWriteEvent extends Event
         return $this->path;
     }
 
-    public function getNodeData() 
+    public function getNode() 
     {
-        return $this->nodeData;
+        return $this->node;
     }
 }

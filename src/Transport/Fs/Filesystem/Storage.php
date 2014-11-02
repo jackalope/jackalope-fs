@@ -51,10 +51,10 @@ class Storage
         $this->eventDispatcher = $eventDispatcher ? : new EventDispatcher();
     }
 
-    public function writeNode($workspace, $path, $nodeData)
+    public function writeNode($workspace, $path, Node $node)
     {
-        $nodeData = $this->nodeWriter->writeNode($workspace, $path, $nodeData);
-        $this->eventDispatcher->dispatch(Events::POST_WRITE_NODE, new NodeWriteEvent($workspace, $path, $nodeData));
+        $node = $this->nodeWriter->writeNode($workspace, $path, $node);
+        $this->eventDispatcher->dispatch(Events::POST_WRITE_NODE, new NodeWriteEvent($workspace, $path, $node));
     }
 
     public function readNode($workspace, $path)
@@ -124,7 +124,8 @@ class Storage
 
     public function nodeExists($workspace, $path)
     {
-        return $this->filesystem->exists($this->helper->getNodePath($workspace, $path));
+        $fullPath = $this->helper->getNodePath($workspace, $path);
+        return $this->filesystem->exists($fullPath);
     }
 
     public function workspaceExists($name)
