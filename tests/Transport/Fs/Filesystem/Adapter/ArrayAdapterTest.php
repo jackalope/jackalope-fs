@@ -5,7 +5,7 @@ namespace Jackalope\Tests\Transport\Fs\Filesystem\Adapter;
 use Jackalope\Tests\Transport\Fs\Filesystem\Adapter\AdapterTestCase;
 use Jackalope\Transport\Fs\Filesystem\Adapter\ArrayAdapter;
 
-class LocalAdapterTest extends AdapterTestCase
+class ArrayAdapterTest extends AdapterTestCase
 {
     private $adapter;
 
