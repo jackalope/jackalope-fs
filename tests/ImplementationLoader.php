@@ -60,6 +60,10 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
             'Reading\SessionNamespaceRemappingTest::testSetNamespacePrefix', // not supported by jackalope
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+
+            // see https://github.com/jackalope/jackalope/pull/229
+            'Reading\\NodeReadMethodsTest::testGetNodesTypeFilter', //TODO implement node type filtering
+            'Reading\\NodeReadMethodsTest::testGetNodesTypeFilterList', //TODO implement node type filtering
             'Query\\NodeViewTest::testSeekable', // see https://github.com/phpcr/phpcr-api-tests/issues/141
 
             // not supported by jackalope
