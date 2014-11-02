@@ -34,7 +34,6 @@ class IndexSubscriber implements EventSubscriberInterface
             'path' => $event->getPath(),
             'node_data' => $event->getNode()
         );
-
     }
 
     public function finishSave()

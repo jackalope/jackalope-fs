@@ -18,6 +18,7 @@ use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use ZendSearch\Lucene\Search\Query\Wildcard;
 use Jackalope\Transport\Fs\Model\Node;
+use ZendSearch\Lucene\Index;
 
 /**
  * Search adapter for the native PHP ZendSearch Lucene library.
