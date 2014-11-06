@@ -102,7 +102,7 @@ class Storage
         }
 
         $node->removeProperty($propertyName);
-        $this->nodeWriter->writeNode($workspace, $path, $node);
+        $this->nodeWriter->writeNode($workspace, $nodePath, $node);
     }
 
     public function moveNode($workspace, $srcPath, $destPath)

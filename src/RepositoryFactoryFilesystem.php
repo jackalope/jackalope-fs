@@ -40,7 +40,8 @@ class RepositoryFactoryFilesystem implements RepositoryFactoryInterface
     {
         return array(
             'path',
-            'search_enabled',
+            'search.enabled',
+            'search.zend.hide_destruct_exception',
         );
     }
 }

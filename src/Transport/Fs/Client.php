@@ -59,6 +59,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     private $factory;
 
     private $searchEnabled;
+    private $zendHideDestructException;
 
     /**
      * Base path for content repository
@@ -75,7 +76,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         }
 
         $this->path = $parameters['path'];
-        $this->searchEnabled = isset($parameters['search_enabled']) ? $parameters['search_enabled'] : true;
+        $this->zendHideDestructException = isset($parameters['search.zend.hide_destruct_exception']) ? $parameters['search.zend.hide_destruct_exception'] : false;
+        $this->searchEnabled = isset($parameters['search.enabled']) ? $parameters['search.enabled'] : true;
         $this->eventDispatcher = new EventDispatcher();
         $adapter = $filesystem ? : new LocalAdapter($this->path);
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
@@ -88,7 +90,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function getSearchAdapter()
     {
-        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager);
+        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager, $this->zendHideDestructException);
 
         return $this->searchAdapter;
     }

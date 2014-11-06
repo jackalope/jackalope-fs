@@ -280,7 +280,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
             $index = new Index($indexPath, false);
         }
 
-        $index->setHideException(true);
+        $index->setHideException($this->hideDestructException);
 
         $this->indexes[$workspace] = $index;
 

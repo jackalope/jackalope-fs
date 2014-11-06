@@ -95,7 +95,10 @@ class Index
         $path = substr($value, strlen($workspace) + 1);
 
         if (!$workspace) {
-            var_dump($value);die();;
+            throw new \RuntimeException(sprintf(
+                'Could not parse workspace from UUID index "%s:%s"',
+                $indexName, $uuid
+            ));
         }
 
         $nodeLocation = new NodeLocation($workspace, $path);

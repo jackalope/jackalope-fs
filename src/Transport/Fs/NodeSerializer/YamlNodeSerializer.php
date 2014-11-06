@@ -37,8 +37,11 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
             foreach ((array) $values as $value) {
                 switch ($property['type']) {
-                    case 'Boolean':
-                        $value = $value === 'false' ? false : true;
+                case 'Boolean':
+                        if ($value === 'false') {
+                            $value = false;
+                        }
+                        $value = (boolean) $value;
                         break;
                 }
 
