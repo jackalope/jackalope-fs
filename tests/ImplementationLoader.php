@@ -94,6 +94,9 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Writing\LastModifiedTest::testUpdateBinary',
             'Writing\LastModifiedTest::testRemoveProperty',
 
+            'Writing\SetPropertyTypesTest::testCreateValueBinaryFromStream',
+            'Writing\SetPropertyTypesTest::testCreateValueBinaryFromStreamAndRead',
+
         );
 
         $this->path = __DIR__ . '/data';
@@ -137,7 +140,8 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     {
         $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array(
             'path' => $this->path,
-            'search_enabled' => true,
+            'search.enabled' => true,
+            'search.zend.hide_destruct_exception' => true,
         ));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {

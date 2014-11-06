@@ -3,6 +3,7 @@
 namespace Jackalope\Transport\Fs\Search\Adapter\Zend;
 
 use ZendSearch\Lucene\Index as BaseIndex;
+use ZendSearch\Lucene\Document;
 
 /**
  * This class adds the possibility to hide destructor errors
@@ -33,15 +34,26 @@ class Index extends BaseIndex
 
     public function __destruct()
     {
+        if (false === $this->hideDestructException) {
+            return parent::__destruct();
+        }
+
         try {
             $level = error_reporting(0);
-            parent::__destruct();
             error_reporting($level);
+            parent::__destruct();
         } catch (\Exception $e) {
             error_reporting($level);
-            if (false === $this->hideDestructException) {
-                throw $e;
-            }
+        }
+    }
+
+    public function addDocument(Document $document)
+    {
+        try {
+            $level = error_reporting(0);
+            parent::addDocument($document);
+        } catch (\Exception $e) {
+            error_reporting($level);
         }
     }
 }
