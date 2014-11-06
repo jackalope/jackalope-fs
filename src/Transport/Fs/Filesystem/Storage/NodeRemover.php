@@ -59,28 +59,35 @@ class NodeRemover
                 );
             }
 
-            $this->index->deindexUuid($node->getPropertyValue(Storage::JCR_UUID), false);
+            if ($node->hasProperty(Storage::JCR_UUID)) {
+                $this->index->deindexUuid($node->getPropertyValue(Storage::JCR_UUID), false);
+            }
         }
 
-        $this->filesystem->remove($this->helper->getNodePath($workspace, $path, false), true);
+        foreach ($paths as $path) {
+            $this->filesystem->remove($this->helper->getNodePath($workspace, $path, false), true);
+        }
+
+        $this->internalUuids = array();
+        $this->nodesToRemove = array();
     }
 
     private function processNode($workspace, $path, $pass)
     {
         $node = $this->nodeReader->readNode($workspace, $path);
+        $internalUuid = $node->getPropertyValue(Storage::INTERNAL_UUID);
 
-        if ($node->hasProperty(Storage::JCR_UUID)) {
-            $internalUuid = $node->getPropertyValue(Storage::INTERNAL_UUID);
-            $jcrUuid = $node->getPropertyValue(Storage::JCR_UUID);
+        if ($pass == 1) {
+            $this->internalUuids[$internalUuid] = true;
+        }
 
-            if ($pass == 1) {
-                $this->internalUuids[$internalUuid] = true;
-            }
-
-            if ($pass == 2) {
+        if ($pass == 2) {
+            if ($node->hasProperty(Storage::JCR_UUID)) {
+                $jcrUuid = $node->getPropertyValue(Storage::JCR_UUID);
                 $this->checkReferringProperties($jcrUuid, $path);
-                $this->nodesToRemove[] = $node;
             }
+
+            $this->nodesToRemove[] = $node;
         }
 
         foreach ($node->getChildrenNames() as $childName) {
