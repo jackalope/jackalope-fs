@@ -18,7 +18,7 @@ use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use ZendSearch\Lucene\Search\Query\Wildcard;
 use Jackalope\Transport\Fs\Model\Node;
-use ZendSearch\Lucene\Index;
+use Jackalope\Transport\Fs\Search\Adapter\Zend\Index;
 
 /**
  * Search adapter for the native PHP ZendSearch Lucene library.
@@ -44,15 +44,17 @@ class ZendSearchAdapter implements SearchAdapterInterface
     private $filesystem;
     private $qomWalker;
     private $nodeTypeManager;
+    private $hideDestructException;
 
     /**
      * @param string $path Path to search index
      */
-    public function __construct($path, NodeTypeManagerInterface $nodeTypeManager = null)
+    public function __construct($path, NodeTypeManagerInterface $nodeTypeManager = null, $hideDestructException = false)
     {
         $this->path = $path;
         $this->filesystem = new Filesystem();
         $this->nodeTypeManager = $nodeTypeManager;
+        $this->hideDestructException = $hideDestructException;
         Analyzer::setDefault(new ExactMatchAnalyzer());
         Wildcard::setMinPrefixLength(0);
     }
@@ -273,10 +275,12 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $indexPath = $this->getIndexPath($workspace);
 
         if (!file_exists($indexPath)) {
-            $index = Lucene::create($indexPath);
+            $index = new Index($indexPath, true);
         } else {
-            $index = Lucene::open($indexPath);
+            $index = new Index($indexPath, false);
         }
+
+        $index->setHideException(true);
 
         $this->indexes[$workspace] = $index;
 

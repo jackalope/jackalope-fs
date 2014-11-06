@@ -511,9 +511,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodes(array $operations)
     {
+        $paths = array();
+
         foreach ($operations as $operation) {
-            $this->storage->removeNode($this->workspaceName, $operation->srcPath);
+            $paths[] = $operation->srcPath;
         }
+
+        $this->storage->removeNodes($this->workspaceName, $paths);
     }
 
     /**

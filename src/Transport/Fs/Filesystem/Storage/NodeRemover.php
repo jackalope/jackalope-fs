@@ -36,10 +36,15 @@ class NodeRemover
      *
      * @return array Node data
      */
-    public function removeNode($workspace, $path)
+    public function removeNodes($workspace, $paths)
     {
-        $this->processNode($workspace, $path, 1);
-        $this->processNode($workspace, $path, 2);
+        foreach ($paths as $path) {
+            $this->processNode($workspace, $path, 1);
+        }
+
+        foreach ($paths as $path) {
+            $this->processNode($workspace, $path, 2);
+        }
 
         foreach ($this->nodesToRemove as $node) {
             foreach ($node->getProperties() as $propertyName => $property) {
@@ -50,7 +55,6 @@ class NodeRemover
                 $this->index->deindexReferrer(
                     $node->getPropertyValue(Storage::INTERNAL_UUID),
                     $propertyName,
-                    $property['value'],
                     $property['type'] === 'Reference' ? false : true
                 );
             }

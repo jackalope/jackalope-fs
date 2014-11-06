@@ -41,7 +41,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Transactions',
             'SameNameSiblings',
             'OrderableChildNodes',
-            'PhpcrUtils',
 
             // not supported yet
             'PermissionsAndCapabilities',

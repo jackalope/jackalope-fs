@@ -1,0 +1,536 @@
+PHPUnit 4.0.20-16-g56b8fc1 by Sebastian Bergmann.
+
+Configuration read from /home/daniel/www/jackalope/jackalope-fs/phpunit.xml.dist
+
+.........[36;1mS[0m..............[33;1mI[0m.[33;1mI[0m.[33;1mI[0m.[33;1mI[0m................................  63 / 906 (  6%)
+...[33;1mI[0m.[36;1mS[0m[36;1mS[0m...................[33;1mI[0m..[33;1mI[0m........[36;1mS[0m[33;1mI[0m....................... 126 / 906 ( 13%)
+..........................................[36;1mS[0m.......[33;1mI[0m............ 189 / 906 ( 20%)
+.................[36;1mS[0m.........[36;1mS[0m................................... 252 / 906 ( 27%)
+.........[36;1mS[0m[36;1mS[0m...............[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m...[36;1mS[0m..........[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m...[36;1mS[0m[36;1mS[0m[36;1mS[0m....... 315 / 906 ( 34%)
+....[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m.................................[36;1mS[0m..............[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m 378 / 906 ( 41%)
+......................[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[31;1mE[0m.....[36;1mS[0m[36;1mS[0m[36;1mS[0m........ 441 / 906 ( 48%)
+.................[36;1mS[0m....[31;1mE[0m......[33;1mI[0m..............[41;37mF[0m.[31;1mE[0m................ 504 / 906 ( 55%)
+.[36;1mS[0m.[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m..[31;1mE[0m.........[31;1mE[0m............................[31;1mE[0m.......... 567 / 906 ( 62%)
+....[36;1mS[0m.......................................................... 630 / 906 ( 69%)
+............................................................... 693 / 906 ( 76%)
+.................................[31;1mE[0m...[41;37mF[0m.......[41;37mF[0m[41;37mF[0m................ 756 / 906 ( 83%)
+..[31;1mE[0m[31;1mE[0m......[31;1mE[0m[31;1mE[0m[31;1mE[0m[31;1mE[0m[31;1mE[0m[31;1mE[0m[31;1mE[0m.[31;1mE[0m.[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m 819 / 906 ( 90%)
+[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m 882 / 906 ( 97%)
+[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m[36;1mS[0m
+
+Time: 2.82 minutes, Memory: 137.00Mb
+
+There were 17 errors:
+
+1) PHPCR\Tests\Writing\CombinedManipulationsTest::testRemoveAndAdd
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_i.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/PropertyDefinition.php:60
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/PropertyDefinition.php:60
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/ItemDefinition.php:73
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:148
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/CombinedManipulationsTest.php:53
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+Caused by
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_h.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/PropertyDefinition.php:60
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/PropertyDefinition.php:60
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/ItemDefinition.php:73
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:148
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/CombinedManipulationsTest.php:53
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+2) PHPCR\Tests\Writing\DeleteMethodsTest::testRemoveNode
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_4.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:36
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:36
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:96
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:1303
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/DeleteMethodsTest.php:94
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+Caused by
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_k.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:36
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:36
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:96
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:1303
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/DeleteMethodsTest.php:94
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+3) PHPCR\Tests\Writing\EncodingTest::testEncoding with data set #0 ('node-ä-x')
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_a.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:375
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/EncodingTest.php:30
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+4) PHPCR\Tests\Writing\MixinReferenceableTest::testReferenceOnReferenceableNode
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_2.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/PropertyDefinition.php:65
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/ItemDefinition.php:73
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:148
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:522
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/MixinReferenceableTest.php:69
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+5) PHPCR\Tests\Writing\MoveMethodsTest::testSessionMovePathUpdatedChild
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_4.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:33
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:33
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:148
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:1368
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:1293
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:1338
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:405
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/MoveMethodsTest.php:251
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+6) PHPCR\Tests\Writing\NodeTypeAssignementTest::testAddMixinOnNewNode with data set #0 ('mix:etag')
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_c.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:101
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:101
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:1368
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:402
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/NodeTypeAssignementTest.php:54
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+Caused by
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_b.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:101
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:101
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:1368
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:402
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/NodeTypeAssignementTest.php:54
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+7) PHPCR\Tests\Writing\SetPropertyMethodsTest::testSetPropertyNewWithType
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_81.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:143
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:143
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:522
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/SetPropertyMethodsTest.php:135
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+Caused by
+ZendSearch\Lucene\Exception\RuntimeException: Can't delete file: unlink(/home/daniel/www/jackalope/jackalope-fs/tests/data/zend-search-indexes/tests/_80.fdx): No such file or directory
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Storage/Directory/Filesystem.php:202
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/AbstractSegmentWriter.php:601
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/SegmentWriter/DocumentWriter.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index/Writer.php:740
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:1158
+/home/daniel/www/jackalope/jackalope-fs/vendor/zendframework/zendsearch/library/ZendSearch/Lucene/Index.php:429
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:143
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:143
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeDefinition.php:102
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Factory.php:47
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:125
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/NodeType/NodeTypeManager.php:240
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:922
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Node.php:522
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/SetPropertyMethodsTest.php:135
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+8) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLSystemSession
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:37
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:23
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+9) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLSystemWorkspace
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Workspace.php:321
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:37
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:32
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+10) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidNewSession
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:133
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:123
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+11) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidNewWorkspace
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Workspace.php:321
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:133
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:129
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+12) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingSession
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:194
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:183
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+13) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidRemoveExistingWorkspace
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Workspace.php:321
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:194
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:189
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+14) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingSession
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:245
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:235
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+15) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidReplaceExistingWorkspace
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:533
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:538
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:108
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:245
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:241
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+16) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLUuidReplaceRoot
+PHPCR\ReferentialIntegrityException: Could not delete node with UUID "14e18ef3-be20-4985-bee9-7bb4763b31de" at path "/tests_general_base/multiValueProperty", it has the follwing referrers: "a7f38bda-07f2-4868-98dc-95669e48d135", "5e8c16ff-b165-41d3-a218-19ae0c835171", "7b9eabe9-fb65-448b-a2ec-0b3ba9bf7484", "c13548bb-3d99-449c-a96e-ebbc167bf223", "5981411c-9e53-40a8-b6ef-44b4da73487e", "9512daab-0925-4687-aa6a-a395b7c06fa0", "229c842e-ca2c-4d52-96a3-f54070f7862c", "7e356c11-cb30-4e9d-b4e2-38cc537e47eb", "1dd17d8f-39d5-4d31-8f7b-25fea01f2674", "426aa70a-891e-4bd7-8a65-2d6bf1a9251a", "def6be90-e9d2-4ab9-b69b-e577a6d64b94", "86039cbd-ab4a-4398-8e19-6a3d62d3037c", "c4acaeba-6be2-4cfd-b546-c7a556bb9afe", "4e48fb08-0fbe-486e-afcf-e1b5286c00a9", "79d1fd19-4f62-40c6-9e80-2125a4a5cc4b", "7d93ca5a-9a88-4faa-a0f2-c82027c358c0", "45d11367-2115-49ad-9b93-67b505a65f1c", "2a4d971a-9304-40bf-ad3c-4e330aa4ac9f", "514c7240-df51-4269-824e-695174fadca8", "b085af14-8a81-4a15-84b1-5cb34cb99ad0", "903bc220-cb48-4070-b769-250c65ae7427", "5a4c02f2-1e52-447b-bbdc-12cc088e0c0c", "078a6e3d-d8a6-4847-a39c-02dac7c92552", "0dbb3d58-8313-4f82-93b4-0d47f5a2003e", "c4951602-251d-4df3-82f2-1e1f78e74132", "1fb0d756-bdaf-4276-bbf1-c9260c88991e", "ec492567-0db0-44c6-a9fc-a1750551d294", "792664ca-0cc0-404f-a0d3-c2c37ed09180", "fecd92b1-4230-4554-affb-f2e64ff5fc53"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeRemover.php:106
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeRemover.php:78
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeRemover.php:88
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeRemover.php:42
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:85
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:515
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:920
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:885
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:799
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:457
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/inc/BaseCase.php:174
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:304
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+17) PHPCR\Tests\Import\ImportRepositoryContentTest::testImportXMLDocument
+InvalidArgumentException: Could not find file at "/home/daniel/www/jackalope/jackalope-fs/tests/data/workspaces/tests/tests_general_base/idExample/jcr:content/weakreference_target/node.yml"
+
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Adapter/LocalAdapter.php:33
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Filesystem.php:26
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:47
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage/NodeReader.php:95
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Filesystem/Storage.php:70
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:273
+/home/daniel/www/jackalope/jackalope-fs/src/Transport/Fs/Client.php:290
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ObjectManager.php:570
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:228
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:201
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:600
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:617
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:617
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:617
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/ImportExport/ImportExport.php:110
+/home/daniel/www/jackalope/jackalope-fs/vendor/jackalope/jackalope/src/Jackalope/Session.php:552
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/11_Import/ImportRepositoryContentTest.php:337
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+--
+
+There were 4 failures:
+
+1) PHPCR\Tests\Writing\DeleteMethodsTest::testWorkspaceDeleteProperty
+Failed asserting that true is false.
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/DeleteMethodsTest.php:562
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+2) PHPCR\Tests\Writing\SetPropertyMethodsTest::testPropertyAddValue
+Failed asserting that two arrays are equal.
+--- Expected
++++ Actual
+@@ @@
+ Array (
+-    0 => false
++    0 => true
+     1 => true
+ )
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/SetPropertyMethodsTest.php:200
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+3) PHPCR\Tests\Writing\SetPropertyTypesTest::testCreateValueBinaryFromStream
+The responsibility for the stream goes into phpcr who must close it
+Failed asserting that true is false.
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/SetPropertyTypesTest.php:74
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+
+4) PHPCR\Tests\Writing\SetPropertyTypesTest::testCreateValueBinaryFromStreamAndRead
+The responsibility for the stream goes into phpcr who must close it
+Failed asserting that true is false.
+
+/home/daniel/www/jackalope/jackalope-fs/vendor/phpcr/phpcr-api-tests/tests/10_Writing/SetPropertyTypesTest.php:94
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:186
+phar:///usr/local/bin/phpunit/phpunit/TextUI/Command.php:138
+[37;41m                                                                                    [0m
+[37;41mFAILURES!                                                                           [0m
+[37;41mTests: 739, Assertions: 5144, Failures: 4, Errors: 17, Incomplete: 10, Skipped: 201.[0m

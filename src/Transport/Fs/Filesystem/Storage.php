@@ -80,9 +80,9 @@ class Storage
         return $this->nodeReader->readNodeReferrers($workspace, $path, $weak, $name);
     }
 
-    public function removeNode($workspace, $path)
+    public function removeNodes($workspace, $paths)
     {
-        $this->nodeRemover->removeNode($workspace, $path);
+        $this->nodeRemover->removeNodes($workspace, $paths);
     }
 
     public function removeProperty($workspace, $path)
