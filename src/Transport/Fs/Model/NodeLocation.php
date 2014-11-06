@@ -25,4 +25,9 @@ class NodeLocation
     {
         return $this->path;
     }
+
+    public function __toString()
+    {
+        return sprintf('%s:%s', $this->getWorkspace(), $this->getPath());
+    }
 }

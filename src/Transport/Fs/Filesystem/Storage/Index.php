@@ -170,7 +170,7 @@ class Index
         $indexValue = $referrerPropertyName . ':' . $referrerInternalUuid;
         $referrerReferrer = $this->readOne($revIdxName, $indexValue);
 
-        if (false === $referrerReferrer) {
+        if (null === $referrerReferrer) {
             throw new \RuntimeException(sprintf(
                 'Could not find reverse index for "%s". Maybe you want to repair your index?',
                 $indexValue

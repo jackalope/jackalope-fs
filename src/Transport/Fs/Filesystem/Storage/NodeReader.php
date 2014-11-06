@@ -92,8 +92,12 @@ class NodeReader
                 continue;
             }
 
-            $node = $this->readNode($location->getWorkspace(), $location->getPath());
-            $nodeCollection[$location->getPath()] = $node;
+            try {
+                $node = $this->readNode($location->getWorkspace(), $location->getPath());
+                $nodeCollection[$location->getPath()] = $node;
+            } catch (\InvalidArgumentException $e) {
+                // not found
+            }
         }
 
         return $nodeCollection;

@@ -97,7 +97,7 @@ class NodeRemover
 
             foreach (array_keys($referrers) as $referrerInternalUuid) {
                 if (!isset($this->internalUuids[$referrerInternalUuid])) {
-                    $extraReferrers[] = $referrerInternalUuid;
+                    $extraReferrers[] = $this->index->getNodeLocationForUuid($referrerInternalUuid, true);
                 }
             }
 

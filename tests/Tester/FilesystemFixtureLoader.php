@@ -18,10 +18,8 @@ class FilesystemFixtureLoader implements FixtureLoaderInterface
             $workspaceKey = 'testsAdditional';
         }
         $destDir = __DIR__ . '/../data/workspaces/' . $workspaceKey;
-        $zendDir = __DIR__ . '/../data/zend-search-indexes';
         $fs = new Filesystem();
-        $fs->remove($destDir);
-        $fs->remove($zendDir);
+        $fs->remove(__DIR__ . '/../data');
         $fs->mkdir($destDir);
 
         $fixtureGenerator = new FixtureGenerator();
