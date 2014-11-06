@@ -70,7 +70,11 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
         foreach ($node->getProperties() as $propertyName => $property) {
             $propertyType = $property['type'];
-            $propertyValues = (array) $property['value'];
+            if (is_object($property['value'])) {
+                $propertyValues = array($property['value']);
+            } else {
+                $propertyValues = (array) $property['value'];
+            }
             $propertyLengths = array();
             $binaryHashes = array();
 
@@ -79,9 +83,14 @@ class YamlNodeSerializer implements NodeSerializerInterface
                     continue;
                 }
 
-                // should this be moved "up" ?
-                if ($value instanceof \DateTime) {
-                    $value = $value->format('c');
+                if ($propertyType == 'Date') {
+                    // should this be moved "up" ?
+                    if ($value instanceof \DateTime) {
+                        $value = $value->format('c');
+                    } else {
+                        $date = new \DateTime($value);
+                        $value = $date->format('c');
+                    }
                 }
 
                 if ($propertyType == 'Binary') {
