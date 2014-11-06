@@ -1,10 +1,9 @@
 Jackalope Filesystem PHPCR implementation
 =========================================
 
-This is a WIP implementation to support a filesystem implementation of PHPCR.
+[![Build Status](https://travis-ci.org/jackalope/jackalope-fs.svg?branch=master](https://travis-ci.org/jackalope/jackalope-fs)
 
-The implementation is meant to be lightweight and ideal for testing PHPCR
-components.
+This is a WIP implementation to support a filesystem implementation of PHPCR.
 
 Connecting
 ----------
@@ -26,6 +25,11 @@ Options:
 Limitations
 -----------
 
+### Node copy
+
+- References not updated within copied subtree (this test is missing from
+  PHPCR-API tests)
+
 ### Querying
 
 #### ZendSearch Lucene (native PHP)
@@ -38,3 +42,15 @@ Not supported:
 - **LOWERCASE, UPPERCASE, LENGTH operands**: Same as above
 - **SQL and XPath query langauges**: Will probably never be implemented
 - **Full text search**: Easy to implement if we add an additional search index
+
+### File handling
+
+- Files (binary data in the repository) are not current handled in a memory
+  efficient manner. This will be addressed.
+
+Testing
+-------
+
+The default ZendSearch implementation doesn't behave very well when the full
+test suite is being run - it will tend to become corrupt after a certain
+number of operations. It is therefore necessary to batch the tests.

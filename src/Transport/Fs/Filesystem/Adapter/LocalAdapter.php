@@ -43,6 +43,22 @@ class LocalAdapter implements AdapterInterface
         $this->fs->remove($this->getAbsPath($path));
     }
 
+    public function move($srcPath, $destPath)
+    {
+        $this->fs->rename(
+            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($destPath)
+        );
+    }
+
+    public function copy($srcPath, $destPath)
+    {
+        $this->fs->mirror(
+            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($destPath)
+        );
+    }
+
     public function exists($path)
     {
         $path = $this->getAbsPath($path);
@@ -87,8 +103,10 @@ class LocalAdapter implements AdapterInterface
                 'Could not find file to stream at "%s"', $this->getAbsPath($path)
             ));
         }
+
         $absPath = $this->getAbsPath($path);
         $res = fopen($absPath, 'r');
+        $this->handles[] = $res;
 
         return $res;
     }

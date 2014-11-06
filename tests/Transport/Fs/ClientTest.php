@@ -28,13 +28,17 @@ class ClientTest extends ProphecyTestCase
 'jcr:createdBy':
     type: String
     value: admin
+'jackalope:fs:id':
+    type: String
+    value: 1234
 EOT
         ;
-        $this->fs->exists('/default/foo/node.yml')->willReturn(true);
-        $this->fs->read('/default/foo/node.yml')->willReturn($yamlData);
+        $this->fs->exists('/workspaces/default/foo/node.yml')->willReturn(true);
+        $this->fs->read('/workspaces/default/foo/node.yml')->willReturn($yamlData);
+        $this->fs->ls('/workspaces/default/foo')->willReturn(array('dirs' => array(), 'files' => array()));
         $res = $this->client->getNode('/foo');
 
         $this->assertEquals('Date', $res->{':jcr:created'});
-        $this->assertInstanceOf('\DateTime', $res->{'jcr:created'});
+        $this->assertEquals('admin', $res->{'jcr:createdBy'});
     }
 }

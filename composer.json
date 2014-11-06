@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=5.4",
-        "jackalope/jackalope": "dev-node_validator@dev",
+        "jackalope/jackalope": "dev-master",
         "symfony/yaml": "~2.4",
         "symfony/filesystem": "~2.6",
         "symfony/event-dispatcher": "~2.6",
@@ -28,7 +28,8 @@
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
-        "phpcr/phpcr-api-tests": "2.1.0",
+        "phpcr/phpcr-api-tests": "dev-fix-precedence-parenthesis",
+        "phpunit/phpunit": "~4.0.0",
         "phpspec/prophecy-phpunit": "~1.0"
     },
     "autoload": {

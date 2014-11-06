@@ -7,6 +7,8 @@ use Jackalope\Transport\Fs\NodeSerializerInterface;
 use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
+use Jackalope\Transport\Fs\Filesystem\Storage\Index;
+use Jackalope\Transport\Fs\Model\Node;
 
 class NodeWriter
 {
@@ -14,9 +16,11 @@ class NodeWriter
     private $serializer;
     private $filesystem;
     private $helper;
+    private $index;
 
     public function __construct(
         Filesystem $filesystem,
+        Index $index,
         NodeSerializerInterface $serializer,
         PathRegistry $pathRegistry,
         StorageHelper $helper
@@ -26,6 +30,7 @@ class NodeWriter
         $this->serializer = $serializer;
         $this->filesystem = $filesystem;
         $this->helper = $helper;
+        $this->index = $index;
     }
 
     /**
@@ -33,26 +38,26 @@ class NodeWriter
      *
      * @return array Node data
      */
-    public function writeNode($workspace, $path, $nodeData)
+    public function writeNode($workspace, $path, Node $node)
     {
         $internalUuid = $this->getOrCreateInternalUuid($path);
-        $this->setProperty($nodeData, Storage::INTERNAL_UUID, $internalUuid, 'String');
+        $node->setProperty(Storage::INTERNAL_UUID, $internalUuid, 'String');
 
         $jcrUuid = null;
-        if (isset($nodeData['jcr:mixinTypes'])) {
-            $mixinTypes = $nodeData['jcr:mixinTypes'];
+        if ($node->hasProperty('jcr:mixinTypes')) {
+            $mixinTypes = $node->getPropertyValue('jcr:mixinTypes');
 
             if (in_array('mix:referenceable', $mixinTypes)) {
-                if (!isset($nodeData['jcr:uuid'])) {
+                if (false === $node->hasProperty('jcr:uuid')) {
                     $jcrUuid = UUIDHelper::generateUUID();
-                    $this->setProperty($nodeData, 'jcr:uuid', $jcrUuid);
+                    $node->setProperty('jcr:uuid', $jcrUuid);
                 } else {
-                    $jcrUuid = $nodeData['jcr:uuid'];
+                    $jcrUuid = $node->getPropertyValue('jcr:uuid');
                 }
             }
         }
 
-        $serialized = $this->serializer->serialize($nodeData);
+        $serialized = $this->serializer->serialize($node);
 
         $absPath = $this->helper->getNodePath($workspace, $path);
         $this->filesystem->write($absPath, $serialized);
@@ -60,35 +65,28 @@ class NodeWriter
         foreach ($this->serializer->getSerializedBinaries() as $binaryHash => $binaryData) {
             // TODO: use Helper to get path ...,
             $binaryPath = sprintf('%s/%s.bin', dirname($absPath), $binaryHash);
-            $this->filesystem->write($binaryPath, base64_decode($binaryData));
+            $this->filesystem->write($binaryPath, $binaryData);
         }
 
-        $this->createIndex(Storage::IDX_INTERNAL_UUID, $internalUuid, $workspace . ':' . $path);
+        $this->index->indexUuid($internalUuid, $workspace, $path, true);
 
         if ($jcrUuid) {
-            $this->createIndex(Storage::IDX_JCR_UUID, $jcrUuid, $workspace . ':' . $path);
+            $this->index->indexUuid($jcrUuid, $workspace, $path, false);
         }
 
-        foreach ($nodeData as $key => $value) {
-            if (substr($key, 0, 1) !== ':') {
-                continue;
-            }
-
-            $propertyName = substr($key, 1);
-            $propertyValues = (array) $nodeData[$propertyName];
-
-            foreach ($propertyValues as $propertyValue) {
-                if ($value === 'Reference') {
-                    $this->appendToIndex(Storage::IDX_REFERRERS_DIR, $propertyValue, $propertyName . ':' . $internalUuid);
+        foreach ($node->getProperties() as $propertyName => $property) {
+            foreach ((array) $property['value'] as $propertyValue) {
+                if ($property['type'] === 'Reference') {
+                    $this->index->indexReferrer($internalUuid, $propertyName, $propertyValue, false);
                 }
 
-                if ($value === 'WeakReference') {
-                    $this->appendToIndex(Storage::IDX_WEAKREFERRERS_DIR, $propertyValue, $propertyName . ':' . $internalUuid);
+                if ($property['type'] === 'WeakReference') {
+                    $this->index->indexReferrer($internalUuid, $propertyName, $propertyValue, true);
                 }
             }
         }
 
-        return $nodeData;
+        return $node;
     }
 
     private function getOrCreateInternalUuid($path)
@@ -104,30 +102,5 @@ class NodeWriter
         }
 
         return $internalUuid;
-    }
-
-    private function setProperty(&$nodeData, $field, $value, $type = 'String')
-    {
-        $nodeData[$field] = $value;
-        $nodeData[':' . $field] = $type;
-    }
-
-    private function createIndex($type, $name, $value)
-    {
-        $this->filesystem->write(Storage::INDEX_DIR . '/' . $type . '/' . $name, $value);
-    }
-
-    private function appendToIndex($type, $name, $value)
-    {
-        $indexPath = Storage::INDEX_DIR . '/' . $type . '/' . $name;
-
-        if (!$this->filesystem->exists($indexPath)) {
-            $this->filesystem->write($indexPath, $value);
-            return;
-        }
-
-        $index = $this->filesystem->read($indexPath);
-        $index .= "\n" . $value;
-        $this->filesystem->write($indexPath, $index);
     }
 }

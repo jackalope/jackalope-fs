@@ -5,6 +5,7 @@ namespace Jackalope\Transport\Fs\NodeSerializer;
 use Jackalope\Transport\Fs\NodeSerializerInterface;
 use Symfony\Component\Yaml\Yaml;
 use PHPCR\Util\UUIDHelper;
+use Jackalope\Transport\Fs\Model\Node;
 
 class YamlNodeSerializer implements NodeSerializerInterface
 {
@@ -27,7 +28,8 @@ class YamlNodeSerializer implements NodeSerializerInterface
     {
         $res = Yaml::parse($yamlData);
 
-        $ret = new \stdClass;
+        $node = new Node();
+
         foreach ($res as $key => $property) {
             $values = $property['value'];
             $type = $property['type'];
@@ -35,8 +37,11 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
             foreach ((array) $values as $value) {
                 switch ($property['type']) {
-                    case 'Boolean':
-                        $value = $value === 'false' ? false : true;
+                case 'Boolean':
+                        if ($value === 'false') {
+                            $value = false;
+                        }
+                        $value = (boolean) $value;
                         break;
                 }
 
@@ -49,71 +54,75 @@ class YamlNodeSerializer implements NodeSerializerInterface
 
             if ($type === 'Binary') {
                 $this->binaryHashMap[$key] = $property['value'];
-                $ret->$key = $property['length'];
-            } else {
-                $ret->$key = $newValues;
+                $newValues = $property['length'];
             }
 
-            $ret->{':' . $key} = $type;
+            $node->setProperty($key, $newValues, $type);
         }
 
-        return $ret;
+        return $node;
     }
 
-    public function serialize($nodeData)
+    public function serialize(Node $node)
     {
         $properties = array();
         $this->binaries = array();
 
-        do {
-            $propertyName = key($nodeData);
-            $propertyValue = current($nodeData);
-            $propertyLength = array();
-
-            // should this be moved "up" ?
-            if ($propertyValue instanceof \DateTime) {
-                $propertyValue = $propertyValue->format('c');
+        foreach ($node->getProperties() as $propertyName => $property) {
+            $propertyType = $property['type'];
+            if (is_object($property['value'])) {
+                $propertyValues = array($property['value']);
+            } else {
+                $propertyValues = (array) $property['value'];
             }
+            $propertyLengths = array();
+            $binaryHashes = array();
 
-            next($nodeData);
-            $propertyTypeName = key($nodeData);
-            $propertyTypeValue = current($nodeData);
-
-            if (':' !== substr($propertyTypeName, 0, 1)) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Property values must be followed by a type, e.g. "title" => "My title" MUST be followed by ":title" => "String". For "%s => %s"',
-                    $propertyTypeName, $propertyTypeValue
-                ));
-            }
-
-            if ($propertyTypeValue == 'Binary') {
-                $binaryHashes = array();
-                foreach ((array) $propertyValue as $binaryData) {
-                    $binaryHash = md5($binaryData);
-                    $binaryHashes[] = $binaryHash;
-                    $propertyLength[] = strlen(base64_decode($binaryData));
-                    $this->binaries[$binaryHash] = $binaryData;
+            foreach ($propertyValues as $i => &$value) {
+                if (null === $value) {
+                    continue;
                 }
 
-                if (is_array($propertyValue)) {
-                    $propertyValue = array();
-                    foreach ($binaryHashes as $binaryHash) {
-                        $propertyValue[] = $binaryHash;
+                if ($propertyType == 'Date') {
+                    // should this be moved "up" ?
+                    if ($value instanceof \DateTime) {
+                        $value = $value->format('c');
+                    } else {
+                        $date = new \DateTime($value);
+                        $value = $date->format('c');
                     }
+                }
+
+                if ($propertyType == 'Binary') {
+                    if (is_resource($value)) {
+                        $stream = $value;
+                        $value = stream_get_contents($stream);
+                        fclose($stream);
+                    }
+                    $propertyLengths[] = strlen($value);
+
+                    $binaryHash = md5($value);
+                    $this->binaries[$binaryHash] = $value;
+                    $value = $binaryHash;
                 } else {
-                    $propertyValue = reset($binaryHashes);
-                    $propertyLength = reset($propertyLength);
+                    $propertyLengths[] = '';
                 }
             }
 
-            $properties[$propertyName]['type'] = $propertyTypeValue;
-            $properties[$propertyName]['value'] = $propertyValue;
-
-            if (!empty($propertyLength)) {
-                $properties[$propertyName]['length'] = $propertyLength;
+            if (empty($propertyValues)) {
+                continue;
             }
 
-        } while (false !== next($nodeData));
+            $properties[$propertyName]['type'] = $propertyType;
+
+            if (is_array($property['value'])) {
+                $properties[$propertyName]['value'] = $propertyValues;
+                $properties[$propertyName]['length'] = $propertyLengths;
+            } else {
+                $properties[$propertyName]['value'] = reset($propertyValues);
+                $properties[$propertyName]['length'] = reset($propertyLengths);
+            }
+        }
 
         $yaml = Yaml::dump($properties);
 

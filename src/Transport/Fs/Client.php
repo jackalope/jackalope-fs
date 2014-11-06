@@ -22,7 +22,7 @@ use Jackalope\Transport\Fs\Filesystem\Storage;
 use Jackalope\Transport\StandardNodeTypes;
 use Jackalope\Transport\WritingInterface;
 use Jackalope\Transport\QueryInterface;
-use Jackalope\Node;
+use Jackalope\Node as JackalopeNode;
 use Jackalope\NodeType\NodeProcessor;
 use PHPCR\NamespaceRegistryInterface;
 use PHPCR\NodeInterface;
@@ -35,6 +35,9 @@ use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
 use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
 use PHPCR\Query\InvalidQueryException;
+use PHPCR\PathNotFoundException;
+use PHPCR\ReferentialIntegrityException;
+use Jackalope\Transport\Fs\Model\Node;
 
 /**
  */
@@ -56,6 +59,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     private $factory;
 
     private $searchEnabled;
+    private $zendHideDestructException;
 
     /**
      * Base path for content repository
@@ -63,7 +67,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array())
+    public function __construct($factory, $parameters = array(), Filesystem $filesystem = null)
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
@@ -72,9 +76,10 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         }
 
         $this->path = $parameters['path'];
-        $this->searchEnabled = isset($parameters['search_enabled']) ? $parameters['search_enabled'] : true;
+        $this->zendHideDestructException = isset($parameters['search.zend.hide_destruct_exception']) ? $parameters['search.zend.hide_destruct_exception'] : false;
+        $this->searchEnabled = isset($parameters['search.enabled']) ? $parameters['search.enabled'] : true;
         $this->eventDispatcher = new EventDispatcher();
-        $adapter = new LocalAdapter($this->path);
+        $adapter = $filesystem ? : new LocalAdapter($this->path);
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
         $this->valueConverter = new ValueConverter();
         $this->nodeSerializer = new YamlNodeSerializer();
@@ -85,7 +90,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function getSearchAdapter()
     {
-        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager);
+        $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager, $this->zendHideDestructException);
 
         return $this->searchAdapter;
     }
@@ -142,7 +147,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             RepositoryInterface::OPTION_UPDATE_PRIMARY_NODETYPE_SUPPORTED => false,
             RepositoryInterface::OPTION_VERSIONING_SUPPORTED => false,
             RepositoryInterface::OPTION_WORKSPACE_MANAGEMENT_SUPPORTED => false,
-            RepositoryInterface::OPTION_XML_EXPORT_SUPPORTED => false,
+            RepositoryInterface::OPTION_XML_EXPORT_SUPPORTED => true,
             RepositoryInterface::OPTION_XML_IMPORT_SUPPORTED => false,
             RepositoryInterface::QUERY_FULL_TEXT_SEARCH_SUPPORTED => false,
             RepositoryInterface::QUERY_CANCEL_SUPPORTED => false,
@@ -240,8 +245,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
         $node = $this->storage->readNode($this->workspaceName, $path);
 
-
-        return $node;
+        return $node->toJackalopeStructure();
     }
 
     /**
@@ -252,10 +256,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $nodes = array();
         foreach ($paths as $path) {
             try {
-                $nodes[$path] = $this->getNode($path);
+                $node = $this->getNode($path);
             } catch (ItemNotFoundException $e) {
                 continue;
             }
+
+            $nodes[$path] = $node;
         }
 
         return $nodes;
@@ -266,7 +272,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function getNodesByIdentifier($identifiers)
     {
-        return $this->storage->readNodesByUuids($identifiers);
+        $nodeCollection = $this->storage->readNodesByUuids($identifiers);
+        return $nodeCollection->toJackalopeStructures();
     }
 
     /**
@@ -290,6 +297,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 'Could not find node with UUID "%s"', $uuid
             ));
         }
+
+        $node->{':jcr:path'} = $node->{'jcr:path'};
 
         return $node;
     }
@@ -439,7 +448,22 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function copyNode($srcAbsPath, $destAbsPath, $srcWorkspace = null)
     {
-        throw new NotImplementedException(__METHOD__);
+        if ($srcWorkspace) {
+            $this->validateWorkspace($srcWorkspace);
+        } else {
+            $srcWorkspace = $this->workspaceName;
+        }
+
+        $this->validatePath($srcWorkspace, $srcAbsPath);
+        $this->validatePath($this->workspaceName, PathHelper::getParentPath($destAbsPath));
+
+        try {
+            $this->storage->copyNode($srcWorkspace, $srcAbsPath, $this->workspaceName, $destAbsPath);
+        } catch (\Exception $e) {
+            throw new RepositoryException(sprintf(
+                $e->getMessage(), $e->getCode(), $e
+            ));
+        }
     }
 
     /**
@@ -453,7 +477,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     /**
      * {@inheritDoc}
      */
-    public function updateNode(Node $node, $srcWorkspace)
+    public function updateNode(JackalopeNode $node, $srcWorkspace)
     {
         throw new NotImplementedException(__METHOD__);
     }
@@ -463,7 +487,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function moveNodes(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        foreach ($operations as $operation) {
+            $this->storage->moveNode($this->workspaceName, $operation->srcPath, $operation->dstPath);
+        }
     }
 
     /**
@@ -471,13 +497,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function moveNodeImmediately($srcAbsPath, $dstAbsPath)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->moveNode($this->workspaceName, $srcAbsPath, $dstAbsPath);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function reorderChildren(Node $node)
+    public function reorderChildren(JackalopeNode $node)
     {
         throw new NotImplementedException(__METHOD__);
     }
@@ -487,7 +513,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodes(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        $paths = array();
+
+        foreach ($operations as $operation) {
+            $paths[] = $operation->srcPath;
+        }
+
+        $this->storage->removeNodes($this->workspaceName, $paths);
     }
 
     /**
@@ -495,7 +527,9 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteProperties(array $operations)
     {
-        throw new NotImplementedException(__METHOD__);
+        foreach ($operations as $operation) {
+            $this->storage->removeProperty($this->workspaceName, $operation->srcPath);
+        }
     }
 
     /**
@@ -503,7 +537,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deleteNodeImmediately($path)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->removeNodes($this->workspaceName, array($path));
     }
 
     /**
@@ -511,7 +545,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function deletePropertyImmediately($path)
     {
-        throw new NotImplementedException(__METHOD__);
+        $this->storage->removeProperty($this->workspaceName, $path);
     }
 
     /**
@@ -520,9 +554,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function storeNodes(array $operations)
     {
         foreach ($operations as $operation) {
-            $node = $operation->node;
-            $this->nodeProcessor->process($node);
-            $nodeData = $this->nodePropertiesToJackalopeArray($node);
+            $phpcrNode = $operation->node;
+            $node = $this->phpcrNodeToNode($phpcrNode);
 
             if ($this->storage->nodeExists($this->workspaceName, $operation->srcPath)) {
                 throw new ItemExistsException(sprintf(
@@ -531,19 +564,19 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 ));
             }
 
-            $this->storage->writeNode($this->workspaceName, $operation->srcPath, $nodeData);
+            $this->storage->writeNode($this->workspaceName, $operation->srcPath, $node);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    public function updateProperties(Node $node)
+    public function updateProperties(JackalopeNode $phpcrNode)
     {
         $this->assertLoggedIn();
-        $this->nodeProcessor->process($node);
-        $nodeData = $this->nodePropertiesToJackalopeArray($node);
-        $this->storage->writeNode($this->workspaceName, $node->getPath(), $nodeData);
+        $this->nodeProcessor->process($phpcrNode);
+        $node = $this->phpcrNodeToNode($phpcrNode);
+        $this->storage->writeNode($this->workspaceName, $phpcrNode->getPath(), $node);
 
         return true;
     }
@@ -577,7 +610,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function finishSave()
     {
-        // nothing
+        $this->storage->commit();
     }
 
     /**
@@ -610,34 +643,43 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         return array('JCR-SQL2', 'JCR-JQOM');
     }
 
-
     private function init()
     {
         $this->nodeProcessor = new NodeProcessor($this->credentials, $this->getNamespaces());
     }
 
-    private function nodePropertiesToJackalopeArray(NodeInterface $node)
+    private function phpcrNodeToNode(\Jackalope\Node $node)
     {
-        $res = array();
-
-        // is there some common code which does this?
-        foreach ($node->getProperties() as $name => $property) {
-            $value = null;
-            switch ($property->getType()) {
-                case PropertyType::DATE:
-                    $value = $property->getValue()->format('c');
-                    break;
-                case PropertyType::REFERENCE:
-                case PropertyType::WEAKREFERENCE:
-                    $value = $property->getValue()->getPropertyValue('jcr:uuid');
-                    break;
-                default:
-                    $value = $property->getValue();
-            }
-            $res[$name] = $value;
-            $res[':' . $name] = $property->getType();
+        if ($node->isDeleted()) {
+            $properties = $node->getPropertiesForStoreDeletedNode();
+        } else {
+            $this->nodeProcessor->process($node);
+            $properties = $node->getProperties();
         }
 
-        return $res;
+        $node = new Node();
+        $node->fromPhpcrProperties($properties);
+
+        return $node;
+    }
+
+    private function validateWorkspace($workspaceName)
+    {
+        if (false === $this->workspaceExists($workspaceName)) {
+            throw new NoSuchWorkspaceException(sprintf(
+                'Workspace "%s" does not exist',
+                $workspaceName
+            ));
+        }
+    }
+
+    private function validatePath($workspaceName, $path)
+    {
+        if (false === $this->storage->nodeExists($workspaceName, $path)) {
+            throw new PathNotFoundException(sprintf(
+                'Path "%s" not found in workspace "%s"',
+                $path, $workspaceName
+            ));
+        }
     }
 }

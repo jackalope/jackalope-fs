@@ -11,16 +11,22 @@ use Symfony\Component\Filesystem\Filesystem;
  */
 class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
-    public function import($fixture, $workspaceKey = 'workspace')
+    public function import($fixture, $workspaceKey = 'tests')
     {
-        $destDir = __DIR__ . '/../data/tests';
         $fs = new Filesystem();
-        $fs->remove(__DIR__ . '/../data');
-        $fs->mkdir(__DIR__ . '/../data');
+        // jackalope 
+        if ($workspaceKey == 'additionalWorkspace') {
+            $workspaceKey = 'testsAdditional';
+        } else {
+            $fs->remove(__DIR__ . '/../data');
+        }
 
+        $destDir = __DIR__ . '/../data/workspaces/' . $workspaceKey;
+        $fs->remove($destDir);
+        $fs->mkdir($destDir);
 
         $fixtureGenerator = new FixtureGenerator();
         $srcDir = __DIR__ . '/../../vendor/phpcr/phpcr-api-tests/fixtures/' . $fixture . '.xml';
-        $fixtureGenerator->generateFixtures($srcDir, $destDir);
+        $fixtureGenerator->generateFixtures($workspaceKey, __DIR__ . '/../data', $srcDir);
     }
 }

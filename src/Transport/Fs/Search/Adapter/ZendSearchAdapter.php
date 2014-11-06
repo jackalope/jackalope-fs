@@ -17,6 +17,8 @@ use Jackalope\Transport\Fs\Search\Adapter\Zend\ExactMatchAnalyzer;
 use ZendSearch\Lucene\Analysis\Analyzer\Analyzer;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use ZendSearch\Lucene\Search\Query\Wildcard;
+use Jackalope\Transport\Fs\Model\Node;
+use Jackalope\Transport\Fs\Search\Adapter\Zend\Index;
 
 /**
  * Search adapter for the native PHP ZendSearch Lucene library.
@@ -28,7 +30,7 @@ use ZendSearch\Lucene\Search\Query\Wildcard;
  */
 class ZendSearchAdapter implements SearchAdapterInterface
 {
-    const SEARCH_PATH = 'zend-search-indexes';
+    const SEARCH_PATH = 'meta/zend-search-indexes';
     const IDX_PATH = 'jcr:path';
     const IDX_NODENAME = 'jcr:nodename';
     const IDX_NODELOCALNAME = 'jcr:nodename';
@@ -42,15 +44,17 @@ class ZendSearchAdapter implements SearchAdapterInterface
     private $filesystem;
     private $qomWalker;
     private $nodeTypeManager;
+    private $hideDestructException;
 
     /**
      * @param string $path Path to search index
      */
-    public function __construct($path, NodeTypeManagerInterface $nodeTypeManager = null)
+    public function __construct($path, NodeTypeManagerInterface $nodeTypeManager = null, $hideDestructException = false)
     {
         $this->path = $path;
         $this->filesystem = new Filesystem();
         $this->nodeTypeManager = $nodeTypeManager;
+        $this->hideDestructException = $hideDestructException;
         Analyzer::setDefault(new ExactMatchAnalyzer());
         Wildcard::setMinPrefixLength(0);
     }
@@ -58,7 +62,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
     /**
      * {@inheritDoc}
      */
-    public function index($workspace, $path, $nodeData)
+    public function index($workspace, $path, Node $node)
     {
         $index = $this->getIndex($workspace);
         $document = new Document();
@@ -71,26 +75,32 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $document->addField(Field::Keyword(self::IDX_NODELOCALNAME, $localNodeName));
         $document->addField(Field::Keyword(self::IDX_PARENTPATH, $parentPath));
 
-        do {
-            $propertyName = key($nodeData);
-            $propertyValue = current($nodeData);
-            next($nodeData);
-            $typeName = key($nodeData);
-            $typeValue = current($nodeData);
+        foreach ($node->getProperties() as $propertyName => $property) {
+            $propertyValue = $property['value'];
+            $propertyType = $property['type'];
 
             if ($propertyName === Storage::INTERNAL_UUID) {
                 $document->addField(Field::Keyword(Storage::INTERNAL_UUID, $propertyValue));
                 continue;
             }
 
-            switch ($typeValue) {
+            switch ($propertyType) {
                 case PropertyType::TYPENAME_STRING:
-                case PropertyType::TYPENAME_DATE:
                 case PropertyType::TYPENAME_NAME:
                 case PropertyType::TYPENAME_PATH:
                 case PropertyType::TYPENAME_URI:
                     $value = (array) $propertyValue;
                     $value = join(self::MULTIVALUE_SEPARATOR, $value);
+                    $document->addField(Field::Text($propertyName, $value));
+                    break;
+                case PropertyType::TYPENAME_DATE:
+                    $values = (array) $propertyValue;
+                    foreach ($values as $i => $value) {
+                        if ($value instanceof \DateTime) {
+                            $values[$i] = $value->format('c');
+                        }
+                    }
+                    $value = join(self::MULTIVALUE_SEPARATOR, $values);
                     $document->addField(Field::Text($propertyName, $value));
                     break;
                 case PropertyType::TYPENAME_DECIMAL:
@@ -118,7 +128,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     break;
             }
 
-        } while (false !== current($nodeData));
+        };
 
         $index->addDocument($document);
     }
@@ -213,7 +223,7 @@ class ZendSearchAdapter implements SearchAdapterInterface
                 $selectorName = $column->getSelectorName();
                 $propertyName = $column->getPropertyName();
 
-                if ('jcr:uuid' === $propertyName) {
+                if (Storage::JCR_UUID === $propertyName) {
                     $dcrValue = $document->getField(self::IDX_UUID)->getUtf8Value();
                 } else {
                     if (isset($properties[$selectorName][$propertyName])) {
@@ -265,10 +275,12 @@ class ZendSearchAdapter implements SearchAdapterInterface
         $indexPath = $this->getIndexPath($workspace);
 
         if (!file_exists($indexPath)) {
-            $index = Lucene::create($indexPath);
+            $index = new Index($indexPath, true);
         } else {
-            $index = Lucene::open($indexPath);
+            $index = new Index($indexPath, false);
         }
+
+        $index->setHideException($this->hideDestructException);
 
         $this->indexes[$workspace] = $index;
 

@@ -1,5 +1,7 @@
 <?php
 
+use Symfony\Component\Filesystem\Filesystem;
+
 /**
  * Implemnentation Loader for filesystem
  */
@@ -17,11 +19,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     }
 
     /**
-     * @var string
-     */
-    private $fixturePath;
-
-    /**
      * Base path for content repository
      * @var string
      */
@@ -32,11 +29,7 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
         parent::__construct('Jackalope\RepositoryFactoryFilesystem', $GLOBALS['phpcr.workspace']);
 
         $this->unsupportedChapters = array(
-            'Export',
-            'NodeTypeDiscovery',
-            'PermissionsAndCapabilities',
-            'Import',
-            'Observation',
+            // to be supported
             'WorkspaceManagement',
             'ShareableNodes',
             'Versioning',
@@ -48,10 +41,17 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Transactions',
             'SameNameSiblings',
             'OrderableChildNodes',
-            'PhpcrUtils'
+
+            // not supported yet
+            'PermissionsAndCapabilities',
+            'Observation',
         );
 
         $this->unsupportedCases = array(
+                    'Query\\XPath', // Query language 'xpath' not implemented.
+                    'Query\\Sql1', // Query language 'sql' is legacy and only makes sense with jackrabbit
+
+                    'Writing\\CloneMethodsTest', // TODO: Support for workspace->clone, node->update, node->getCorrespondingNodePath
         );
 
         $this->unsupportedTests = array(
@@ -59,21 +59,16 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Reading\\NodeReadMethodsTest::testGetSharedSetUnreferenced', // TODO: should this be moved to 14_ShareableNodes
             'Reading\SessionNamespaceRemappingTest::testSetNamespacePrefix', // not supported by jackalope
             'Reading\\SessionReadMethodsTest::testImpersonate', //TODO: Check if that's implemented in newer jackrabbit versions.
+
+            // see https://github.com/jackalope/jackalope/pull/229
+            'Reading\\NodeReadMethodsTest::testGetNodesTypeFilter', //TODO implement node type filtering
+            'Reading\\NodeReadMethodsTest::testGetNodesTypeFilterList', //TODO implement node type filtering
             'Query\\NodeViewTest::testSeekable', // see https://github.com/phpcr/phpcr-api-tests/issues/141
 
             // not supported by jackalope
             'Query\\QueryManagerTest::testGetQuery',
             'Query\\QueryManagerTest::testGetQueryInvalid',
             'Query\\QueryObjectSql2Test::testGetStoredQueryPath',
-
-            // sql2 + xpath not supported by FS
-            'Query\\Sql1\\QueryOperationsTest::testQueryField',
-            'Query\\Sql1\\QueryOperationsTest::testQueryFieldSomenull',
-            'Query\\Sql1\\QueryOperationsTest::testQueryOrder',
-            'Query\\XPath\\QueryOperationsTest::testQueryField',
-            'Query\\XPath\\QueryOperationsTest::testQueryFieldSomenull',
-            'Query\\XPath\\QueryOperationsTest::testQueryOrder',
-
 
             'Query\\QuerySql2OperationsTest::testQueryJoin',
             'Query\\QuerySql2OperationsTest::testQueryJoinChildnode',
@@ -87,10 +82,28 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'Query\QuerySql2OperationsTest::testLengthOperandOnEmptyProperty',
             'Query\QuerySql2OperationsTest::testLengthOperandOnStringProperty',
 
+            // this doesn't work with ZendSearch -- need to implement a native search engine
+            'Writing\CombinedManipulationsTest::testAddAndRemoveAndAdd',
+            'Writing\CombinedManipulationsTest::testRemoveAndAddToplevelNode',
+            'Writing\CombinedManipulationsTest::testRemoveAndAddAndRemoveToplevelNode',
+
+            'Writing\\CopyMethodsTest::testCopyUpdateOnCopy', //TODO: update-on-copy is currently not supported
+            'Writing\\CopyMethodsTest::testCopyUpdateOnCopy', //TODO: update-on-copy is currently not supported
+
+            'Writing\LastModifiedTest::testUpdateText',
+            'Writing\LastModifiedTest::testUpdateBinary',
+            'Writing\LastModifiedTest::testRemoveProperty',
+
+            'Writing\SetPropertyTypesTest::testCreateValueBinaryFromStream',
+            'Writing\SetPropertyTypesTest::testCreateValueBinaryFromStreamAndRead',
 
         );
 
         $this->path = __DIR__ . '/data';
+
+        // start with a clean system
+        $filesystem = new Filesystem();
+        $filesystem->remove($this->path);
     }
 
     public function getRepositoryFactoryParameters()
@@ -125,7 +138,11 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
 
     public function getRepository()
     {
-        $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array('path' => $this->path));
+        $transport = new \Jackalope\Transport\Fs\Client(new \Jackalope\Factory, array(
+            'path' => $this->path,
+            'search.enabled' => true,
+            'search.zend.hide_destruct_exception' => true,
+        ));
         foreach (array($GLOBALS['phpcr.workspace'], $this->otherWorkspacename) as $workspace) {
             try {
                 $transport->createWorkspace($workspace);

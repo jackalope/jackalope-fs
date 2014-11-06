@@ -11,17 +11,17 @@ use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use Jackalope\Transport\Fs\Search\Adapter\ZendSearchAdapter;
+use Jackalope\Transport\Fs\Model\Node;
 
 class FixtureGenerator
 {
     const NS_SV = 'http://www.jcp.org/jcr/sv/1.0';
 
-    protected $destDir;
     protected $fs;
 
-    function generateFixtures($srcDir, $destDir)
+    function generateFixtures($workspaceName, $dataDir, $srcDir)
     {
-        $dataDir = dirname($destDir);
+        $this->workspaceName = $workspaceName;
         $eventDispatcher = new EventDispatcher();
         $searchAdapter = new ZendSearchAdapter($dataDir);
 
@@ -30,9 +30,7 @@ class FixtureGenerator
         );
 
         $this->storage = new Storage(new FsFilesystem(new LocalAdapter($dataDir)), $eventDispatcher);
-        $this->workspaceName = basename($destDir);
         $this->storage->registerNamespace($this->workspaceName, 'test', 'http://example.com');
-
         $this->storage->workspaceInit($this->workspaceName);
 
         if (is_file($srcDir)) {
@@ -56,6 +54,8 @@ class FixtureGenerator
         $dom->format = true;
 
         $this->iterateNode($dom->firstChild);
+
+        $this->storage->commit();
     }
 
     function iterateNode(\DomNode $domNode)
@@ -91,7 +91,11 @@ class FixtureGenerator
                     continue;
                 }
 
-                $values[] = $childNode->nodeValue;
+                if ($propertyType === 'Binary') {
+                    $values[] = base64_decode($childNode->nodeValue);
+                } else {
+                    $values[] = $childNode->nodeValue;
+                }
             }
 
             if ($propertyName === 'jcr:mixinTypes' || $domProperty->getAttributeNs(self::NS_SV, 'multiple') === 'true' || count($values) > 1) {
@@ -99,6 +103,7 @@ class FixtureGenerator
             } else {
                 $propertyValue = current($values);
             }
+
 
             $properties[$propertyName] = $propertyValue;
             $properties[':' . $propertyName] = $propertyType;
@@ -112,7 +117,8 @@ class FixtureGenerator
         }
 
         $path[] = $domNode->getAttributeNs(self::NS_SV, 'name');
+        $node = new Node($properties);
 
-        $this->storage->writeNode($this->workspaceName, '/' . implode('/', $path), $properties);
+        $this->storage->writeNode($this->workspaceName, '/' . implode('/', $path), $node);
     }
 }

@@ -8,6 +8,9 @@ use Jackalope\Transport\Fs\Filesystem\PathRegistry;
 use PHPCR\Util\UUIDHelper;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use PHPCR\Util\PathHelper;
+use PHPCR\PropertyType;
+use Jackalope\Transport\Fs\Filesystem\Storage\Index;
+use Jackalope\Transport\Fs\Model\NodeCollection;
 
 class NodeReader
 {
@@ -15,9 +18,11 @@ class NodeReader
     private $serializer;
     private $filesystem;
     private $helper;
+    private $index;
 
     public function __construct(
         Filesystem $filesystem,
+        Index $index,
         NodeSerializerInterface $serializer,
         PathRegistry $pathRegistry,
         StorageHelper $helper
@@ -27,8 +32,16 @@ class NodeReader
         $this->serializer = $serializer;
         $this->filesystem = $filesystem;
         $this->helper = $helper;
+        $this->index = $index;
     }
 
+    /**
+     * @param string $workspace
+     * @param string $path
+     * @param boolean $censor Do not return internal properties
+     *
+     * @return Node
+     */
     public function readNode($workspace, $path)
     {
         $nodeData = $this->filesystem->read($this->helper->getNodePath($workspace, $path));
@@ -41,8 +54,9 @@ class NodeReader
 
         $node = $this->serializer->deserialize($nodeData);
 
-        if (!isset($node->{'jcr:mixinTypes'})) {
-            $node->{'jcr:mixinTypes'} = array();
+        // Move to node ?
+        if (false === $node->hasProperty('jcr:mixinTypes')) {
+            $node->setProperty('jcr:mixinTypes', array(), 'Name');
         }
 
         $nodePath = $this->helper->getNodePath($workspace, $path, false);
@@ -50,44 +64,43 @@ class NodeReader
         $children = $children['dirs'];
 
         foreach ($children as $childName) {
-            $node->{$childName} = new \stdClass();
+            $node->addChildName($childName);
         }
 
         // the user shouldn't know about the internal UUID
-        if (!isset($node->{Storage::INTERNAL_UUID})) {
+        if (false === $node->hasProperty(Storage::INTERNAL_UUID)) {
             throw new \RuntimeException(sprintf('Internal UUID propery (%s) not set on node at path "%s". This should not happen!', Storage::INTERNAL_UUID, $path));
         }
 
-        $internalUuid = $node->{Storage::INTERNAL_UUID};
+        $internalUuid = $node->getPropertyValue(Storage::INTERNAL_UUID);
 
         $this->pathRegistry->registerUuid($path, $internalUuid);
-        unset($node->{Storage::INTERNAL_UUID});
-        // we store the lengths as the values
+
+        $node->setProperty('jcr:path', $path);
 
         return $node;
     }
 
     public function readNodesByUuids(array $uuids, $internal = false)
     {
-        $nodes = array();
+        $nodeCollection = new NodeCollection();
 
         foreach ($uuids as $uuid) {
-            $indexName = $internal ? Storage::IDX_INTERNAL_UUID : Storage::IDX_JCR_UUID;
-            $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
+            $location = $this->index->getNodeLocationForUuid($uuid, $internal);
 
-            if (!$this->filesystem->exists($path)) {
+            if (null === $location) {
                 continue;
             }
 
-            $value = $this->filesystem->read($path);
-            $workspace = strstr($value, ':', true);
-            $path = substr($value, strlen($workspace) + 1);
-
-            $node = $this->readNode($workspace, $path);
-            $nodes[$path] = $node;
+            try {
+                $node = $this->readNode($location->getWorkspace(), $location->getPath());
+                $nodeCollection[$location->getPath()] = $node;
+            } catch (\InvalidArgumentException $e) {
+                // not found
+            }
         }
 
-        return $nodes;
+        return $nodeCollection;
     }
 
     public function readBinaryStream($workspace, $path)
@@ -121,7 +134,9 @@ class NodeReader
             $streams[] = $this->filesystem->stream($path);
         }
 
-        return is_array($originalBinaryHash) ? $streams : reset($streams);
+        $res = is_array($originalBinaryHash) ? $streams : reset($streams);
+
+        return $res;
     }
 
     public function readNodeReferrers($workspace, $path, $weak = false, $name)
@@ -129,42 +144,20 @@ class NodeReader
         $node = $this->readNode($workspace, $path);
 
         // tests say that we should return an empty iteratable when node is not referenceable
-        if (!isset($node->{'jcr:uuid'})) {
+        if (false === $node->hasProperty('jcr:uuid')) {
             return array();
         }
 
-        $uuid = $node->{'jcr:uuid'};
+        $uuid = $node->getPropertyValue('jcr:uuid');
 
-        $indexName = $weak === true ? Storage::IDX_WEAKREFERRERS_DIR : Storage::IDX_REFERRERS_DIR;
-
-        $path = Storage::INDEX_DIR . '/' . $indexName . '/' . $uuid;
-
-        if (!$this->filesystem->exists($path)) {
-            return array();
-        }
-
-        $value = $this->filesystem->read($path);
-        $values = explode("\n", $value);
-
-        $propertyNames = array();
-
-        foreach ($values as $line) {
-            $propertyName = strstr($line, ':', true);
-
-            if (null !== $name && $name != $propertyName) {
-                continue;
-            }
-
-            $internalUuid = substr($line, strlen($propertyName) + 1);
-            $propertyNames[$propertyName] = $internalUuid;
-        }
-
+        $referrers = $this->index->getReferringProperties($uuid, $name, $weak);
         $referrerPaths = array();
 
-        foreach ($propertyNames as $propertyName => $internalUuid) {
-
-            $referrer = $this->readNodesByUuids(array($internalUuid), true);
-            $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
+        foreach ($referrers as $internalUuid => $propertyNames) {
+            foreach (array_keys($propertyNames) as $propertyName) {
+                $referrer = $this->readNodesByUuids(array($internalUuid), true);
+                $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
+            }
         }
 
         return $referrerPaths;
