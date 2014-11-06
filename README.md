@@ -1,7 +1,7 @@
 Jackalope Filesystem PHPCR implementation
 =========================================
 
-[![Build Status](https://travis-ci.org/jackalope/jackalope-fs.svg?branch=master](https://travis-ci.org/jackalope/jackalope-fs)
+[![Build Status](https://travis-ci.org/jackalope/jackalope-fs.svg?branch=master)](https://travis-ci.org/jackalope/jackalope-fs)
 
 This is a WIP implementation to support a filesystem implementation of PHPCR.
 
