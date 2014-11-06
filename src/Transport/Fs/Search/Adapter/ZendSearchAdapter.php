@@ -30,7 +30,7 @@ use Jackalope\Transport\Fs\Search\Adapter\Zend\Index;
  */
 class ZendSearchAdapter implements SearchAdapterInterface
 {
-    const SEARCH_PATH = 'zend-search-indexes';
+    const SEARCH_PATH = 'meta/zend-search-indexes';
     const IDX_PATH = 'jcr:path';
     const IDX_NODENAME = 'jcr:nodename';
     const IDX_NODELOCALNAME = 'jcr:nodename';

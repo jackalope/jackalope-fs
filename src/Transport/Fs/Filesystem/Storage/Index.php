@@ -13,7 +13,7 @@ use Jackalope\Transport\Fs\Filesystem\Filesystem;
  */
 class Index
 {
-    const INDEX_DIR = '/indexes';
+    const INDEX_DIR = '/meta/indexes';
     const IDX_REFERRERS_DIR = 'referrers';
     const IDX_REFERRERS_REV_DIR = 'referrers-rev';
     const IDX_WEAKREFERRERS_DIR = 'referrers-weak';

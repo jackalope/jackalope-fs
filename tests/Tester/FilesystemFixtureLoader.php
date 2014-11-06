@@ -13,13 +13,16 @@ class FilesystemFixtureLoader implements FixtureLoaderInterface
 {
     public function import($fixture, $workspaceKey = 'tests')
     {
+        $fs = new Filesystem();
         // jackalope 
         if ($workspaceKey == 'additionalWorkspace') {
             $workspaceKey = 'testsAdditional';
+        } else {
+            $fs->remove(__DIR__ . '/../data');
         }
+
         $destDir = __DIR__ . '/../data/workspaces/' . $workspaceKey;
-        $fs = new Filesystem();
-        $fs->remove(__DIR__ . '/../data');
+        $fs->remove($destDir);
         $fs->mkdir($destDir);
 
         $fixtureGenerator = new FixtureGenerator();
