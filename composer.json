@@ -28,7 +28,7 @@
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
-        "phpcr/phpcr-api-tests": "dev-master",
+        "phpcr/phpcr-api-tests": "dev-fix-precedence-parenthesis",
         "phpunit/phpunit": "~4.0.0",
         "phpspec/prophecy-phpunit": "~1.0"
     },
