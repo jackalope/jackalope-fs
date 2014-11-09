@@ -645,7 +645,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function init()
     {
-        $this->nodeProcessor = new NodeProcessor($this->credentials, $this->getNamespaces());
+        $this->nodeProcessor = new NodeProcessor($this->credentials->getUserID(), $this->getNamespaces());
     }
 
     private function phpcrNodeToNode(\Jackalope\Node $node)
