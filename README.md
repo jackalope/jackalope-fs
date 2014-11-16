@@ -20,7 +20,11 @@ Connect as follows:
 Options:
 
 - **path**: (required) Path to store data, indexes, etc.
-- **search_enabled**: If search should be enabled or not (default true)
+- **search.enabled**: If search should be enabled or not (default true)
+- **search.zend.hide_destruct_exception**: Hack to hide exceptions from the
+  ZendSearch engine when running functional tests.
+- **filesystem.adapter**: Filesystem adapter to use, either `local` for using
+  the filesystem or `array` to use in-memory storage (for testing)
 
 Limitations
 -----------
