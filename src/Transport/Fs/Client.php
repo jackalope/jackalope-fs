@@ -98,29 +98,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->registerEventSubscribers();
     }
 
-    private function getFilesystemAdapter($adapterName)
-    {
-        if ($adapterName instanceof AdapterInterface) {
-            return $adapterName;
-        }
-
-        if (null === $adapterName) {
-            return new LocalAdapter($this->path);
-        }
-
-        switch ($adapterName) {
-            case 'local':
-                return new LocalAdapter($this->path);
-            case 'array':
-                return new ArrayAdapter();
-        }
-
-        throw new \InvalidArgumentException(sprintf(
-            'Unknown filesystem adapter "%s", must be one of "%s"',
-            implode('", "', array('local', 'array'))
-        ));
-    }
-
     private function getSearchAdapter()
     {
         $this->searchAdapter = new ZendSearchAdapter($this->path, $this->nodeTypeManager, $this->zendHideDestructException);
@@ -714,5 +691,36 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 $path, $workspaceName
             ));
         }
+    }
+
+    /**
+     * Return the filesystem adapter indicated by $adapterName
+     * Defaults to LocalAdapter when null.
+     *
+     * @param string|AdapterInterface $adapterName
+     * @return AdapterInterface
+     * @throws InvalidArgumentException
+     */
+    private function getFilesystemAdapter($adapterName)
+    {
+        if ($adapterName instanceof AdapterInterface) {
+            return $adapterName;
+        }
+
+        if (null === $adapterName) {
+            return new LocalAdapter($this->path);
+        }
+
+        switch ($adapterName) {
+            case 'local':
+                return new LocalAdapter($this->path);
+            case 'array':
+                return new ArrayAdapter();
+        }
+
+        throw new \InvalidArgumentException(sprintf(
+            'Unknown filesystem adapter "%s", must be one of "%s"',
+            implode('", "', array('local', 'array'))
+        ));
     }
 }

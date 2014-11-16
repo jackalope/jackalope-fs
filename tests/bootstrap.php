@@ -39,7 +39,9 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 require_once __DIR__ . '/../vendor/phpcr/phpcr-api-tests/inc/AbstractLoader.php';
 require_once __DIR__ . '/../vendor/phpcr/phpcr-api-tests/inc/FixtureLoaderInterface.php';
 require_once __DIR__ . '/ImplementationLoader.php';
+require_once __DIR__ . '/Transport/Fs/FunctionalTestCase.php';
 require_once __DIR__ . '/Transport/Fs/Filesystem/Adapter/AdapterTestCase.php';
+require_once __DIR__ . '/Transport/Fs/Search/Adapter/AdapterTestCase.php';
 
 function dodefine($name, $value)
 {

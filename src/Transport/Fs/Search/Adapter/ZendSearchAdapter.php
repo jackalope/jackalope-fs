@@ -65,6 +65,8 @@ class ZendSearchAdapter implements SearchAdapterInterface
     public function index($workspace, $path, Node $node)
     {
         $index = $this->getIndex($workspace);
+        $this->removeExisting($index, $node);
+
         $document = new Document();
         $nodeName = PathHelper::getNodeName($path);
         $localNodeName = $nodeName; // PathHelper::getLocalNodeName($path);
@@ -127,7 +129,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     $document->addField(Field::Text($propertyName, $value));
                     break;
             }
-
         };
 
         $index->addDocument($document);
@@ -202,7 +203,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
                         'dcr:selectorName' => $selectorName
                     );
                 }
-
 
                 $properties[$selectorName] = array();
                 foreach ($document->getFieldNames() as $fieldName) {
@@ -317,5 +317,21 @@ class ZendSearchAdapter implements SearchAdapterInterface
         }
 
         return $value;
+    }
+
+    /**
+     * Remove any existing references to this node in the index
+     *
+     * @param Index $index Zend search index object
+     * @param Node $node Jackalope FS node object
+     */
+    private function removeExisting(Index $index, Node $node)
+    {
+        $internalUuid = $node->getPropertyValue(Storage::INTERNAL_UUID);
+        $hits = $index->find(str_replace(':', "\\:", Storage::INTERNAL_UUID) . ':' . $internalUuid);
+
+        foreach ($hits as $hit) {
+            $index->delete($hit->id);
+        }
     }
 }
