@@ -38,6 +38,8 @@ use PHPCR\Query\InvalidQueryException;
 use PHPCR\PathNotFoundException;
 use PHPCR\ReferentialIntegrityException;
 use Jackalope\Transport\Fs\Model\Node;
+use Jackalope\Transport\Fs\Filesystem\Adapter\ArrayAdapter;
+use Jackalope\Transport\Fs\Filesystem\AdapterInterface;
 
 /**
  */
@@ -67,20 +69,28 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     protected $path;
 
-    public function __construct($factory, $parameters = array(), Filesystem $filesystem = null)
+    public function __construct($factory, $parameters = array())
     {
         if (!isset($parameters['path'])) {
             throw new \InvalidArgumentException(
                 'You must provide the "path" parameter for the filesystem jackalope repository'
             );
         }
-
         $this->path = $parameters['path'];
+
+        $parameters = array_merge(array(
+            'search.enabled' => true,
+            'search.zend.hide_destruct_exception',
+            'filesystem.adapter' => null,
+        ), $parameters);
+
         $this->zendHideDestructException = isset($parameters['search.zend.hide_destruct_exception']) ? $parameters['search.zend.hide_destruct_exception'] : false;
         $this->searchEnabled = isset($parameters['search.enabled']) ? $parameters['search.enabled'] : true;
         $this->eventDispatcher = new EventDispatcher();
-        $adapter = $filesystem ? : new LocalAdapter($this->path);
+
+        $adapter =  $this->getFilesystemAdapter($parameters['filesystem.adapter']);
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
+
         $this->valueConverter = new ValueConverter();
         $this->nodeSerializer = new YamlNodeSerializer();
         $this->factory = $factory;
@@ -681,5 +691,36 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
                 $path, $workspaceName
             ));
         }
+    }
+
+    /**
+     * Return the filesystem adapter indicated by $adapterName
+     * Defaults to LocalAdapter when null.
+     *
+     * @param string|AdapterInterface $adapterName
+     * @return AdapterInterface
+     * @throws InvalidArgumentException
+     */
+    private function getFilesystemAdapter($adapterName)
+    {
+        if ($adapterName instanceof AdapterInterface) {
+            return $adapterName;
+        }
+
+        if (null === $adapterName) {
+            return new LocalAdapter($this->path);
+        }
+
+        switch ($adapterName) {
+            case 'local':
+                return new LocalAdapter($this->path);
+            case 'array':
+                return new ArrayAdapter();
+        }
+
+        throw new \InvalidArgumentException(sprintf(
+            'Unknown filesystem adapter "%s", must be one of "%s"',
+            implode('", "', array('local', 'array'))
+        ));
     }
 }

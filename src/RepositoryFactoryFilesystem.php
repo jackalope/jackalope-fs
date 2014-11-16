@@ -42,6 +42,7 @@ class RepositoryFactoryFilesystem implements RepositoryFactoryInterface
             'path',
             'search.enabled',
             'search.zend.hide_destruct_exception',
+            'filesystem.adapter'
         );
     }
 }
