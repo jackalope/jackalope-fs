@@ -149,6 +149,12 @@ class Storage
         $node = new Node();
         $node->setProperty('jcr:primaryType', 'nt:unstructured', 'Name');
         $this->writeNode($name, '/', $node);
+        $node = new Node();
+        $node->setProperty('jcr:primaryType', 'rep:system', 'Name');
+        $this->writeNode($name, '/jcr:system', $node);
+        $node = new Node();
+        $node->setProperty('jcr:primaryType', 'rep:nodeTypes', 'Name');
+        $this->writeNode($name, '/jcr:system/jcr:nodeTypes', $node);
     }
 
     public function ls($workspace, $path)

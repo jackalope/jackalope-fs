@@ -36,7 +36,6 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
             'AccessControlManagement',
             'Locking',
             'LifecycleManagement',
-            'NodeTypeManagement',
             'RetentionAndHold',
             'Transactions',
             'SameNameSiblings',
