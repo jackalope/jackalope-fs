@@ -38,10 +38,12 @@ use PHPCR\Query\InvalidQueryException;
 use PHPCR\PathNotFoundException;
 use PHPCR\ReferentialIntegrityException;
 use Jackalope\Transport\Fs\Model\Node;
+use Jackalope\Transport\NodeTypeManagementInterface;
+use Jackalope\Transport\Fs\NodeType\NodeTypeStorage;
 
 /**
  */
-class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface, QueryInterface
+class Client extends BaseTransport implements WorkspaceManagementInterface, WritingInterface, QueryInterface, NodeTypeManagementInterface
 {
     private $loggedIn;
 
@@ -83,6 +85,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->storage = new Storage(new Filesystem($adapter), $this->eventDispatcher);
         $this->valueConverter = new ValueConverter();
         $this->nodeSerializer = new YamlNodeSerializer();
+        $this->nodeTypeStorage = new NodeTypeStorage($this->storage);
         $this->factory = $factory;
 
         $this->registerEventSubscribers();
@@ -156,6 +159,29 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             RepositoryInterface::QUERY_STORED_QUERIES_SUPPORTED => false,
             RepositoryInterface::WRITE_SUPPORTED => true,
         );
+    }
+
+    public function registerNodeTypes($nodeTypes, $allowUpdate)
+    {
+        $standardNodeTypes = StandardNodeTypes::getNodeTypeData();
+
+        foreach ($nodeTypes as $nodeType) {
+            if (isset($standardNodeTypes[$nodeType->getName()])) {
+                throw new RepositoryException(sprintf(
+                    'Cannot overwrite standard node type "%s"', $nodeType->getName()
+                ));
+            }
+
+            if (!$allowUpdate) {
+                if ($this->nodeTypeStorage->hasNodeType($nodeType->getName())) {
+                    throw new RepositoryException(sprintf(
+                        'Node type "%s" already exists and allowUpdate is false',
+                        $nodeType->getName()
+                    ));
+                }
+            }
+            $this->nodeTypeStorage->registerNodeType($this->workspaceName, $nodeType);
+        }
     }
 
     /**
@@ -348,8 +374,12 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
      */
     public function getNodeTypes($nodeTypes = array())
     {
-        $standardTypes = StandardNodeTypes::getNodeTypeData();
-        return $standardTypes;
+        $types = array_merge(
+            StandardNodeTypes::getNodeTypeData(),
+            $this->nodeTypeStorage->getNodeTypes($this->workspaceName)
+        );
+
+        return $types;
     }
 
     /**
@@ -587,6 +617,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function registerNamespace($prefix, $uri)
     {
         $this->storage->registerNamespace($this->workspaceName, $prefix, $uri);
+
+        $this->init();
     }
 
     /**

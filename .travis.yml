@@ -6,7 +6,6 @@ php:
 before_script:
   - composer selfupdate
   - composer install
-  - composer require "jackalope/jackalope" "dev-node_validator as dev-master"
 
 script: phpunit
 
