@@ -617,6 +617,8 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     public function registerNamespace($prefix, $uri)
     {
         $this->storage->registerNamespace($this->workspaceName, $prefix, $uri);
+
+        $this->init();
     }
 
     /**
