@@ -7,7 +7,9 @@ before_script:
   - composer selfupdate
   - composer install
 
-script: phpunit
+script: 
+    - php vendor/bin/phpunit
+    - php vendor/bin/phpbench run --iterations=2
 
 matrix:
   allow_failures:
