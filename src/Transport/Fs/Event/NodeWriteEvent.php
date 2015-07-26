@@ -23,17 +23,17 @@ class NodeWriteEvent extends Event
         $this->node = $node;
     }
 
-    public function getWorkspace() 
+    public function getWorkspace()
     {
         return $this->workspace;
     }
 
-    public function getPath() 
+    public function getPath()
     {
         return $this->path;
     }
 
-    public function getNode() 
+    public function getNode()
     {
         return $this->node;
     }

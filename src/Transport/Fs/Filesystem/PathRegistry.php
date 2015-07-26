@@ -16,8 +16,7 @@ class PathRegistry
     {
         if (!isset($this->pathMap[$path])) {
             throw new \InvalidArgumentException(sprintf(
-                'Path "%s" has not been registered in path registry'
-            , $path));
+                'Path "%s" has not been registered in path registry', $path));
         }
 
         return $this->pathMap[$path];

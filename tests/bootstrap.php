@@ -47,4 +47,3 @@ function dodefine($name, $value)
         define($name, $value);
     }
 }
-

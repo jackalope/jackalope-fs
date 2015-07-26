@@ -73,4 +73,3 @@ class ArrayAdapter implements AdapterInterface
         throw new \InvalidArgumentException('Not implemented');
     }
 }
-

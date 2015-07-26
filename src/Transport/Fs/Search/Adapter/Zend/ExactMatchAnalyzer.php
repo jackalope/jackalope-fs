@@ -54,5 +54,3 @@ class ExactMatchAnalyzer extends AbstractCommon
         return $token;
     }
 }
-
-

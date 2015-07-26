@@ -26,8 +26,7 @@ class NodeReader
         NodeSerializerInterface $serializer,
         PathRegistry $pathRegistry,
         StorageHelper $helper
-    )
-    {
+    ) {
         $this->pathRegistry = $pathRegistry;
         $this->serializer = $serializer;
         $this->filesystem = $filesystem;

@@ -160,5 +160,4 @@ class ImplementationLoader extends \PHPCR\Test\AbstractLoader
     {
         return new \Jackalope\Test\Tester\FilesystemFixtureLoader();
     }
-
 }

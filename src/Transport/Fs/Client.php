@@ -431,7 +431,6 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $this->storage->workspaceInit($name);
 
         $this->workspaceName = $name;
-
     }
 
     /**

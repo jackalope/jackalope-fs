@@ -152,7 +152,6 @@ class Node
             }
 
             $this->setProperty($propertyName, $propertyValue, $propertyTypeValue);
-
         } while (false !== next($data));
     }
 
