@@ -23,8 +23,7 @@ class NodeRemover
         Filesystem $filesystem,
         Index $index,
         StorageHelper $helper
-    )
-    {
+    ) {
         $this->nodeReader = $nodeReader;
         $this->filesystem = $filesystem;
         $this->index = $index;
@@ -120,7 +119,6 @@ class NodeRemover
                     implode('", "', $extraReferrers)
                 ));
             }
-
         }
     }
 }

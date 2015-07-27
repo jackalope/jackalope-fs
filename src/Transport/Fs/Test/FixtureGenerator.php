@@ -19,7 +19,7 @@ class FixtureGenerator
 
     protected $fs;
 
-    function generateFixtures($workspaceName, $dataDir, $srcDir)
+    public function generateFixtures($workspaceName, $dataDir, $srcDir)
     {
         $this->workspaceName = $workspaceName;
         $eventDispatcher = new EventDispatcher();
@@ -46,7 +46,7 @@ class FixtureGenerator
         }
     }
 
-    function loadFile($filePath)
+    public function loadFile($filePath)
     {
         $dom = new \DOMDocument(1.0);
         $dom->load($filePath);
@@ -58,7 +58,7 @@ class FixtureGenerator
         $this->storage->commit();
     }
 
-    function iterateNode(\DomNode $domNode)
+    public function iterateNode(\DomNode $domNode)
     {
         if ($domNode->nodeName == 'sv:node') {
             $this->persistSystemNode($domNode);
@@ -73,7 +73,7 @@ class FixtureGenerator
         }
     }
 
-    function persistSystemNode(\DomNode $domNode)
+    public function persistSystemNode(\DomNode $domNode)
     {
         $xpath = new \DOMXpath($domNode->ownerDocument);
         $properties = array();

@@ -16,12 +16,12 @@ class NodeLocation
         $this->path = $path;
     }
 
-    public function getWorkspace() 
+    public function getWorkspace()
     {
         return $this->workspace;
     }
 
-    public function getPath() 
+    public function getPath()
     {
         return $this->path;
     }

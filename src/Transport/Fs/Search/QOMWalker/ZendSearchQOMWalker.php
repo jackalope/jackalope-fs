@@ -7,13 +7,11 @@ use Jackalope\Query\QOM\PropertyValue;
 use Jackalope\Query\QOM\QueryObjectModel;
 use Jackalope\Transport\DoctrineDBAL\RepositorySchema;
 use Jackalope\Transport\DoctrineDBAL\Util\Xpath;
-
 use PHPCR\NamespaceException;
 use PHPCR\NodeType\NodeTypeManagerInterface;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\Query\QOM\QueryObjectModelConstantsInterface as QOMConstants;
 use PHPCR\Query\QOM;
-
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\MySqlPlatform;
@@ -233,7 +231,7 @@ class ZendSearchQOMWalker
         $selectorName = $constraint->getSelectorName();
         $path = $constraint->getPath();
 
-        return sprintf( '%s:%s', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
+        return sprintf('%s:%s', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
     }
 
     private function walkChildNodeConstraint(QOM\ChildNodeInterface $constraint)
@@ -249,7 +247,7 @@ class ZendSearchQOMWalker
         $selectorName = $constraint->getSelectorName();
         $path = $constraint->getAncestorPath();
 
-        return sprintf( '%s:%s/*', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
+        return sprintf('%s:%s/*', $this->escape(ZendSearchAdapter::IDX_PATH), $path);
     }
 
     private function walkFullTextSearchConstraint(QOM\FullTextSearchInterface $constraint)

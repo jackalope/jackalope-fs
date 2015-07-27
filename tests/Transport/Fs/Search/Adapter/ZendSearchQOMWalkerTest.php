@@ -186,7 +186,7 @@ class ZendSearchQOMWalkerTest extends ProphecyTestCase
             ),
 
             // POST PROCESS
-            
+
             // Length not supported
             //array(
             //    'FROM foobar WHERE LENGTH("a", "bar") =  5',
@@ -266,8 +266,6 @@ class ZendSearchQOMWalkerTest extends ProphecyTestCase
                 '(jcr\:primaryType:foobar) AND (' . ZendSearchAdapter::IDX_NODELOCALNAME. ':"nt\:Foo")'
             ),
         );
-
-
     }
 
     /**

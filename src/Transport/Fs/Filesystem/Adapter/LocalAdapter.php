@@ -46,7 +46,7 @@ class LocalAdapter implements AdapterInterface
     public function move($srcPath, $destPath)
     {
         $this->fs->rename(
-            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($srcPath),
             $this->getAbsPath($destPath)
         );
     }
@@ -54,7 +54,7 @@ class LocalAdapter implements AdapterInterface
     public function copy($srcPath, $destPath)
     {
         $this->fs->mirror(
-            $this->getAbsPath($srcPath), 
+            $this->getAbsPath($srcPath),
             $this->getAbsPath($destPath)
         );
     }

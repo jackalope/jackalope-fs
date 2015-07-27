@@ -38,8 +38,7 @@ class NodeCopier
     public function __construct(
         NodeReader $nodeReader,
         NodeWriter $nodeWriter
-    )
-    {
+    ) {
         $this->nodeReader = $nodeReader;
         $this->nodeWriter = $nodeWriter;
     }

@@ -17,8 +17,8 @@ class NodeTest extends ProphecyTestCase
             ':jcr:primaryType' => 'Name',
             'jcr:data' => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ':jcr:data' => 'Binary',
-            'multidata' => 
-            array (
+            'multidata' =>
+            array(
                 0 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
                 1 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ),
@@ -31,15 +31,15 @@ class NodeTest extends ProphecyTestCase
             ':zeronumber' => 'Long',
             'mydateprop' => '2011-04-21T14:34:20.431+01:00',
             ':mydateprop' => 'Date',
-            'multidate' => 
-            array (
+            'multidate' =>
+            array(
                 0 => '2011-04-22T14:34:20.000+01:00',
                 1 => '2011-10-23T14:34:20.000+01:00',
                 2 => '2010-10-23T14:34:20.000+01:00',
             ),
             ':multidate' => 'Date',
-            'multivalue' => 
-            array (
+            'multivalue' =>
+            array(
                 0 => '200',
                 1 => '0',
                 2 => '100',
@@ -73,8 +73,8 @@ class NodeTest extends ProphecyTestCase
             ':jcr:primaryType' => 'Name',
             'jcr:data' => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ':jcr:data' => 'Binary',
-            'multidata' => 
-            array (
+            'multidata' =>
+            array(
                 0 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
                 1 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ),
@@ -101,8 +101,8 @@ class NodeTest extends ProphecyTestCase
             ':jcr:primaryType' => 'Name',
             'jcr:data' => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ':jcr:data' => 'Binary',
-            'multidata' => 
-            array (
+            'multidata' =>
+            array(
                 0 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
                 1 => 'aDEuIENoYXB0ZXIgMSBUaXRsZQoKKiBmb28KKiBiYXIKKiogZm9vMgoqKiBmb28zCiogZm9vMAoKfHwgaGVhZGVyIHx8IGJhciB8fAp8IGggfCBqIHwKCntjb2RlfQpoZWxsbyB3b3JsZAp7Y29kZX0KCiMgZm9vCg==',
             ),
@@ -141,4 +141,3 @@ class NodeTest extends ProphecyTestCase
         ), $node->getProperty('prop1'));
     }
 }
-

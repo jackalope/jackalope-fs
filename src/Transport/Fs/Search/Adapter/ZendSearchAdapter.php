@@ -127,7 +127,6 @@ class ZendSearchAdapter implements SearchAdapterInterface
                     $document->addField(Field::Text($propertyName, $value));
                     break;
             }
-
         };
 
         $index->addDocument($document);

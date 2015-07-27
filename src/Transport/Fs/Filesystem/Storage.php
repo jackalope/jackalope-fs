@@ -11,9 +11,7 @@ use Jackalope\Transport\Fs\Filesystem\Storage\NodeWriter;
 use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage\Index;
-
 use PHPCR\Util\PathHelper;
-
 use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Jackalope\Transport\Fs\Model\Node;

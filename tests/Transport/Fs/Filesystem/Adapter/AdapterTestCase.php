@@ -9,7 +9,7 @@ abstract class AdapterTestCase extends \PHPUnit_Framework_TestCase
 {
     protected $testDir;
 
-    abstract function getAdapter();
+    abstract public function getAdapter();
 
     public function testReadWrite()
     {
@@ -79,4 +79,3 @@ abstract class AdapterTestCase extends \PHPUnit_Framework_TestCase
         $this->assertFalse($this->getAdapter()->exists('/level1'));
     }
 }
-
