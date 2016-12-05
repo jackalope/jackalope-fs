@@ -6,6 +6,7 @@ use PHPCR\NodeInterface;
 use PHPCR\PropertyType;
 use Jackalope\Transport\Fs\Filesystem\Storage;
 use PHPCR\ItemNotFoundException;
+use PHPCR\RepositoryException;
 
 /**
  * Class that encapsulates the strange Jackalope node data structure
@@ -174,6 +175,8 @@ class Node
                     try {
                         $references = $property->getValue();
                     } catch (ItemNotFoundException $e) {
+                        continue;
+                    } catch (RepositoryException $e) {
                         continue;
                     }
 
