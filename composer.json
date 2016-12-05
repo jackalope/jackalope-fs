@@ -18,9 +18,9 @@
     "require": {
         "php": ">=5.4",
         "jackalope/jackalope": "dev-master",
-        "symfony/yaml": "~2.3",
-        "symfony/filesystem": "~2.3",
-        "symfony/event-dispatcher": "~2.3",
+        "symfony/yaml": "~2.3 || ~3.0",
+        "symfony/filesystem": "~2.3 || ~3.0",
+        "symfony/event-dispatcher": "~2.3 || ~3.0",
         "zendframework/zend-stdlib": "~2.3",
         "zendframework/zendsearch": "@dev"
     },
