@@ -7,10 +7,10 @@ use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use PHPCR\CredentialsInterface;
 use PHPCR\NoSuchWorkspaceException;
+use PHPCR\Query\QOM\QueryObjectModelInterface;
 use PHPCR\RepositoryInterface;
-use PHPCR\Shell\Serializer\NodeNormalizer;
-use PHPCR\Shell\Serializer\YamlEncoder;
 use PHPCR\ItemNotFoundException;
+use PHPCR\SimpleCredentials;
 use Symfony\Component\Yaml\Yaml;
 use PHPCR\LoginException;
 use PHPCR\RepositoryException;
@@ -54,6 +54,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
     private $fs;
     private $nodeSerializer;
     private $storage;
+    /** @var  SimpleCredentials */
     private $credentials;
     private $valueConverter;
     private $eventDispatcher;
@@ -204,7 +205,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $this->workspaceName = $workspaceName;
         }
 
-        if (null === $credentials) {
+        if (null === $credentials || !$credentials instanceof SimpleCredentials) {
             throw new LoginException('No credentials provided');
         }
 
@@ -219,7 +220,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $this->createWorkspace($this->workspaceName);
         }
 
-        if ($credentials->getUserId() != 'admin' || $credentials->getPassword() != 'admin') {
+        if ($credentials->getUserId() !== 'admin' || $credentials->getPassword() !== 'admin') {
             throw new LoginException('Invalid credentials (you must connect with admin/admin');
         }
 
@@ -676,7 +677,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function init()
     {
-        $this->nodeProcessor = new NodeProcessor($this->credentials->getUserID(), $this->getNamespaces());
+        $this->nodeProcessor = new NodeProcessor($this->credentials->getUserID(), new \ArrayObject($this->getNamespaces()));
     }
 
     private function phpcrNodeToNode(\Jackalope\Node $node)
