@@ -2,18 +2,20 @@
 
 namespace Jackalope\Transport\Fs;
 
+use ArrayObject;
+use Jackalope\Factory;
+use Jackalope\NodeType\NodeType;
 use Jackalope\Transport\BaseTransport;
 use Jackalope\Transport\WorkspaceManagementInterface;
 use Jackalope\NotImplementedException;
 use PHPCR\CredentialsInterface;
 use PHPCR\NoSuchWorkspaceException;
+use PHPCR\Query\QOM\QueryObjectModelInterface;
 use PHPCR\RepositoryInterface;
-use PHPCR\Shell\Serializer\NodeNormalizer;
-use PHPCR\Shell\Serializer\YamlEncoder;
 use PHPCR\ItemNotFoundException;
-use Symfony\Component\Yaml\Yaml;
 use PHPCR\LoginException;
 use PHPCR\RepositoryException;
+use PHPCR\SimpleCredentials;
 use PHPCR\Util\PathHelper;
 use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 use Jackalope\Transport\Fs\Filesystem\Filesystem;
@@ -25,8 +27,6 @@ use Jackalope\Transport\QueryInterface;
 use Jackalope\Node as JackalopeNode;
 use Jackalope\NodeType\NodeProcessor;
 use PHPCR\NamespaceRegistryInterface;
-use PHPCR\NodeInterface;
-use PHPCR\PropertyType;
 use PHPCR\ItemExistsException;
 use PHPCR\Util\ValueConverter;
 use Jackalope\Query\Query;
@@ -36,7 +36,6 @@ use Jackalope\Transport\Fs\Search\IndexSubscriber;
 use PHPCR\Util\QOM\Sql2ToQomQueryConverter;
 use PHPCR\Query\InvalidQueryException;
 use PHPCR\PathNotFoundException;
-use PHPCR\ReferentialIntegrityException;
 use Jackalope\Transport\Fs\Model\Node;
 use Jackalope\Transport\NodeTypeManagementInterface;
 use Jackalope\Transport\Fs\NodeType\NodeTypeStorage;
@@ -47,17 +46,25 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 {
     private $loggedIn;
 
+    /** @var NodeProcessor */
+    private $nodeProcessor;
+    /** @var NodeTypeStorage */
+    private $nodeTypeStorage;
+
     // not yet implemented
     private $autoLastModified;
     private $workspaceName = 'default';
     private $nodeTypeManager;
-    private $fs;
     private $nodeSerializer;
+    /** @var Storage  */
     private $storage;
+    /** @var SimpleCredentials */
     private $credentials;
     private $valueConverter;
     private $eventDispatcher;
+    /** @var  */
     private $searchAdapter;
+    /** @var Factory */
     private $factory;
 
     private $searchEnabled;
@@ -166,6 +173,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
         $standardNodeTypes = StandardNodeTypes::getNodeTypeData();
 
         foreach ($nodeTypes as $nodeType) {
+            /** @var NodeType $nodeType */
             if (isset($standardNodeTypes[$nodeType->getName()])) {
                 throw new RepositoryException(sprintf(
                     'Cannot overwrite standard node type "%s"', $nodeType->getName()
@@ -173,7 +181,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             }
 
             if (!$allowUpdate) {
-                if ($this->nodeTypeStorage->hasNodeType($nodeType->getName())) {
+                if ($this->nodeTypeStorage->hasNodeType($this->workspaceName, $nodeType->getName())) {
                     throw new RepositoryException(sprintf(
                         'Node type "%s" already exists and allowUpdate is false',
                         $nodeType->getName()
@@ -204,7 +212,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $this->workspaceName = $workspaceName;
         }
 
-        if (null === $credentials) {
+        if (null === $credentials || !$credentials instanceof SimpleCredentials) {
             throw new LoginException('No credentials provided');
         }
 
@@ -219,7 +227,7 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
             $this->createWorkspace($this->workspaceName);
         }
 
-        if ($credentials->getUserId() != 'admin' || $credentials->getPassword() != 'admin') {
+        if ($credentials->getUserId() !== 'admin' || $credentials->getPassword() !== 'admin') {
             throw new LoginException('Invalid credentials (you must connect with admin/admin');
         }
 
@@ -676,10 +684,13 @@ class Client extends BaseTransport implements WorkspaceManagementInterface, Writ
 
     private function init()
     {
-        $this->nodeProcessor = new NodeProcessor($this->credentials->getUserID(), $this->getNamespaces());
+        $this->nodeProcessor = new NodeProcessor(
+            $this->credentials->getUserID(),
+            new ArrayObject($this->getNamespaces())
+        );
     }
 
-    private function phpcrNodeToNode(\Jackalope\Node $node)
+    private function phpcrNodeToNode(JackalopeNode $node)
     {
         if ($node->isDeleted()) {
             $properties = $node->getPropertiesForStoreDeletedNode();
