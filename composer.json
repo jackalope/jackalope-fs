@@ -8,7 +8,6 @@
         "MIT",
         "Apache-2.0"
     ],
-    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Jackalope Community",
@@ -17,10 +16,10 @@
     ],
     "require": {
         "php": ">=5.4",
-        "jackalope/jackalope": "dev-master",
-        "symfony/yaml": "~2.3 || ~3.0",
-        "symfony/filesystem": "~2.3 || ~3.0",
-        "symfony/event-dispatcher": "~2.3 || ~3.0",
+        "jackalope/jackalope": "~1.3",
+        "symfony/yaml": "~2.8 || ~3.4 || ~4.0",
+        "symfony/filesystem": "~2.8 || ~3.4 || ~4.0",
+        "symfony/event-dispatcher": "~2.8 || ~3.4 || ~4.0",
         "zendframework/zend-stdlib": "~2.3",
         "zendframework/zendsearch": "@dev"
     },
@@ -29,7 +28,7 @@
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "phpunit/phpunit": "~4.0.0",
+        "phpunit/phpunit": "~5.7",
         "phpspec/prophecy-phpunit": "~1.0"
     },
     "autoload": {
