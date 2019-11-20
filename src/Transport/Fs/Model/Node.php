@@ -174,7 +174,7 @@ class Node
                     try {
                         $references = $property->getValue();
                     } catch (ItemNotFoundException $e) {
-                        continue;
+                        continue 2;
                     }
 
                     if ($property->isMultiple()) {
