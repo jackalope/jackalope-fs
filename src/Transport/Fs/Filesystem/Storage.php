@@ -53,7 +53,7 @@ class Storage
     public function writeNode($workspace, $path, Node $node)
     {
         $node = $this->nodeWriter->writeNode($workspace, $path, $node);
-        $this->dispatch(new NodeWriteEvent($workspace, $path, $node), Events::POST_WRITE_NODE);
+        $this->eventDispatcher->dispatch(new NodeWriteEvent($workspace, $path, $node), Events::POST_WRITE_NODE);
     }
 
     public function readNode($workspace, $path)
@@ -201,7 +201,7 @@ class Storage
 
     public function commit()
     {
-        $this->dispatch(new BaseEvent(), Events::COMMIT);
+        $this->eventDispatcher->dispatch(new BaseEvent(), Events::COMMIT);
     }
 
     public function getNamespaces()
@@ -219,14 +219,5 @@ class Storage
         }
 
         return $res;
-    }
-
-    private function dispatch($event, $eventName)
-    {
-        if (class_exists(LegacyEventDispatcherProxy::class)) {
-            return $this->eventDispatcher->dispatch($event, $eventName);
-        }
-
-        return $this->eventDispatcher->dispatch($eventName, $event);
     }
 }
