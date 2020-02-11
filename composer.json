@@ -16,20 +16,19 @@
     ],
     "require": {
         "php": ">=5.4",
-        "jackalope/jackalope": "~1.3",
-        "symfony/yaml": "~2.8 || ~3.4 || ~4.0",
-        "symfony/filesystem": "~2.8 || ~3.4 || ~4.0",
-        "symfony/event-dispatcher": "~2.8 || ~3.4 || ~4.0",
-        "zendframework/zend-stdlib": "~2.3",
-        "zendframework/zendsearch": "@dev"
+        "jackalope/jackalope": "^1.3",
+        "symfony/yaml": "^2.8 || ^3.4 || ^4.0 || ^5.0",
+        "symfony/filesystem": "^2.8 || ^3.4 || ^4.0 || ^5.0",
+        "symfony/event-dispatcher": "^2.8 || ^3.4 || ^4.0 || ^5.0",
+        "handcraftedinthealps/zendsearch": "^2.0"
     },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "phpunit/phpunit": "~5.7",
-        "phpspec/prophecy-phpunit": "~1.0"
+        "phpunit/phpunit": "^5.7",
+        "phpspec/prophecy-phpunit": "^1.0"
     },
     "autoload": {
         "psr-4": { 
@@ -39,7 +38,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.x-dev"
         }
     }
 }

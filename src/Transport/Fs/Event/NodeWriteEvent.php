@@ -2,7 +2,6 @@
 
 namespace Jackalope\Transport\Fs\Event;
 
-use Symfony\Component\EventDispatcher\Event;
 use Jackalope\Transport\Fs\Model\Node;
 
 /**
@@ -10,7 +9,7 @@ use Jackalope\Transport\Fs\Model\Node;
  *
  * @author Daniel Leech <daniel@dantleech.com>
  */
-class NodeWriteEvent extends Event
+class NodeWriteEvent extends BaseEvent
 {
     protected $workspace;
     protected $path;
