@@ -2,7 +2,9 @@
 
 namespace Jackalope\Transport\Fs\Filesystem;
 
-class PathRegistryTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class PathRegistryTest extends TestCase
 {
     public function setUp()
     {
