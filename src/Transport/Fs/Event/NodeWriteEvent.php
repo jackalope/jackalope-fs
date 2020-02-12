@@ -3,13 +3,14 @@
 namespace Jackalope\Transport\Fs\Event;
 
 use Jackalope\Transport\Fs\Model\Node;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event which is dispatched when a node is written.
  *
  * @author Daniel Leech <daniel@dantleech.com>
  */
-class NodeWriteEvent extends BaseEvent
+class NodeWriteEvent extends Event
 {
     protected $workspace;
     protected $path;

@@ -2,7 +2,6 @@
 
 namespace Jackalope\Transport\Fs\Filesystem;
 
-use Jackalope\Transport\Fs\Event\BaseEvent;
 use Jackalope\Transport\Fs\Event\NodeWriteEvent;
 use Jackalope\Transport\Fs\Events;
 use Jackalope\Transport\Fs\Filesystem\PathRegistry;
@@ -14,9 +13,9 @@ use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage\Index;
 use PHPCR\Util\PathHelper;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Contracts\EventDispatcher\Event;
 use Jackalope\Transport\Fs\Model\Node;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeRemover;
-use Symfony\Component\EventDispatcher\LegacyEventDispatcherProxy;
 
 class Storage
 {
@@ -201,7 +200,7 @@ class Storage
 
     public function commit()
     {
-        $this->eventDispatcher->dispatch(new BaseEvent(), Events::COMMIT);
+        $this->eventDispatcher->dispatch(new Event(), Events::COMMIT);
     }
 
     public function getNamespaces()
