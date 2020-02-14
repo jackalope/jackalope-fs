@@ -12,8 +12,8 @@ use Jackalope\Transport\Fs\Filesystem\Storage\StorageHelper;
 use Jackalope\Transport\Fs\NodeSerializer\YamlNodeSerializer;
 use Jackalope\Transport\Fs\Filesystem\Storage\Index;
 use PHPCR\Util\PathHelper;
-use Symfony\Component\EventDispatcher\Event;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Contracts\EventDispatcher\Event;
 use Jackalope\Transport\Fs\Model\Node;
 use Jackalope\Transport\Fs\Filesystem\Storage\NodeRemover;
 
@@ -52,7 +52,7 @@ class Storage
     public function writeNode($workspace, $path, Node $node)
     {
         $node = $this->nodeWriter->writeNode($workspace, $path, $node);
-        $this->eventDispatcher->dispatch(Events::POST_WRITE_NODE, new NodeWriteEvent($workspace, $path, $node));
+        $this->eventDispatcher->dispatch(new NodeWriteEvent($workspace, $path, $node), Events::POST_WRITE_NODE);
     }
 
     public function readNode($workspace, $path)
@@ -200,7 +200,7 @@ class Storage
 
     public function commit()
     {
-        $this->eventDispatcher->dispatch(Events::COMMIT, new Event());
+        $this->eventDispatcher->dispatch(new Event(), Events::COMMIT);
     }
 
     public function getNamespaces()

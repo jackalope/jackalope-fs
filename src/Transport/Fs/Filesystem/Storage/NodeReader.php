@@ -126,7 +126,7 @@ class NodeReader
 
         $originalBinaryHash = $binaryHashMap[$propertyName];
         $binaryHashes = (array) $originalBinaryHash;
-        
+
         $streams = array();
         foreach ($binaryHashes as $binaryHash) {
             $path = $this->helper->getBinaryPath($workspace, $parentPath, $binaryHash);
@@ -155,7 +155,7 @@ class NodeReader
         foreach ($referrers as $internalUuid => $propertyNames) {
             foreach (array_keys($propertyNames) as $propertyName) {
                 $referrer = $this->readNodesByUuids(array($internalUuid), true);
-                $referrerPaths[] = sprintf('%s/%s', key($referrer), $propertyName);
+                $referrerPaths[] = sprintf('%s/%s', $referrer->getIterator()->key(), $propertyName);
             }
         }
 

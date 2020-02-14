@@ -2,10 +2,11 @@
 
 namespace Jackalope\Tests\Transport\Fs\Filesystem\Adapter;
 
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 use Jackalope\Transport\Fs\Filesystem\Adapter\LocalAdapter;
 
-abstract class AdapterTestCase extends \PHPUnit_Framework_TestCase
+abstract class AdapterTestCase extends TestCase
 {
     protected $testDir;
 

@@ -15,31 +15,33 @@
         }
     ],
     "require": {
-        "php": ">=5.4",
-        "jackalope/jackalope": "~1.3",
-        "symfony/yaml": "~2.8 || ~3.4 || ~4.0",
-        "symfony/filesystem": "~2.8 || ~3.4 || ~4.0",
-        "symfony/event-dispatcher": "~2.8 || ~3.4 || ~4.0",
-        "zendframework/zend-stdlib": "~2.3",
-        "zendframework/zendsearch": "@dev"
+        "php": "^7.2",
+        "jackalope/jackalope": "^1.3.4",
+        "symfony/yaml": "^4.4 || ^5.0",
+        "symfony/filesystem": "^4.4 || ^5.0",
+        "symfony/event-dispatcher": "^4.4 || ^5.0",
+        "symfony/event-dispatcher-contracts": "^1.0 || ^2.0",
+        "handcraftedinthealps/zendsearch": "^2.0"
+    },
+    "conflict": {
+        "phpcr/phpcr-utils": "<1.3.1"
     },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "phpunit/phpunit": "~5.7",
-        "phpspec/prophecy-phpunit": "~1.0"
+        "phpunit/phpunit": "^7.0"
     },
     "autoload": {
-        "psr-4": { 
+        "psr-4": {
             "Jackalope\\": "src/",
             "Jackalope\\Test\\": "tests/"
         }
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.x-dev"
         }
     }
 }

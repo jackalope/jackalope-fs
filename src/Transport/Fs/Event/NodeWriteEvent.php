@@ -2,8 +2,8 @@
 
 namespace Jackalope\Transport\Fs\Event;
 
-use Symfony\Component\EventDispatcher\Event;
 use Jackalope\Transport\Fs\Model\Node;
+use Symfony\Contracts\EventDispatcher\Event;
 
 /**
  * Event which is dispatched when a node is written.
