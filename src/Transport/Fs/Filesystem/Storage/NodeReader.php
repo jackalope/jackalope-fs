@@ -138,7 +138,7 @@ class NodeReader
         return $res;
     }
 
-    public function readNodeReferrers($workspace, $path, $weak = false, $name)
+    public function readNodeReferrers($workspace, $path, $weak, $name)
     {
         $node = $this->readNode($workspace, $path);
 

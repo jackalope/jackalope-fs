@@ -15,7 +15,7 @@
         }
     ],
     "require": {
-        "php": "^7.2",
+        "php": "^7.2 || ^8.0",
         "jackalope/jackalope": "^1.3.4",
         "symfony/yaml": "^4.4 || ^5.0",
         "symfony/filesystem": "^4.4 || ^5.0",
@@ -31,7 +31,7 @@
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^8.5.14"
     },
     "autoload": {
         "psr-4": {

@@ -73,7 +73,7 @@ class Storage
         return $this->nodeReader->readBinaryStream($workspace, $path);
     }
 
-    public function readNodeReferrers($workspace, $path, $weak = false, $name)
+    public function readNodeReferrers($workspace, $path, $weak, $name)
     {
         return $this->nodeReader->readNodeReferrers($workspace, $path, $weak, $name);
     }
