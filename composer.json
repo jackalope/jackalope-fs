@@ -31,7 +31,7 @@
     },
     "require-dev": {
         "phpcr/phpcr-api-tests": "dev-master",
-        "phpunit/phpunit": "^7.0"
+        "phpunit/phpunit": "^7.5.20"
     },
     "autoload": {
         "psr-4": {
