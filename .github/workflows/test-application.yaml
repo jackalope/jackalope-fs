@@ -8,7 +8,7 @@ on:
 
 jobs:
     test:
-        name: 'PHP ${{ matrix.php-version }}, Dependencies ${{ matrix.symfony-version }}'
+        name: 'PHP ${{ matrix.php-version }} ${{ matrix.dependencies }}'
         runs-on: ubuntu-20.04
 
         strategy:
@@ -20,6 +20,7 @@ jobs:
                     - php-version: '7.2'
                     - php-version: '7.3'
                     - php-version: '7.4'
+                    - php-version: '8.0'
 
         steps:
             - name: Checkout project
