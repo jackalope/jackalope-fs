@@ -32,10 +32,6 @@ jobs:
                   php-version: ${{ matrix.php-version }}
                   tools: 'composer:v2'
 
-            - name: Require Specific Symfony Version
-              if: ${{ matrix.symfony-version }}
-              run: composer require --no-update symfony/symfony:${{ matrix.symfony-version }}
-
             - name: Install dependencies with Composer
               uses: ramsey/composer-install@v1
               with:
