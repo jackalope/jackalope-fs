@@ -17,6 +17,7 @@ jobs:
                 include:
                     - php-version: '7.2'
                       dependencies: 'lowest'
+                      phpunit-args: '--testdox' # regular output fails in lowest build
                     - php-version: '7.2'
                     - php-version: '7.3'
                     - php-version: '7.4'
@@ -38,4 +39,4 @@ jobs:
                   dependency-versions: ${{ matrix.dependencies }}
                   composer-options: --prefer-dist
             - name: Execute test cases
-              run: vendor/bin/phpunit
+              run: vendor/bin/phpunit ${{ matrix.phpunit-args }}
