@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": "^7.2 || ^8.0",
-        "jackalope/jackalope": "^1.3.4",
+        "jackalope/jackalope": "^1.4.2",
         "symfony/yaml": "^4.4 || ^5.0",
         "symfony/filesystem": "^4.4 || ^5.0",
         "symfony/event-dispatcher": "^4.4 || ^5.0",
@@ -24,13 +24,14 @@
         "handcraftedinthealps/zendsearch": "^2.0"
     },
     "conflict": {
-        "phpcr/phpcr-utils": "<1.3.1"
+        "phpcr/phpcr-utils": "<1.6.1",
+	"phpcr/phpcr": "<2.1.6"
     },
     "provide": {
         "jackalope/jackalope-transport": "1.1.0"
     },
     "require-dev": {
-        "phpcr/phpcr-api-tests": "dev-master",
+        "phpcr/phpcr-api-tests": "2.1.23",
         "phpunit/phpunit": "^8.5.14"
     },
     "autoload": {
